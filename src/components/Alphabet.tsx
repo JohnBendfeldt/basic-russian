@@ -10,7 +10,7 @@ interface AlphabetCardProps {
 
 const AlphabetCard: React.FC<AlphabetCardProps> = ({ letter, pronunciation, example }) => {
   // Get just the first character of the letter to avoid duplicates
-  const singleLetter = letter.charAt(0);
+  const singleLetter = letter.charAt(2);
   
   // Extract only the Russian word from the example
   // Assuming the format is "Russian word - English translation" or similar
