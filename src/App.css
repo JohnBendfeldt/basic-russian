@@ -41,12 +41,45 @@ body {
   min-height: 100vh;
 }
 
+.App {
+  text-align: center;
+}
+
 header {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   color: var(--text-light);
   padding: 1.5rem 1rem;
   text-align: center;
   box-shadow: var(--shadow-md);
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 20vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  position: relative;
+}
+
+.install-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
 header h1 {
@@ -60,7 +93,7 @@ main {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 20px;
 }
 
 footer {
@@ -337,6 +370,7 @@ footer {
   border-radius: var(--border-radius);
   margin: 1.5rem 0;
   transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+  padding-right: 45px; /* Make room for the keyboard toggle button */
 }
 
 .quiz-input:focus {
@@ -382,12 +416,19 @@ footer {
   transform: translateY(-2px);
 }
 
+/* Enhanced Quiz Result Styles */
 .quiz-result {
   margin: 1.2rem 0;
   padding: 1rem;
   border-radius: var(--border-radius);
   font-weight: 600;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  animation: slideIn 0.4s ease;
 }
 
 .quiz-result.correct {
@@ -400,6 +441,53 @@ footer {
   background-color: rgba(220, 53, 69, 0.1);
   color: var(--error-color);
   border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.correct-answer-container,
+.incorrect-answer-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.result-icon {
+  font-size: 1.5rem;
+}
+
+.correct-icon {
+  color: var(--success-color);
+  animation: bounceIn 0.6s ease;
+}
+
+.incorrect-icon {
+  color: var(--error-color);
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .pronunciation-hint {
@@ -460,6 +548,186 @@ footer {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+/* Russian Keyboard Styles */
+.russian-keyboard {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: #f0f2f5;
+  border-radius: var(--border-radius);
+  padding: 10px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.keyboard-guide {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 5px;
+  background-color: rgba(74, 90, 244, 0.1);
+  border-radius: 4px;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.keyboard-row:last-child {
+  margin-bottom: 0;
+}
+
+.keyboard-key {
+  min-width: 40px;
+  height: 48px;
+  margin: 3px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: var(--primary-dark);
+  padding: 4px 8px;
+  position: relative;
+}
+
+.key-ru {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.key-en {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.keyboard-key:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.keyboard-key:active {
+  transform: scale(0.95);
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.keyboard-key:active .key-ru,
+.keyboard-key:active .key-en {
+  color: white;
+}
+
+.space-key {
+  min-width: 120px;
+  flex-grow: 1;
+  max-width: 200px;
+  font-size: 14px;
+}
+
+.backspace-key {
+  min-width: 60px;
+  font-size: 20px;
+}
+
+.clear-key {
+  min-width: 60px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.clear-key:hover {
+  background-color: #f5c6cb;
+  color: #721c24;
+}
+
+/* Special additions for the Russian keyboard special characters row */
+.special-chars-row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.special-key {
+  background-color: var(--primary-light);
+}
+
+.vowel-key {
+  background-color: #e8f4ff;
+  font-weight: bold;
+}
+
+.special-key {
+  font-weight: bold;
+  background-color: #e9ecef;
+}
+
+/* Special styling for the soft sign key to make it stand out */
+.soft-sign-key {
+  background-color: #ffefd5;
+  border: 2px solid var(--primary-color);
+}
+
+.soft-sign-key:hover {
+  background-color: #ffe0b2;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.keyboard-toggle-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.keyboard-toggle-button:hover {
+  color: var(--primary-dark);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.keyboard-toggle-button.active {
+  color: var(--secondary-color);
+}
+
+.virtual-keyboard-container {
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Add this for the tips text */
+.answer-tips {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0.5rem 0;
+  font-style: italic;
 }
 
 /* Animations */
