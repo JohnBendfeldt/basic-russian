@@ -115,8 +115,11 @@ export const containsCyrillic = (text: string): boolean => {
   return Array.from(text).some(char => isCyrillic(char));
 };
 
-export default {
+// Create a named export object to avoid ESLint warning
+const transliterationUtils = {
   transliterate,
   isCyrillic,
   containsCyrillic
 };
+
+export default transliterationUtils;
