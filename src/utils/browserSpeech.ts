@@ -1,6 +1,15 @@
 /**
- * Browser Speech Synthesis for Russian language
+ * Browser Speech Synthesis for Russian language with local audio fallback
  */
+
+// Audio file mapping
+interface AudioFileMap {
+  [key: string]: string;
+}
+
+// Cache for audio lookups
+let audioFilesCache: AudioFileMap | null = null;
+let audioFilesFetched = false;
 
 // Cache for successful voice lookups
 const voiceCache: {
@@ -70,11 +79,123 @@ export const isRussianVoiceAvailable = (): boolean => {
 };
 
 /**
- * Speaks the text using browser speech synthesis
+ * Try to load audio file for the text
+ * @returns URL to audio file if found, null otherwise
  */
-export const speakText = (
+const getAudioFileForText = async (text: string): Promise<string | null> => {
+  if (!audioFilesFetched) {
+    try {
+      // Try to fetch the audio index
+      const response = await fetch('/audio/index.json');
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Build a map of text -> audio file path
+        audioFilesCache = {};
+        
+        // Map alphabet letters
+        if (data.files.alphabet) {
+          data.files.alphabet.forEach((file: any) => {
+            const letter = file.filename.replace('.mp3', '');
+            // Fix non-null assertion warning by checking if audioFilesCache exists
+            if (audioFilesCache) {
+              audioFilesCache[letter] = file.path;
+            }
+          });
+        }
+        
+        // Map examples, phrases, numbers and words
+        ['examples', 'phrases', 'numbers', 'words'].forEach(category => {
+          if (data.files[category]) {
+            data.files[category].forEach((file: any) => {
+              const word = file.filename.replace('.mp3', '').replace(/_/g, ' ');
+              // Fix non-null assertion warning by checking if audioFilesCache exists
+              if (audioFilesCache) {
+                audioFilesCache[word] = file.path;
+              }
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.log('Could not load audio index, falling back to browser TTS');
+    } finally {
+      audioFilesFetched = true;
+    }
+  }
+  
+  // If we have a cache, try to find the text
+  if (audioFilesCache) {
+    const normalizedText = text.toLowerCase().trim();
+    
+    // Exact match
+    if (audioFilesCache[normalizedText]) {
+      return audioFilesCache[normalizedText];
+    }
+    
+    // Search for closest match
+    for (const [word, path] of Object.entries(audioFilesCache)) {
+      if (normalizedText.includes(word) || word.includes(normalizedText)) {
+        return path;
+      }
+    }
+  }
+  
+  return null;
+};
+
+/**
+ * Speaks the text using browser speech synthesis
+ * Falls back to local audio files if available
+ */
+export const speakText = async (
   text: string, 
   lang = 'ru-RU',
+  onEnd?: () => void,
+  onError?: (error: Error) => void
+): Promise<void> => {
+  try {
+    // First, try to use a local audio file
+    const audioFilePath = await getAudioFileForText(text);
+    
+    if (audioFilePath) {
+      // Use audio element with local file
+      const audio = new Audio(audioFilePath);
+      
+      audio.onended = () => {
+        if (onEnd) onEnd();
+      };
+      
+      audio.onerror = () => {
+        // If local audio fails, fall back to browser TTS
+        playWithBrowserTTS(text, lang, onEnd, onError);
+      };
+      
+      await audio.play();
+      return;
+    }
+    
+    // If no local audio found, use browser TTS
+    playWithBrowserTTS(text, lang, onEnd, onError);
+  } catch (error) {
+    console.error('Speech error:', error);
+    if (onError) {
+      if (error instanceof Error) {
+        onError(error);
+      } else {
+        onError(new Error('Unknown speech error'));
+      }
+    }
+  }
+};
+
+/**
+ * Uses browser's built-in speech synthesis
+ * Renamed from useBrowserTTS to playWithBrowserTTS to avoid ESLint react-hooks warning
+ */
+const playWithBrowserTTS = (
+  text: string,
+  lang: string,
   onEnd?: () => void,
   onError?: (error: Error) => void
 ): void => {
@@ -113,37 +234,34 @@ export const speakText = (
  * Checks if speech synthesis is supported in this browser
  */
 export const isSpeechSupported = (): boolean => {
-  return typeof window !== 'undefined' && 'speechSynthesis' in window;
+  return typeof window !== 'undefined' && (
+    'speechSynthesis' in window || audioFilesFetched
+  );
 };
 
 /**
  * Wait for voices to be loaded (workaround for Chrome)
  */
-export const initVoices = (): Promise<void> => {
-  return new Promise((resolve) => {
-    const synth = window.speechSynthesis;
-    if (!synth) {
-      resolve();
-      return;
-    }
-    
-    // If voices are already loaded
-    if (synth.getVoices().length > 0) {
-      resolve();
-      return;
-    }
-    
-    // Wait for voices to be loaded
-    const onVoicesChanged = () => {
-      synth.removeEventListener('voiceschanged', onVoicesChanged);
-      resolve();
-    };
-    
-    synth.addEventListener('voiceschanged', onVoicesChanged);
-    
-    // Fallback timeout in case the event doesn't fire
-    setTimeout(resolve, 1000);
-  });
+export const initVoices = async (): Promise<void> => {
+  const synth = window.speechSynthesis;
+  if (!synth) {
+    return;
+  }
+  
+  // If voices are already loaded
+  if (synth.getVoices().length > 0) {
+    return;
+  }
+  
+  // Wait for voices to be loaded
+  const onVoicesChanged = () => {
+    synth.removeEventListener('voiceschanged', onVoicesChanged);
+  };
+  
+  synth.addEventListener('voiceschanged', onVoicesChanged);
+  
+  // Fallback timeout in case the event doesn't fire
+  await new Promise(resolve => setTimeout(resolve, 1000));
 };
 
 /**

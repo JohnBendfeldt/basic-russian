@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PhraseItem } from '../types';
+import { PhraseItem } from '../types/index';
 import PronunciationButton from './PronunciationButton';
 
 interface PhraseCardProps {
