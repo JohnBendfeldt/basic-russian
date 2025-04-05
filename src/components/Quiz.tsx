@@ -21,25 +21,16 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const [lastInput, setLastInput] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
 
-  // Helper function to normalize text for comparison
   const normalizeText = (text: string): string => {
-    // First extract the main text without explanatory parentheses
-    // This helps accept answers like "вы" when the expected answer is "вы (formal)"
     let mainText = text;
-    
-    // Only use the content outside parentheses for comparison
     const outsideParentheses = text.replace(/\s*\([^)]*\)\s*/g, "");
     if (outsideParentheses.trim()) {
       mainText = outsideParentheses;
     }
-    
-    // Then normalize as usual
     let normalized = mainText.toLowerCase()
       .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
       .replace(/\s+/g, " ")
       .trim();
-    
-    // Special normalization for Russian text
     normalized = normalized
       .replace(/c(?=[а-яёА-ЯЁ])/g, 'с')
       .replace(/a(?=[а-яёА-ЯЁ])/g, 'а')
@@ -48,11 +39,9 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       .replace(/p(?=[а-яёА-ЯЁ])/g, 'р')
       .replace(/x(?=[а-яёА-ЯЁ])/g, 'х')
       .replace(/y(?=[а-яёА-ЯЁ])/g, 'у');
-      
     return normalized;
   };
 
-  // Convert number words to digits and vice versa
   const numberEquivalents: { [key: string]: string[] } = {
     "0": ["zero", "ноль"],
     "1": ["one", "один", "одна", "одно"],
@@ -85,29 +74,20 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     "100": ["hundred", "сто"]
   };
 
-  // Check if the answer might be a number
   const checkNumberEquivalence = (userAnswer: string, correctAnswer: string): boolean => {
-    // If either answer is already a direct match, no need to proceed
     if (userAnswer === correctAnswer) return true;
-    
-    // Check if user entered a digit and the correct answer is the word form
     if (/^\d+$/.test(userAnswer)) {
-      // User entered a digit - check if the correct answer is the word form
       const possibleWordForms = numberEquivalents[userAnswer] || [];
       return possibleWordForms.some(wordForm => 
         correctAnswer === wordForm || correctAnswer.includes(wordForm)
       );
-    } 
-    // Check if user entered a word and the correct answer is the digit form
-    else {
-      // User entered a word - check if it matches any number word
+    } else {
       for (const [digit, wordForms] of Object.entries(numberEquivalents)) {
         if (wordForms.includes(userAnswer) && (correctAnswer === digit || correctAnswer.includes(digit))) {
           return true;
         }
       }
     }
-    
     return false;
   };
 
@@ -259,58 +239,38 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   const checkAnswer = () => {
     if (!userAnswer.trim()) return;
-    
-    // Normalize user answer to ignore parentheses, punctuation, case, and common transliteration errors
     const userAnswerNormalized = normalizeText(userAnswer);
     let isAnswerCorrect = false;
-    
-    // Handle multiple correct answers (e.g., "please/thank you")
     if (currentQuestion.answer.includes('/')) {
-      // Split the answer by "/" and check if any of them match
       const possibleAnswers = currentQuestion.answer
         .split('/')
         .map((ans: string) => normalizeText(ans));
-      
       isAnswerCorrect = possibleAnswers.includes(userAnswerNormalized);
-      
-      // If still not correct, check for number equivalence with each possible answer
       if (!isAnswerCorrect) {
         isAnswerCorrect = possibleAnswers.some((possibleAnswer: string) => 
           checkNumberEquivalence(userAnswerNormalized, possibleAnswer)
         );
       }
     } else {
-      // Normalize the correct answer the same way as the user's answer
       const correctAnswerNormalized = normalizeText(currentQuestion.answer);
-      
-      // Check for direct match
       if (userAnswerNormalized === correctAnswerNormalized) {
         isAnswerCorrect = true;
-      } 
-      // Check for number equivalence (e.g., "6" vs "six")
-      else if (checkNumberEquivalence(userAnswerNormalized, correctAnswerNormalized)) {
+      } else if (checkNumberEquivalence(userAnswerNormalized, correctAnswerNormalized)) {
         isAnswerCorrect = true;
-      }
-      // For Russian answers, use Levenshtein distance for tolerance
-      else if (containsCyrillic(userAnswerNormalized) || containsCyrillic(correctAnswerNormalized)) {
-        // Allow for a small error tolerance (1 character difference per 5 characters)
+      } else if (containsCyrillic(userAnswerNormalized) || containsCyrillic(correctAnswerNormalized)) {
         const maxErrors = Math.floor(correctAnswerNormalized.length / 5) + 1;
         const distance = levenshteinDistance(userAnswerNormalized, correctAnswerNormalized);
         isAnswerCorrect = distance <= maxErrors;
       }
-      
-      // Also check if the answer contains the correct text plus the formal/informal note
       if (!isAnswerCorrect) {
         const answerWithFormal = `${correctAnswerNormalized} formal`;
         const answerWithInformal = `${correctAnswerNormalized} informal`;
-        
         isAnswerCorrect = 
           userAnswerNormalized.includes(correctAnswerNormalized) || 
           normalizeText(answerWithFormal).includes(userAnswerNormalized) || 
           normalizeText(answerWithInformal).includes(userAnswerNormalized);
       }
     }
-    
     setIsCorrect(isAnswerCorrect);
     setShowNext(true);
     setQuestionsAnswered(prev => prev + 1);
@@ -371,39 +331,108 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     !currentQuestion.type.includes('alphabet') && 
     currentQuestion.hint.includes('How do you say this in Russian');
 
+  // Characters that need special handling - we should delay their transliteration
+  const combinationStarters = ['y', 'Y', 'z', 'Z', 's', 'S', 'c', 'C', 't', 'T', 'k', 'K'];
+
+  // Add these potential second characters that form combinations
+  const combinationFollowers = {
+    'y': ['a', 'A', 'u', 'U', 'o', 'O', 'e', 'E'],
+    'Y': ['a', 'A', 'u', 'U', 'o', 'O', 'e', 'E'],
+    'z': ['h', 'H'],
+    'Z': ['h', 'H'],
+    's': ['h', 'H'],
+    'S': ['h', 'H'],
+    'c': ['h', 'H'],
+    'C': ['h', 'H'],
+    't': ['s', 'S'],
+    'T': ['s', 'S'],
+    'k': ['h', 'H'],
+    'K': ['h', 'H']
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     const selectionStart = e.target.selectionStart || 0;
+    
+    // Skip transliteration for English answers
     if (!needsRussianKeyboard) {
       setUserAnswer(newValue);
       setLastInput(newValue);
       return;
     }
-    const specialCharsFixed = newValue
-      .replace(/'/g, 'ь')
-      .replace(/`/g, 'ь')
-      .replace(/"/g, 'ъ');
-    if (specialCharsFixed !== newValue) {
-      setUserAnswer(specialCharsFixed);
-      setLastInput(specialCharsFixed);
-      setCursorPosition(selectionStart);
-      return;
-    }
-    const isAddition = newValue.length > lastInput.length;
-    if (isAddition) {
-      if (/[a-zA-Z]/.test(newValue)) {
-        const transliteratedValue = transliterate(newValue);
-        const lengthDiff = transliteratedValue.length - newValue.length;
-        const newCursorPosition = selectionStart + lengthDiff;
-        setUserAnswer(transliteratedValue);
-        setLastInput(transliteratedValue);
-        setCursorPosition(Math.min(newCursorPosition, transliteratedValue.length));
-        return;
+    
+    // Store the current input in the state immediately
+    setUserAnswer(newValue);
+    
+    // Check if we should transliterate
+    // This is a more robust way to handle transliteration triggers
+    const transliterationTriggers = [
+      // Space - end of a word
+      newValue.endsWith(' ') && !lastInput.endsWith(' '),
+      // Punctuation added
+      /[.,!?;:]/.test(newValue.charAt(selectionStart - 1)) && 
+        (lastInput.length === 0 || newValue.charAt(selectionStart - 1) !== lastInput.charAt(selectionStart - 1)),
+      // Check button clicked
+      (e as any).isSubmit === true,
+      // End of sentence (newline)
+      newValue.includes('\n') && !lastInput.includes('\n')
+    ];
+    
+    // Special handling for partial combination detection
+    let pendingCombination = false;
+    
+    // Check if the last character is a combination starter (like 'y')
+    // and the cursor is at the end (user is actively typing)
+    const lastChar = newValue.charAt(selectionStart - 1);
+    const isAtEnd = selectionStart === newValue.length;
+    
+    if (isAtEnd && combinationStarters.includes(lastChar)) {
+      // This might be the start of a combination, so we should wait
+      pendingCombination = true;
+    } 
+    // If the last character is a potential second part of a combination (like 'a' after 'y')
+    else if (isAtEnd && selectionStart >= 2) {
+      const secondLastChar = newValue.charAt(selectionStart - 2);
+      const lastChar = newValue.charAt(selectionStart - 1);
+      
+      // Check if this completes a pending combination (e.g., "ya")
+      if (
+        combinationStarters.includes(secondLastChar) && 
+        combinationFollowers[secondLastChar as keyof typeof combinationFollowers]?.includes(lastChar)
+      ) {
+        // This completes a combination, so we should transliterate now
+        transliterationTriggers.push(true);
       }
     }
-    setUserAnswer(newValue);
+    
+    // If any trigger condition is true and we don't have a pending combination
+    if (transliterationTriggers.some(trigger => trigger === true) && !pendingCombination) {
+      console.log("Transliterating:", newValue);
+      const transliteratedValue = transliterate(newValue);
+      setUserAnswer(transliteratedValue);
+      
+      // Update cursor position
+      const lengthDiff = transliteratedValue.length - newValue.length;
+      setCursorPosition(selectionStart + lengthDiff);
+    } else {
+      // Just update cursor position without transliterating
+      setCursorPosition(selectionStart);
+    }
+    
+    // Always update last input to track what's changed
     setLastInput(newValue);
-    setCursorPosition(selectionStart);
+  };
+
+  // Add a submit handler to force transliteration before checking
+  const handleCheckAnswer = () => {
+    // Force transliteration of any pending input
+    if (needsRussianKeyboard && userAnswer) {
+      const transliteratedValue = transliterate(userAnswer);
+      setUserAnswer(transliteratedValue);
+    }
+    
+    // Then check the answer
+    checkAnswer();
   };
 
   useEffect(() => {
@@ -453,7 +482,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             type="text"
             className="quiz-input"
             value={userAnswer}
-            onChange={handleInputChange}
+            onChange={handleInputChange} 
             onKeyDown={handleKeyDown}
             placeholder={needsRussianKeyboard ? "Type in English, get Russian letters" : "Your answer here..."}
             disabled={showNext}
@@ -469,9 +498,16 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             </button>
           )}
         </div>
-        <div className="answer-tips">
-          <small>Tip: Punctuation is ignored when checking answers.</small>
-        </div>
+        {needsRussianKeyboard && (
+          <div className="answer-tips">
+            <small>Tip: Type combinations like "zh" for "ж", "ya" for "я". Letters convert after space/punctuation.</small>
+          </div>
+        )}
+        {!needsRussianKeyboard && (
+          <div className="answer-tips">
+            <small>Tip: Punctuation is ignored when checking answers.</small>
+          </div>
+        )}
         {needsRussianKeyboard && showKeyboard && !showNext && (
           <div className="virtual-keyboard-container">
             <RussianKeyboard onLetterClick={handleKeyboardLetterClick} />
@@ -499,7 +535,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         )}
         <div className="quiz-buttons">
           {!showNext ? (
-            <button className="check-button" onClick={checkAnswer}>
+            <button className="check-button" onClick={handleCheckAnswer}>
               Check Answer
             </button>
           ) : (
