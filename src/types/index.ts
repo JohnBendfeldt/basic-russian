@@ -1,26 +1,37 @@
-// Define data structure types for the application
+/**
+ * Shared TypeScript interfaces for the Russian Learning App
+ */
+
+// Alphabet item structure
 export interface AlphabetItem {
   letter: string;
   pronunciation: string;
   example: string;
+  russianWord?: string;
+  englishWord?: string;
 }
 
+// Phrase item structure - ensure pronunciation is required
 export interface PhraseItem {
   russian: string;
   english: string;
-  pronunciation: string;
+  pronunciation: string; // Not optional to match the expected type in Phrases component
 }
 
-export interface RussianData {
+// Quiz-related interfaces
+export interface QuizItem {
+  prompt: string;
+  answer: string;
+  hint?: string;
+  russian?: string;
+  id?: string;
+  type?: string;
+}
+
+// App data structure
+export interface AppData {
   alphabet: AlphabetItem[];
   basicPhrases: PhraseItem[];
   numbers: PhraseItem[];
   commonWords: PhraseItem[];
-}
-
-export interface QuizQuestion extends PhraseItem {
-  type: 'phrase' | 'number' | 'word';
-  isEnglishToRussian: boolean;
-  prompt: string;
-  answer: string;
 }

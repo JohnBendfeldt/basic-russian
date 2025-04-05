@@ -257,6 +257,14 @@ footer {
   font-weight: 500;
 }
 
+.alphabet-card .pronunciation strong {
+  margin-right: 4px;
+}
+
+.alphabet-card .pronunciation-text {
+  font-weight: normal;
+}
+
 .alphabet-card .example {
   font-style: italic;
   color: var(--text-muted);
@@ -265,6 +273,18 @@ footer {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.alphabet-card .example strong {
+  margin-right: 4px;
+}
+
+.alphabet-card .example-word {
+  margin-right: 4px;
+}
+
+.alphabet-card .example-translation {
+  color: var(--text-muted);
 }
 
 .letter-pronunciation {

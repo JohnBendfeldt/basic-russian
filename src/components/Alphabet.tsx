@@ -1,39 +1,16 @@
 import React from 'react';
-import { AlphabetItem } from '../types';
 import PronunciationButton from './PronunciationButton';
 
-interface AlphabetCardProps {
+interface AlphabetItemProps {
   letter: string;
   pronunciation: string;
   example: string;
-}
-
-const AlphabetCard: React.FC<AlphabetCardProps> = ({ letter, pronunciation, example }) => {
-  // Get just the first character of the letter to avoid duplicates
-  const singleLetter = letter.charAt(2);
-  
-  // Extract only the Russian word from the example
-  // Assuming the format is "Russian word - English translation" or similar
-  const russianWord = example.split(/[-–—(]/)[0].trim();
-  
-  return (
-    <div className="alphabet-card">
-      <div className="letter-header">
-        <h2 className="letter">{letter}</h2>
-        <PronunciationButton 
-          text={singleLetter} 
-          label={`Pronounce letter ${singleLetter}`}
-          className="letter-pronunciation"
-        />
-      </div>
-      <p className="pronunciation">Pronunciation: {pronunciation}</p>
-      <p className="example">Example: {example} <PronunciationButton text={russianWord} label={`Pronounce example word ${russianWord}`} className="example-pronunciation" /></p>
-    </div>
-  );
+  russianWord?: string;
+  englishWord?: string;
 }
 
 interface AlphabetProps {
-  data: AlphabetItem[];
+  data: AlphabetItemProps[];
 }
 
 const Alphabet: React.FC<AlphabetProps> = ({ data }) => {
@@ -42,16 +19,33 @@ const Alphabet: React.FC<AlphabetProps> = ({ data }) => {
       <h2>Russian Alphabet</h2>
       <div className="alphabet-container">
         {data.map((item, index) => (
-          <AlphabetCard 
-            key={index}
-            letter={item.letter}
-            pronunciation={item.pronunciation}
-            example={item.example}
-          />
+          <div className="alphabet-card" key={index}>
+            <div className="letter-header">
+              <div className="letter">{item.letter}</div>
+              <PronunciationButton text={item.letter} />
+            </div>
+            
+            <div className="pronunciation">
+              <strong>Pronunciation:</strong> <span className="pronunciation-text">{item.pronunciation} {item.example}</span>
+            </div>
+            
+            {item.russianWord && (
+              <div className="example">
+                <strong>Example:</strong> <span className="example-word">{item.russianWord}</span> 
+                {item.englishWord && <span className="example-translation"> ({item.englishWord})</span>}
+                {item.russianWord && (
+                  <PronunciationButton 
+                    text={item.russianWord} 
+                    className="example-pronunciation"
+                  />
+                )}
+              </div>
+            )}
+          </div>
         ))}
       </div>
     </div>
   );
-}
+};
 
 export default Alphabet;
