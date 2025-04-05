@@ -24,12 +24,25 @@ const speechQueues = new Map<string, Array<{
 // Track if initialization has happened
 let isInitialized = false;
 
-// Check if speech is supported - only check for ResponsiveVoice
+// Set to true to completely disable browser speech synthesis
+const ONLY_USE_RESPONSIVE_VOICE = true;
+
+// Check if speech is supported - prioritize ResponsiveVoice
 export const isSpeechSupported = (): boolean => {
-  return isInitialized || isResponsiveVoiceAvailable();
+  // First check if ResponseVoice is available or initialized
+  if (isInitialized || isResponsiveVoiceAvailable()) {
+    return true;
+  }
+  
+  // Only fall back to browser TTS if we're allowing it
+  if (!ONLY_USE_RESPONSIVE_VOICE) {
+    return typeof window !== 'undefined' && 'speechSynthesis' in window;
+  }
+  
+  return false;
 };
 
-// Initialize voice list - only initialize ResponsiveVoice
+// Initialize voice list - prioritize ResponsiveVoice
 export const initVoices = async (): Promise<void> => {
   try {
     // If already initialized, return immediately
@@ -44,6 +57,12 @@ export const initVoices = async (): Promise<void> => {
     return Promise.resolve();
   } catch (error) {
     console.warn('Failed to load ResponsiveVoice:', error);
+    
+    // Only attempt to initialize browser TTS if we're allowing it
+    if (!ONLY_USE_RESPONSIVE_VOICE && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      return Promise.resolve();
+    }
+    
     return Promise.resolve();
   }
 };
@@ -70,29 +89,54 @@ const processSpeechQueue = async (buttonId: string): Promise<void> => {
     return;
   }
   
-  const { text, lang, onEnd, onError } = queueItem;
+  const { text, onEnd, onError } = queueItem;
   
   try {
-    // Only use ResponsiveVoice - don't fall back to browser TTS
-    if (!isResponsiveVoiceAvailable()) {
-      throw new Error('ResponsiveVoice not available');
-    }
-    
-    const voice = lang.includes('ru') ? 'Russian Female' : 'UK English Female';
-    await speakWithResponsiveVoice(text, voice, {
-      onend: () => {
-        speakingButtons.set(buttonId, false);
-        if (onEnd) onEnd();
-        // Process next item in this button's queue
-        processSpeechQueue(buttonId);
-      },
-      onerror: (error: unknown) => {
-        speakingButtons.set(buttonId, false);
-        if (onError) onError(error);
-        // Process next item in this button's queue
-        processSpeechQueue(buttonId);
+    // First try ResponsiveVoice
+    if (isResponsiveVoiceAvailable()) {
+      try {
+        // Always use female voice for consistency
+        const voice = 'Russian Female';
+        await speakWithResponsiveVoice(text, voice, {
+          onend: () => {
+            speakingButtons.set(buttonId, false);
+            if (onEnd) onEnd();
+            // Process next item in this button's queue
+            processSpeechQueue(buttonId);
+          },
+          onerror: (error: unknown) => {
+            console.warn('ResponsiveVoice error, may try browser TTS:', error);
+            
+            // If only using ResponsiveVoice, report the error and move on
+            if (ONLY_USE_RESPONSIVE_VOICE) {
+              speakingButtons.set(buttonId, false);
+              if (onError) onError(error);
+              processSpeechQueue(buttonId);
+              return;
+            }
+            
+            // Otherwise, fall back to browser TTS (continues to the code below)
+            throw error;
+          }
+        });
+        
+        // If we successfully executed ResponsiveVoice, return early
+        return;
+      } catch (rvError) {
+        // If we're only using ResponsiveVoice, don't try browser TTS
+        if (ONLY_USE_RESPONSIVE_VOICE) {
+          throw rvError;
+        }
+        
+        console.warn('Falling back to browser TTS due to ResponsiveVoice error');
+        // Otherwise fall through to browser TTS
       }
-    });
+    }
+
+    // Only reach here if ResponsiveVoice failed and we're allowing browser TTS
+    if (!ONLY_USE_RESPONSIVE_VOICE && window.speechSynthesis) {
+      throw new Error('Text-to-speech not available');
+    }
   } catch (error) {
     console.error('Error during speech:', error);
     speakingButtons.set(buttonId, false);
@@ -102,7 +146,7 @@ const processSpeechQueue = async (buttonId: string): Promise<void> => {
   }
 };
 
-// Speak text using ResponsiveVoice
+// Speak text - prioritize ResponsiveVoice
 export const speak = (
   text: string, 
   lang = 'ru-RU',
