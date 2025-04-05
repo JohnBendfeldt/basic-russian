@@ -1,7 +1,14 @@
 /**
- * Utility functions for text-to-speech using Google Cloud TTS
+ * Utility functions for text-to-speech using browser speech synthesis
  */
-import { playGoogleTTS, isGoogleTTSConfigured } from './googleCloudTTS';
+import { 
+  speakText, 
+  isSpeechSupported as isBrowserSpeechSupported,
+  initVoices as initBrowserVoices,
+  getRussianVoices,
+  getBestRussianVoice,
+  isRussianVoiceAvailable
+} from './browserSpeech';
 
 // Track currently speaking items by button ID
 const speakingButtons = new Map<string, boolean>();
@@ -19,7 +26,7 @@ let isInitialized = false;
 
 // Check if speech is supported
 export const isSpeechSupported = (): boolean => {
-  return isInitialized || isGoogleTTSConfigured();
+  return isInitialized || isBrowserSpeechSupported();
 };
 
 // Initialize speech system
@@ -28,9 +35,18 @@ export const initVoices = async (): Promise<void> => {
     return Promise.resolve();
   }
   
-  // Simply mark as initialized - Google TTS doesn't need initialization
+  await initBrowserVoices();
   isInitialized = true;
-  console.log('Speech system initialized with Google TTS');
+  
+  // Log voice information for debugging
+  const russianVoices = getRussianVoices();
+  console.log(`Speech system initialized with browser speech synthesis`);
+  console.log(`Found ${russianVoices.length} Russian voices`);
+  if (russianVoices.length > 0) {
+    console.log('Available Russian voices:', russianVoices.map(v => v.name).join(', '));
+  } else {
+    console.log('No Russian voices found. Users will be prompted to install one.');
+  }
   
   return Promise.resolve();
 };
@@ -60,10 +76,9 @@ const processSpeechQueue = async (buttonId: string): Promise<void> => {
   const { text, lang, onEnd, onError } = queueItem;
   
   try {
-    // Use Google TTS to play audio
-    await playGoogleTTS(
+    // Use browser speech synthesis to play audio
+    speakText(
       text,
-      'ru-RU-Standard-A', // Default voice
       lang,
       () => {
         speakingButtons.set(buttonId, false);
@@ -72,7 +87,7 @@ const processSpeechQueue = async (buttonId: string): Promise<void> => {
         processSpeechQueue(buttonId);
       },
       (error: Error) => {
-        console.error('Google TTS error:', error);
+        console.error('Speech synthesis error:', error);
         speakingButtons.set(buttonId, false);
         if (onError) onError(error);
         // Process next item in queue
@@ -88,7 +103,7 @@ const processSpeechQueue = async (buttonId: string): Promise<void> => {
   }
 };
 
-// Speak text using Google TTS
+// Speak text using browser speech synthesis
 export const speak = (
   text: string, 
   lang = 'ru-RU',
@@ -110,9 +125,8 @@ export const speak = (
   processSpeechQueue(buttonId);
 };
 
-// Compatibility stubs
-export const getRussianVoices = (): SpeechSynthesisVoice[] => [];
-export const getBestRussianVoice = (): SpeechSynthesisVoice | null => null;
+// Export functions from browserSpeech
+export { getRussianVoices, getBestRussianVoice, isRussianVoiceAvailable };
 
 // Create a named export object to avoid ESLint warning
 const speechUtils = {
@@ -120,7 +134,8 @@ const speechUtils = {
   speak,
   getRussianVoices,
   initVoices,
-  getBestRussianVoice
+  getBestRussianVoice,
+  isRussianVoiceAvailable
 };
 
 export default speechUtils;

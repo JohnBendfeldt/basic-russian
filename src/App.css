@@ -593,6 +593,17 @@ footer {
   cursor: not-allowed;
 }
 
+/* Style for pronunciation button when voice is missing */
+.pronunciation-button.needs-voice {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+}
+
+.pronunciation-button.needs-voice:hover {
+  background-color: #ffe8a1;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -951,6 +962,63 @@ footer {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* Voice prompt banner */
+.voice-prompt-banner {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 10px 20px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid #ffeeba;
+  animation: slideDown 0.3s ease-out;
+  position: relative;
+}
+
+.voice-prompt-icon {
+  font-size: 24px;
+  color: #856404;
+  flex-shrink: 0;
+}
+
+.voice-prompt-text {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.voice-prompt-text p {
+  margin: 4px 0;
+}
+
+.voice-instructions {
+  font-style: italic;
+  font-size: 13px;
+}
+
+.voice-prompt-close {
+  background: none;
+  border: none;
+  color: #856404;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.voice-prompt-close:hover {
+  color: #533f03;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
 }
 
 /* Responsive Adjustments */

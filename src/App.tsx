@@ -5,14 +5,16 @@ import Phrases from './components/Phrases';
 import Navigation from './components/Navigation';
 import Quiz from './components/Quiz';
 import russianData from './data/russianData';
-import { FaBars, FaTimes } from 'react-icons/fa';
-import { initVoices } from './utils/speech';
+import { FaBars, FaTimes, FaInfoCircle } from 'react-icons/fa';
+import { initVoices, isRussianVoiceAvailable } from './utils/speech';
+import { getRussianVoiceInstallInstructions } from './utils/browserSpeech';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('alphabet');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechInitialized, setSpeechInitialized] = useState(false);
+  const [showVoicePrompt, setShowVoicePrompt] = useState(false);
 
   useEffect(() => {
     // Handle the install prompt
@@ -45,10 +47,17 @@ const App: React.FC = () => {
     const initSpeech = async () => {
       try {
         await initVoices();
+        
+        // Check if a Russian voice is available
+        if (!isRussianVoiceAvailable()) {
+          setShowVoicePrompt(true);
+        }
+        
         setSpeechInitialized(true);
         console.log('Speech initialization completed successfully');
       } catch (err) {
         console.error('Failed to initialize speech:', err);
+        setSpeechInitialized(true); // Still set as initialized to allow app to function
       }
     };
     
@@ -147,6 +156,24 @@ const App: React.FC = () => {
         />
       </header>
       {menuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
+      
+      {showVoicePrompt && (
+        <div className="voice-prompt-banner">
+          <FaInfoCircle className="voice-prompt-icon" />
+          <div className="voice-prompt-text">
+            <p><strong>Russian voice not detected!</strong> Pronunciation features require a Russian voice pack.</p>
+            <p className="voice-instructions">{getRussianVoiceInstallInstructions()}</p>
+          </div>
+          <button 
+            className="voice-prompt-close" 
+            onClick={() => setShowVoicePrompt(false)}
+            aria-label="Close voice prompt"
+          >
+            <FaTimes />
+          </button>
+        </div>
+      )}
+      
       <main>
         {renderActiveSection()}
       </main>
