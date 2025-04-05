@@ -18,7 +18,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const correctSoundRef = useRef<HTMLAudioElement | null>(null);
   const incorrectSoundRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [lastInput, setLastInput] = useState('');
+  const [_lastInput, setLastInput] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
 
   const normalizeText = (text: string): string => {
@@ -28,7 +28,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       mainText = outsideParentheses;
     }
     let normalized = mainText.toLowerCase()
-      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
+      .replace(/[.,/#!$%^&*;:{}=\-_`~()?]/g, "")
       .replace(/\s+/g, " ")
       .trim();
     normalized = normalized
@@ -354,8 +354,10 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     }
     
     // Also transliterate at specific triggers
-    // Fix the TypeScript error by properly typing nativeEvent and checking for inputType safely
-    const inputType = e.nativeEvent instanceof InputEvent ? (e.nativeEvent as any).inputType : undefined;
+    // Fix the TypeScript error by properly typing nativeEvent
+    const hasInputType = 'inputType' in e.nativeEvent;
+    const inputType = hasInputType ? (e.nativeEvent as any).inputType : undefined;
+    
     if (newValue.endsWith(' ') || 
         /[.,!?;:]/.test(newValue.charAt(selectionStart - 1)) ||
         inputType === 'insertLineBreak' ||
