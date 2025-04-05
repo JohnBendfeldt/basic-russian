@@ -1,114 +1,102 @@
 /**
- * Simple and robust Russian transliteration utility
+ * Russian transliteration utility
  */
 
-// Define all mappings with explicit ordering
-const transliterationRules = [
-  // Special characters (handled first)
-  { from: "'", to: 'ь' },  // soft sign
-  { from: "`", to: 'ь' },  // alternative soft sign
-  { from: '"', to: 'ъ' },  // hard sign
-  
-  // Four-letter combinations
-  { from: 'shch', to: 'щ' },
-  { from: 'Shch', to: 'Щ' },
-  { from: 'SHCH', to: 'Щ' },
-  
-  // Two-letter combinations - critical ones first
-  { from: 'ya', to: 'я' },
-  { from: 'Ya', to: 'Я' },
-  { from: 'YA', to: 'Я' },
-  { from: 'yu', to: 'ю' },
-  { from: 'Yu', to: 'Ю' },
-  { from: 'YU', to: 'Ю' },
-  { from: 'yo', to: 'ё' },
-  { from: 'Yo', to: 'Ё' },
-  { from: 'YO', to: 'Ё' },
-  { from: 'ye', to: 'е' },
-  { from: 'Ye', to: 'Е' },
-  { from: 'YE', to: 'Е' },
-  { from: 'zh', to: 'ж' },
-  { from: 'Zh', to: 'Ж' },
-  { from: 'ZH', to: 'Ж' },
-  { from: 'sh', to: 'ш' },
-  { from: 'Sh', to: 'Ш' },
-  { from: 'SH', to: 'Ш' },
-  { from: 'ch', to: 'ч' },
-  { from: 'Ch', to: 'Ч' },
-  { from: 'CH', to: 'Ч' },
-  { from: 'ts', to: 'ц' },
-  { from: 'Ts', to: 'Ц' },
-  { from: 'TS', to: 'Ц' },
-  { from: 'kh', to: 'х' },
-  { from: 'Kh', to: 'Х' },
-  { from: 'KH', to: 'Х' },
-  
-  // Single characters - lowercase
-  { from: 'a', to: 'а' },
-  { from: 'b', to: 'б' },
-  { from: 'v', to: 'в' },
-  { from: 'g', to: 'г' },
-  { from: 'd', to: 'д' },
-  { from: 'e', to: 'е' },
-  { from: 'z', to: 'з' },
-  { from: 'i', to: 'и' },
-  { from: 'j', to: 'й' },
-  { from: 'k', to: 'к' },
-  { from: 'l', to: 'л' },
-  { from: 'm', to: 'м' },
-  { from: 'n', to: 'н' },
-  { from: 'o', to: 'о' },
-  { from: 'p', to: 'п' },
-  { from: 'r', to: 'р' },
-  { from: 's', to: 'с' },
-  { from: 't', to: 'т' },
-  { from: 'u', to: 'у' },
-  { from: 'f', to: 'ф' },
-  { from: 'h', to: 'х' },
-  { from: 'c', to: 'ц' },
-  { from: 'y', to: 'ы' },  // Processed after 'ya', 'yu', etc.
-  
-  // Single characters - uppercase
-  { from: 'A', to: 'А' },
-  { from: 'B', to: 'Б' },
-  { from: 'V', to: 'В' },
-  { from: 'G', to: 'Г' },
-  { from: 'D', to: 'Д' },
-  { from: 'E', to: 'Е' },
-  { from: 'Z', to: 'З' },
-  { from: 'I', to: 'И' },
-  { from: 'J', to: 'Й' },
-  { from: 'K', to: 'К' },
-  { from: 'L', to: 'Л' },
-  { from: 'M', to: 'М' },
-  { from: 'N', to: 'Н' },
-  { from: 'O', to: 'О' },
-  { from: 'P', to: 'П' },
-  { from: 'R', to: 'Р' },
-  { from: 'S', to: 'С' },
-  { from: 'T', to: 'Т' },
-  { from: 'U', to: 'У' },
-  { from: 'F', to: 'Ф' },
-  { from: 'H', to: 'Х' },
-  { from: 'C', to: 'Ц' },
-  { from: 'Y', to: 'Ы' }   // Processed after 'YA', 'YU', etc.
-];
-
-/**
- * Transliterates Latin text to Cyrillic using explicit mapping
- */
+// Use the approach that was working before - simple and reliable
 export const transliterate = (input: string): string => {
   if (!input) return input;
   
-  let result = input;
+  // First replace quotes and apostrophes
+  let result = input
+    .replace(/'/g, 'ь')
+    .replace(/`/g, 'ь')
+    .replace(/"/g, 'ъ');
   
-  // Apply each rule in the order specified
-  for (const rule of transliterationRules) {
-    // Escape special regex characters in the 'from' string
-    const escapedFrom = rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const pattern = new RegExp(escapedFrom, 'g');
-    result = result.replace(pattern, rule.to);
-  }
+  // Process combinations first (to avoid issues with individual letters)
+  result = result
+    // 4-letter combinations
+    .replace(/shch/g, 'щ')
+    .replace(/Shch/g, 'Щ')
+    .replace(/SHCH/g, 'Щ')
+    .replace(/SHch/g, 'Щ')
+    
+    // 2-letter combinations
+    .replace(/zh/g, 'ж')
+    .replace(/Zh/g, 'Ж')
+    .replace(/ZH/g, 'Ж')
+    .replace(/ya/g, 'я')
+    .replace(/Ya/g, 'Я')
+    .replace(/YA/g, 'Я')
+    .replace(/yu/g, 'ю')
+    .replace(/Yu/g, 'Ю')
+    .replace(/YU/g, 'Ю')
+    .replace(/yo/g, 'ё')
+    .replace(/Yo/g, 'Ё')
+    .replace(/YO/g, 'Ё')
+    .replace(/ye/g, 'е')
+    .replace(/Ye/g, 'Е')
+    .replace(/YE/g, 'Е')
+    .replace(/sh/g, 'ш')
+    .replace(/Sh/g, 'Ш')
+    .replace(/SH/g, 'Ш')
+    .replace(/ch/g, 'ч')
+    .replace(/Ch/g, 'Ч')
+    .replace(/CH/g, 'Ч')
+    .replace(/ts/g, 'ц')
+    .replace(/Ts/g, 'Ц')
+    .replace(/TS/g, 'Ц')
+    .replace(/kh/g, 'х')
+    .replace(/Kh/g, 'Х')
+    .replace(/KH/g, 'Х')
+    
+    // Individual characters (after combinations to avoid conflicts)
+    .replace(/a/g, 'а')
+    .replace(/b/g, 'б')
+    .replace(/v/g, 'в')
+    .replace(/g/g, 'г')
+    .replace(/d/g, 'д')
+    .replace(/e/g, 'е')
+    .replace(/z/g, 'з')
+    .replace(/i/g, 'и')
+    .replace(/j/g, 'й')
+    .replace(/k/g, 'к')
+    .replace(/l/g, 'л')
+    .replace(/m/g, 'м')
+    .replace(/n/g, 'н')
+    .replace(/o/g, 'о')
+    .replace(/p/g, 'п')
+    .replace(/r/g, 'р')
+    .replace(/s/g, 'с')
+    .replace(/t/g, 'т')
+    .replace(/u/g, 'у')
+    .replace(/f/g, 'ф')
+    .replace(/h/g, 'х')
+    .replace(/c/g, 'ц')
+    .replace(/y/g, 'ы')
+    
+    .replace(/A/g, 'А')
+    .replace(/B/g, 'Б')
+    .replace(/V/g, 'В')
+    .replace(/G/g, 'Г')
+    .replace(/D/g, 'Д')
+    .replace(/E/g, 'Е')
+    .replace(/Z/g, 'З')
+    .replace(/I/g, 'И')
+    .replace(/J/g, 'Й')
+    .replace(/K/g, 'К')
+    .replace(/L/g, 'Л')
+    .replace(/M/g, 'М')
+    .replace(/N/g, 'Н')
+    .replace(/O/g, 'О')
+    .replace(/P/g, 'П')
+    .replace(/R/g, 'Р')
+    .replace(/S/g, 'С')
+    .replace(/T/g, 'Т')
+    .replace(/U/g, 'У')
+    .replace(/F/g, 'Ф')
+    .replace(/H/g, 'Х')
+    .replace(/C/g, 'Ц')
+    .replace(/Y/g, 'Ы');
   
   return result;
 };
