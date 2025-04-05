@@ -3,37 +3,39 @@ import React from 'react';
 interface NavigationProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
+  isOpen: boolean;
+  _onClose: () => void;
 }
 
-interface SectionItem {
-  id: string;
-  name: string;
-}
-
-const Navigation: React.FC<NavigationProps> = ({ activeSection, setActiveSection }) => {
-  const sections: SectionItem[] = [
-    { id: 'alphabet', name: 'Alphabet' },
-    { id: 'phrases', name: 'Basic Phrases' },
-    { id: 'numbers', name: 'Numbers' },
-    { id: 'words', name: 'Common Words' },
-    { id: 'quiz', name: 'Quiz' }
+const Navigation: React.FC<NavigationProps> = ({ 
+  activeSection, 
+  setActiveSection,
+  isOpen,
+  _onClose
+}) => {
+  const navItems = [
+    { id: 'alphabet', label: 'Alphabet' },
+    { id: 'phrases', label: 'Basic Phrases' },
+    { id: 'words', label: 'Common Words' },
+    { id: 'numbers', label: 'Numbers' },
+    { id: 'quiz', label: 'Quiz' }
   ];
 
   return (
-    <nav className="navigation">
+    <nav className={`navigation ${isOpen ? 'open' : ''}`}>
       <ul>
-        {sections.map((section) => (
-          <li 
-            key={section.id}
-            className={activeSection === section.id ? 'active' : ''}
-            onClick={() => setActiveSection(section.id)}
+        {navItems.map(item => (
+          <li
+            key={item.id}
+            className={activeSection === item.id ? 'active' : ''}
+            onClick={() => setActiveSection(item.id)}
           >
-            {section.name}
+            {item.label}
           </li>
         ))}
       </ul>
     </nav>
   );
-}
+};
 
 export default Navigation;

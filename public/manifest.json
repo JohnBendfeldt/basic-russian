@@ -1,6 +1,6 @@
 {
-  "short_name": "Russian App",
-  "name": "Russian Learning App",
+  "short_name": "Basic Russian",
+  "name": "Basic Russian Learning",
   "icons": [
     {
       "src": "favicon.ico",
@@ -26,7 +26,7 @@
   "background_color": "#ffffff",
   "orientation": "portrait",
   "categories": ["education", "learning", "languages"],
-  "description": "Learn Russian with interactive exercises",
+  "description": "Learn Basic Russian with interactive exercises",
   "screenshots": [
     {
       "src": "screenshot1.png",

@@ -104,6 +104,44 @@ footer {
   margin-top: 2rem;
 }
 
+/* Header Layout Improvements */
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  position: relative;
+}
+
+/* Menu Toggle Button */
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.3s;
+  z-index: 1100;
+  padding: 8px;
+}
+
+.menu-toggle:hover {
+  transform: scale(1.1);
+}
+
+.menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  animation: fadeIn 0.3s ease;
+}
+
 /* Navigation Component */
 .navigation {
   margin-bottom: 1rem;
@@ -876,19 +914,68 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+  
+  .menu-overlay {
+    display: block;
+  }
+  
   header h1 {
-    font-size: 2rem;
+    margin: 0;
+    flex: 1;
+    text-align: center;
+  }
+  
+  .navigation {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100vh;
+    background: var(--primary-dark);
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    padding-top: 70px;
+  }
+  
+  .navigation.open {
+    left: 0;
   }
   
   .navigation ul {
-    justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
+    flex-direction: column;
+    background-color: transparent;
+    border-radius: 0;
+    overflow: visible;
   }
   
-  .navigation ul::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Edge */
+  .navigation li {
+    text-align: left;
+    padding: 1.2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+  }
+  
+  .navigation li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .navigation li.active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .navigation li.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: var(--secondary-color);
   }
   
   .alphabet-container,

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Alphabet from './components/Alphabet';
+import Phrases from './components/Phrases';
 import Navigation from './components/Navigation';
 import Quiz from './components/Quiz';
 import russianData from './data/russianData';
+import { FaBars, FaTimes } from 'react-icons/fa';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('alphabet');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     // Handle the install prompt
@@ -54,10 +57,29 @@ const App: React.FC = () => {
     });
   };
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section);
+    closeMenu();
+  };
+
   const renderActiveSection = () => {
     switch (activeSection) {
       case 'alphabet':
         return <Alphabet data={russianData.alphabet} />;
+      case 'phrases':
+        return <Phrases data={russianData.basicPhrases} title="Basic Phrases" />;
+      case 'numbers':
+        return <Phrases data={russianData.numbers} title="Numbers" />;
+      case 'words':
+        return <Phrases data={russianData.commonWords} title="Common Words" />;
       case 'quiz':
         return <Quiz data={{
           alphabet: russianData.alphabet.map(item => ({
@@ -77,19 +99,30 @@ const App: React.FC = () => {
   return (
     <div className="app">
       <header>
-        <h1>Learn Russian</h1>
-        <Navigation activeSection={activeSection} setActiveSection={setActiveSection} />
-        {installPrompt && (
-          <button onClick={handleInstallClick} className="install-button">
-            Install App
+        <div className="header-content">
+          <button className="menu-toggle" onClick={toggleMenu} aria-label="Toggle menu">
+            {menuOpen ? <FaTimes /> : <FaBars />}
           </button>
-        )}
+          <h1>Basic Russian</h1>
+          {installPrompt && (
+            <button onClick={handleInstallClick} className="install-button">
+              Install App
+            </button>
+          )}
+        </div>
+        <Navigation 
+          activeSection={activeSection} 
+          setActiveSection={handleSectionChange} 
+          isOpen={menuOpen}
+          _onClose={closeMenu}  // Updated to match the new property name
+        />
       </header>
+      {menuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
       <main>
         {renderActiveSection()}
       </main>
       <footer>
-        <p>© {new Date().getFullYear()} Russian Learning App</p>
+        <p>© {new Date().getFullYear()} Basic Russian Learning</p>
       </footer>
     </div>
   );
