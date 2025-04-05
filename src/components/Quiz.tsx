@@ -479,7 +479,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             value={userAnswer}
             onChange={handleInputChange} 
             onKeyDown={handleKeyDown}
-            placeholder={needsRussianKeyboard ? "Type in English, get Russian letters" : "Your answer here..."}
+            placeholder={needsRussianKeyboard ? "Type in English, press SPACE to convert" : "Your answer here..."}
             disabled={showNext}
             autoFocus
           />
@@ -493,21 +493,40 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             </button>
           )}
         </div>
+        
+        {/* Enhanced instructions for transliteration */}
         {needsRussianKeyboard && (
-          <div className="answer-tips">
-            <small>Tip: Type combinations like "zh" for "ж", "ya" for "я". Letters convert after space/punctuation.</small>
+          <div className="transliteration-instructions">
+            <div className="answer-tips">
+              <strong>Typing in Russian:</strong> Type in English letters and press <span className="instruction-highlight">SPACE</span> or <span className="instruction-highlight">punctuation</span> to convert to Russian.
+            </div>
+            <div className="answer-tips examples">
+              Type <span className="example-text">ya</span> + <span className="key-badge">space</span> → <span className="example-result">я</span>
+              <span className="example-divider">|</span>
+              Type <span className="example-text">zh</span> + <span className="key-badge">space</span> → <span className="example-result">ж</span>
+            </div>
           </div>
         )}
+        
         {!needsRussianKeyboard && (
           <div className="answer-tips">
             <small>Tip: Punctuation is ignored when checking answers.</small>
           </div>
         )}
+        
+        {/* Visual flash notification when transliteration happens */}
+        {needsRussianKeyboard && (
+          <div id="transliteration-notification" className={userAnswer.length > 0 ? "has-content" : ""}>
+            Press SPACE to convert to Russian letters
+          </div>
+        )}
+        
         {needsRussianKeyboard && showKeyboard && !showNext && (
           <div className="virtual-keyboard-container">
             <RussianKeyboard onLetterClick={handleKeyboardLetterClick} />
           </div>
         )}
+        
         {isCorrect !== null && (
           <div className={`quiz-result ${isCorrect ? 'correct' : 'incorrect'}`}>
             {isCorrect ? (
