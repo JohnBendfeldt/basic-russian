@@ -20,12 +20,19 @@ const Alphabet: React.FC<AlphabetProps> = ({ data }) => {
       <div className="alphabet-container">
         {data.map((item, index) => (
           <div className="alphabet-card" key={index}>
-            <div className="letter-header">
-              <div className="letter-pair">
-                <span className="letter-uppercase">{item.letter}</span>
-                <span className="letter-lowercase">{item.letter.toLowerCase()}</span>
+            <div className="letter-container">
+              <div className="letter-header">
+                <div className="letter-pair">
+                  <span className="letter-uppercase">{item.letter}</span>
+                  <span className="letter-lowercase">{item.letter.toLowerCase()}</span>
+                </div>
               </div>
-              <PronunciationButton text={item.letter.toLowerCase()} />
+              
+              <div className="letter-underline"></div>
+              
+              <div className="pronunciation-button-wrapper">
+                <PronunciationButton text={item.letter.toLowerCase()} />
+              </div>
             </div>
             
             <div className="pronunciation">

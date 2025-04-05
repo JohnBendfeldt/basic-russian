@@ -213,7 +213,7 @@ footer {
   border-radius: 2px;
 }
 
-/* Alphabet Component */
+/* Alphabet Component - Updated for letter and button alignment */
 .alphabet-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -237,11 +237,56 @@ footer {
   box-shadow: var(--shadow-md);
 }
 
+.letter-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
 .letter-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  position: relative;
+  width: 100%;
+}
+
+.letter-pair {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.letter-uppercase, .letter-lowercase {
+  font-size: 2.8rem;
+  color: var(--primary-color);
+  font-weight: 700;
+  font-family: var(--font-family);
+}
+
+.letter-lowercase {
+  font-size: 2.4rem;
+}
+
+.letter-underline {
+  width: 80px;
+  height: 4px;
+  margin: 0.5rem auto 0.5rem;
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  border-radius: 2px;
+  position: relative;
+}
+
+.pronunciation-button-wrapper {
+  position: absolute;
+  right: 30px; 
+  top: 50%;
+  transform: translateY(-70%);
 }
 
 .alphabet-card .letter {
@@ -292,29 +337,7 @@ footer {
 }
 
 .example-pronunciation {
-  margin-left: 0.5rem;
-}
-
-/* Alphabet Component - Updated for uppercase/lowercase display */
-.letter-pair {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  margin-right: 0.5rem;
-}
-
-.letter-uppercase {
-  font-size: 2.8rem;
-  color: var(--primary-color);
-  font-weight: 700;
-}
-
-.letter-lowercase {
-  font-size: 2.4rem;
-  color: var(--primary-color);
-  opacity: 0.8;
-  font-weight: 400;
+  margin-left: 5px; /* Reduced from 0.5rem for consistency */
 }
 
 /* Phrases Component */
