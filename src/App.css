@@ -332,9 +332,25 @@ footer {
 .quiz-stats {
   margin-bottom: 1.5rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quiz-stats > div:first-child {
   font-weight: 700;
   color: var(--primary-dark);
   font-size: 1.2rem;
+}
+
+.quiz-progress-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  background-color: var(--primary-light);
+  border-radius: 12px;
+  padding: 4px 10px;
+  display: inline-block;
+  margin: 0 auto;
 }
 
 .quiz-card {

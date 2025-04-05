@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Alphabet from './components/Alphabet';
-import Phrases from './components/Phrases';
 import Navigation from './components/Navigation';
 import Quiz from './components/Quiz';
 import russianData from './data/russianData';
@@ -27,11 +26,11 @@ const App: React.FC = () => {
       console.log('App was installed');
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as any);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as any);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
@@ -41,10 +40,10 @@ const App: React.FC = () => {
     if (!installPrompt) return;
 
     // Show the install prompt
-    installPrompt.prompt();
+    (installPrompt as any).prompt();
 
     // Wait for the user to respond to the prompt
-    installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
+    (installPrompt as any).userChoice.then((choiceResult: { outcome: string }) => {
       if (choiceResult.outcome === 'accepted') {
         console.log('User accepted the install prompt');
       } else {
@@ -55,18 +54,21 @@ const App: React.FC = () => {
     });
   };
 
-  const renderActiveSection = (): JSX.Element => {
+  const renderActiveSection = () => {
     switch (activeSection) {
       case 'alphabet':
         return <Alphabet data={russianData.alphabet} />;
-      case 'phrases':
-        return <Phrases data={russianData.basicPhrases} title="Basic Phrases" />;
-      case 'numbers':
-        return <Phrases data={russianData.numbers} title="Numbers" />;
-      case 'words':
-        return <Phrases data={russianData.commonWords} title="Common Words" />;
       case 'quiz':
-        return <Quiz data={russianData} />;
+        return <Quiz data={{
+          alphabet: russianData.alphabet.map(item => ({
+            character: item.letter,
+            pronunciation: item.pronunciation,
+            example: item.example,
+          })),
+          basicPhrases: russianData.basicPhrases,
+          numbers: russianData.numbers,
+          commonWords: russianData.commonWords
+        }} />;
       default:
         return <Alphabet data={russianData.alphabet} />;
     }
