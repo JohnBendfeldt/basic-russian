@@ -18,23 +18,56 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   style
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isSupported, setIsSupported] = useState(true);
+  const [isSupported, setIsSupported] = useState(false); // Default to false until confirmed
   const [initialized, setInitialized] = useState(false);
   
   // Create a unique ID for each button instance
   const buttonId = useRef(`btn-${Math.random().toString(36).substring(2, 9)}`);
+  
+  // Track mounting state to avoid state updates after unmount
+  const isMounted = useRef(true);
 
   // Initialize speech synthesis on component mount
   useEffect(() => {
+    // Reset mount status on component mount
+    isMounted.current = true;
+    
     const init = async () => {
-      setIsSupported(isSpeechSupported());
-      if (isSpeechSupported()) {
-        await initVoices();
-        setInitialized(true);
+      try {
+        // Check if ResponsiveVoice is supported
+        const supported = isSpeechSupported();
+        
+        // If not mounted anymore, abort
+        if (!isMounted.current) return;
+        
+        setIsSupported(supported);
+        
+        if (supported) {
+          // Ensure voices are initialized
+          await initVoices();
+          
+          // If not mounted anymore, abort
+          if (!isMounted.current) return;
+          
+          setInitialized(true);
+        }
+      } catch (err) {
+        console.error('Error initializing speech in button:', err);
       }
     };
     
+    // Execute initialization
     init();
+    
+    // Cleanup function
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // Update speech supported status whenever component is shown
+  useEffect(() => {
+    setIsSupported(isSpeechSupported());
   }, []);
 
   const handleSpeak = () => {
@@ -45,29 +78,28 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     speak(
       text, 
       lang,
-      // Pass the buttonId to the speak function so it knows which button to enable
       buttonId.current,
       // onEnd callback
       () => {
-        setIsPlaying(false);
+        if (isMounted.current) {
+          setIsPlaying(false);
+        }
       },
       // onError callback
       (error: unknown) => {
         console.error(`Pronunciation error for ${buttonId.current}:`, error);
-        setIsPlaying(false);
+        if (isMounted.current) {
+          setIsPlaying(false);
+        }
         
-        // Properly check error.message by first ensuring it's an Error object
-        if (
-          error instanceof Error && 
-          error.message === 'Speech synthesis not supported'
-        ) {
-          alert('Voice not available. Try installing Russian in your device language settings.');
+        if (error instanceof Error) {
+          alert(`Voice error: ${error.message}`);
         }
       }
     );
   };
 
-  // Don't render if speech synthesis is not supported
+  // Don't render if ResponsiveVoice is not supported
   if (!isSupported) {
     return null;
   }
