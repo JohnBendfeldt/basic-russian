@@ -3,10 +3,32 @@ import { FaVolumeUp, FaCheck, FaTimes, FaKeyboard } from 'react-icons/fa';
 import RussianKeyboard from './RussianKeyboard';
 import { transliterate, containsCyrillic } from '../utils/transliteration';
 
-interface QuizProps {
-  data: any;
+// Define interfaces for the data structure
+interface AlphabetItem {
+  character: string;
+  pronunciation: string;
+  example?: string;
+  russianWord?: string;
 }
 
+interface PhraseItem {
+  english: string;
+  russian: string;
+  pronunciation?: string;
+}
+
+// Update the existing interface to include data structure
+interface QuizProps {
+  data: {
+    alphabet?: AlphabetItem[];
+    basicPhrases?: PhraseItem[];
+    numbers?: PhraseItem[];
+    commonWords?: PhraseItem[];
+    [key: string]: any;
+  };
+}
+
+// Use a ref to track askedQuestions to prevent re-renders
 const Quiz: React.FC<QuizProps> = ({ data }) => {
   const [currentQuestion, setCurrentQuestion] = useState<any>(null);
   const [userAnswer, setUserAnswer] = useState('');
@@ -20,6 +42,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [_lastInput, setLastInput] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
+  
+  // Instead of using state for askedQuestions, use a ref to prevent re-renders
+  const askedQuestionsRef = useRef<Set<string>>(new Set());
+  // Only use this state for UI updates, not for logic that would trigger re-renders
+  const [askedQuestionsCount, setAskedQuestionsCount] = useState(0);
 
   const normalizeText = (text: string): string => {
     let mainText = text;
@@ -108,133 +135,232 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     return matrix[a.length][b.length];
   };
 
+  // Fix the getRandomQuestion function to prevent infinite loops
   const getRandomQuestion = useCallback(() => {
+    console.log("getRandomQuestion called");
     setUserAnswer('');
     setIsCorrect(null);
     setShowNext(false);
 
+    // Don't continue if data isn't loaded yet
+    if (!data) {
+      console.log("No data available yet");
+      return;
+    }
+
     try {
       const categories = ['alphabet', 'basicPhrases', 'numbers', 'commonWords'];
-      let randomCategory = categories[Math.floor(Math.random() * categories.length)];
-      let itemsList = data[randomCategory];
+      // Filter to only include categories that actually have data
+      const availableCategories = categories.filter(cat => 
+        data[cat] && Array.isArray(data[cat]) && data[cat].length > 0
+      );
+      
+      if (availableCategories.length === 0) {
+        console.error("No data available in any category");
+        setCurrentQuestion({
+          type: 'dummy',
+          prompt: 'No questions available',
+          answer: '',
+          hint: 'Please load some content first',
+          russian: ''
+        });
+        return;
+      }
+      
+      // Pick a random category from available ones
+      const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
+      const itemsList = data[randomCategory];
 
-      if (!itemsList || !Array.isArray(itemsList) || itemsList.length === 0) {
-        const availableCategories = categories.filter(cat => 
-          data[cat] && Array.isArray(data[cat]) && data[cat].length > 0
-        );
-        if (availableCategories.length === 0) {
-          console.error("No quiz data available");
+      // Look for unasked questions using the ref instead of state
+      const questionPool: Array<{item: AlphabetItem | PhraseItem, isRussianToEnglish: boolean}> = [];
+      
+      if (randomCategory === 'alphabet') {
+        // Add alphabet items that haven't been asked yet
+        (itemsList as AlphabetItem[]).forEach((item: AlphabetItem) => {
+          const id = `alphabet-${item.character}`;
+          if (!askedQuestionsRef.current.has(id)) {
+            questionPool.push({ item, isRussianToEnglish: true });
+          }
+        });
+      } else {
+        // Add phrase items that haven't been asked yet in either direction
+        (itemsList as PhraseItem[]).forEach((item: PhraseItem) => {
+          const russianToEnglishId = `${randomCategory}-${item.russian}-to-en`;
+          const englishToRussianId = `${randomCategory}-${item.english}-to-ru`;
+          
+          if (!askedQuestionsRef.current.has(russianToEnglishId)) {
+            questionPool.push({ item, isRussianToEnglish: true });
+          }
+          
+          if (!askedQuestionsRef.current.has(englishToRussianId)) {
+            questionPool.push({ item, isRussianToEnglish: false });
+          }
+        });
+      }
+      
+      // If we've asked all questions, reset the history
+      if (questionPool.length === 0) {
+        console.log("All questions have been asked. Resetting question history.");
+        askedQuestionsRef.current = new Set();
+        setAskedQuestionsCount(0);
+        
+        // After resetting, run the same logic again to get a new question
+        // But this time use direct selection rather than recursion
+        if (randomCategory === 'alphabet' && itemsList.length > 0) {
+          const randomIndex = Math.floor(Math.random() * itemsList.length);
+          const item = (itemsList as AlphabetItem[])[randomIndex];
+          const questionId = `alphabet-${item.character}`;
+          
+          // Add to the asked questions without triggering re-render
+          askedQuestionsRef.current.add(questionId);
+          setAskedQuestionsCount(1); // Only update the count for UI
+          
           setCurrentQuestion({
-            type: 'dummy',
-            prompt: 'Loading...',
-            answer: '',
-            hint: 'Please wait while we load questions',
-            russian: ''
+            type: 'alphabet',
+            prompt: item.character,
+            answer: item.pronunciation.toLowerCase(),
+            hint: `How is the letter "${item.character}" pronounced in Russian?`,
+            russian: item.character,
+            id: questionId
           });
           return;
+        } else if (itemsList.length > 0) {
+          const randomIndex = Math.floor(Math.random() * itemsList.length);
+          const item = (itemsList as PhraseItem[])[randomIndex];
+          const isRussianToEnglish = Math.random() > 0.5;
+          
+          let questionId: string;
+          if (isRussianToEnglish) {
+            questionId = `${randomCategory}-${item.russian}-to-en`;
+            setCurrentQuestion({
+              type: randomCategory,
+              prompt: item.russian,
+              answer: item.english.toLowerCase(),
+              hint: 'What does this mean in English?',
+              russian: item.russian,
+              id: questionId
+            });
+          } else {
+            questionId = `${randomCategory}-${item.english}-to-ru`;
+            setCurrentQuestion({
+              type: randomCategory,
+              prompt: item.english,
+              answer: item.russian.toLowerCase(),
+              hint: 'How do you say this in Russian?',
+              russian: item.russian,
+              id: questionId
+            });
+          }
+          
+          // Add to the asked questions without triggering re-render
+          askedQuestionsRef.current.add(questionId);
+          setAskedQuestionsCount(1); // Only update the count for UI
+          return;
         }
-        randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
-        itemsList = data[randomCategory];
       }
+      
+      // Pick a random question from the pool
+      const randomIndex = Math.floor(Math.random() * questionPool.length);
+      const { item: randomItem, isRussianToEnglish } = questionPool[randomIndex];
 
-      if (!itemsList || itemsList.length === 0) {
-        throw new Error("No items in the selected category");
-      }
-
-      const randomIndex = Math.floor(Math.random() * itemsList.length);
-      const randomItem = itemsList[randomIndex];
-
-      if (!randomItem) {
-        throw new Error("Failed to get random item");
-      }
-
+      // Process the chosen question based on its type
       if (randomCategory === 'alphabet') {
-        if (typeof randomItem !== 'object' || randomItem === null) {
-          throw new Error("Invalid alphabet item structure");
-        }
-        const character = randomItem.character?.toString() || '';
-        const pronunciation = randomItem.pronunciation?.toString() || '';
+        // Process alphabet question
+        const alphabetItem = randomItem as AlphabetItem;
+        const character = alphabetItem.character?.toString() || '';
+        const pronunciation = alphabetItem.pronunciation?.toString() || '';
+        
         if (!character || !pronunciation) {
           throw new Error("Missing required alphabet properties");
         }
+        
+        const questionId = `alphabet-${character}`;
+        
+        // Update the asked questions set using the ref
+        askedQuestionsRef.current.add(questionId);
+        setAskedQuestionsCount(askedQuestionsRef.current.size);
+        
+        // Set the current question
         setCurrentQuestion({
           type: 'alphabet',
           prompt: character,
           answer: pronunciation.toLowerCase(),
           hint: `How is the letter "${character}" pronounced in Russian?`,
-          russian: character
+          russian: character,
+          id: questionId
         });
       } else {
-        const russian = randomItem.russian?.toString() || '';
-        const english = randomItem.english?.toString() || '';
+        // Process phrase question
+        const phraseItem = randomItem as PhraseItem;
+        const russian = phraseItem.russian?.toString() || '';
+        const english = phraseItem.english?.toString() || '';
+        
         if (!russian || !english) {
           throw new Error(`Invalid ${randomCategory} item: missing russian or english`);
         }
-        const isRussianToEnglish = Math.random() > 0.5;
+        
+        let questionId: string;
+        
         if (isRussianToEnglish) {
+          questionId = `${randomCategory}-${russian}-to-en`;
           setCurrentQuestion({
             type: randomCategory,
             prompt: russian,
             answer: english.toLowerCase(),
             hint: 'What does this mean in English?',
-            russian: russian
+            russian: russian,
+            id: questionId
           });
         } else {
+          questionId = `${randomCategory}-${english}-to-ru`;
           setCurrentQuestion({
             type: randomCategory,
             prompt: english,
             answer: russian.toLowerCase(),
             hint: 'How do you say this in Russian?',
-            russian: russian
+            russian: russian,
+            id: questionId
           });
         }
+        
+        // Update the asked questions set using the ref
+        askedQuestionsRef.current.add(questionId);
+        setAskedQuestionsCount(askedQuestionsRef.current.size);
       }
     } catch (error) {
       console.error("Error generating question:", error);
-      try {
-        if (data.basicPhrases && Array.isArray(data.basicPhrases) && data.basicPhrases.length > 0) {
-          const fallbackItem = data.basicPhrases[0];
-          setCurrentQuestion({
-            type: 'fallback',
-            prompt: fallbackItem.english,
-            answer: fallbackItem.russian.toLowerCase(),
-            hint: 'How do you say this in Russian?',
-            russian: fallbackItem.russian
-          });
-          return;
-        }
-        setCurrentQuestion({
-          type: 'hardcoded',
-          prompt: 'Hello',
-          answer: 'привет',
-          hint: 'How do you say this in Russian?',
-          russian: 'Привет'
-        });
-      } catch (fallbackError) {
-        console.error("Error creating fallback question:", fallbackError);
-        setCurrentQuestion({
-          type: 'emergency',
-          prompt: 'Hello',
-          answer: 'привет',
-          hint: 'How do you say this in Russian?',
-          russian: 'Привет'
-        });
-      }
+      // Fallback to a static question to prevent loops
+      setCurrentQuestion({
+        type: 'emergency',
+        prompt: 'Hello',
+        answer: 'привет',
+        hint: 'How do you say this in Russian?',
+        russian: 'Привет'
+      });
     }
-  }, [data]);
+  }, [data]); // Only depend on data, not on any state that changes with each question
 
+  // Initial question loading - wrap in its own effect
+  const isInitialMount = useRef(true);
   useEffect(() => {
-    getRandomQuestion();
-    correctSoundRef.current = new Audio('/sounds/correct.mp3');
-    incorrectSoundRef.current = new Audio('/sounds/incorrect.mp3');
-    return () => {
-      if (correctSoundRef.current) {
-        correctSoundRef.current.pause();
-      }
-      if (incorrectSoundRef.current) {
-        incorrectSoundRef.current.pause();
-      }
-    };
+    if (isInitialMount.current) {
+      console.log("Initial mount - loading first question");
+      isInitialMount.current = false;
+      getRandomQuestion();
+      
+      // Load sounds
+      correctSoundRef.current = new Audio('/sounds/correct.mp3');
+      incorrectSoundRef.current = new Audio('/sounds/incorrect.mp3');
+      
+      return () => {
+        if (correctSoundRef.current) {
+          correctSoundRef.current.pause();
+        }
+        if (incorrectSoundRef.current) {
+          incorrectSoundRef.current.pause();
+        }
+      };
+    }
   }, [getRandomQuestion]);
 
   const checkAnswer = () => {
@@ -313,14 +439,12 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     const newValue = e.target.value;
     const selectionStart = e.target.selectionStart || 0;
     
-    // Skip transliteration for English answers
     if (!needsRussianKeyboard) {
       setUserAnswer(newValue);
       setLastInput(newValue);
       return;
     }
     
-    // Check if we are dealing with quotes or apostrophes (handle immediately)
     if (["'", "`", '"'].includes(newValue.charAt(selectionStart - 1))) {
       const withSpecials = newValue
         .replace(/'/g, 'ь')
@@ -332,10 +456,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       return;
     }
     
-    // Store raw input for comparison
     setUserAnswer(newValue);
     
-    // Check if we just completed a combination (like "ya", "zh", etc.)
     const lastCharIndex = selectionStart - 1;
     if (lastCharIndex >= 1 && lastCharIndex < newValue.length) {
       const prevChar = newValue.charAt(lastCharIndex - 1);
@@ -343,8 +465,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       
       if (combinationStarters.includes(prevChar) && 
           combinationFollowers[prevChar as keyof typeof combinationFollowers]?.includes(currChar)) {
-        // We just typed a valid combination - transliterate immediately
-        console.log(`Found combination: ${prevChar}${currChar}`);
         const transliteratedValue = transliterate(newValue);
         setUserAnswer(transliteratedValue);
         setCursorPosition(selectionStart);
@@ -353,8 +473,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       }
     }
     
-    // Also transliterate at specific triggers
-    // Fix the TypeScript error by properly typing nativeEvent
     const hasInputType = 'inputType' in e.nativeEvent;
     const inputType = hasInputType ? (e.nativeEvent as any).inputType : undefined;
     
@@ -362,7 +480,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         /[.,!?;:]/.test(newValue.charAt(selectionStart - 1)) ||
         inputType === 'insertLineBreak' ||
         newValue.includes('\n')) {
-      console.log('Transliterating at trigger point');
       const transliteratedValue = transliterate(newValue);
       setUserAnswer(transliteratedValue);
       setCursorPosition(selectionStart);
@@ -374,7 +491,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   };
 
   const handleCheckAnswer = () => {
-    // Always transliterate before checking
     if (needsRussianKeyboard && userAnswer) {
       const transliteratedValue = transliterate(userAnswer);
       setUserAnswer(transliteratedValue);
@@ -391,9 +507,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     } else if (letter === 'clear') {
       setUserAnswer('');
     } else {
-      // When using the virtual keyboard, we should transliterate immediately
       const newInput = userAnswer + letter;
-      // If it's a space, we should transliterate the whole input
       if (letter === ' ') {
         const transliteratedValue = transliterate(newInput);
         setUserAnswer(transliteratedValue);
@@ -415,7 +529,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     !currentQuestion.type.includes('alphabet') && 
     currentQuestion.hint.includes('How do you say this in Russian');
 
-  // Define the combination starters and followers
   const combinationStarters = ['y', 'Y', 'z', 'Z', 's', 'S', 'c', 'C', 't', 'T', 'k', 'K'];
   const combinationFollowers = {
     'y': ['a', 'A', 'u', 'U', 'o', 'O', 'e', 'E'],
@@ -442,6 +555,16 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     }
   }, [cursorPosition, userAnswer, needsRussianKeyboard]);
 
+  const getProgressText = () => {
+    const totalQuestions = 
+      (data.alphabet?.length || 0) + 
+      ((data.basicPhrases?.length || 0) * 2) + 
+      ((data.numbers?.length || 0) * 2) + 
+      ((data.commonWords?.length || 0) * 2);
+    
+    return `${askedQuestionsCount}/${totalQuestions} unique questions asked`;
+  };
+
   if (!data || !currentQuestion) {
     return <div className="section quiz-section">
       <h2>Test Your Knowledge</h2>
@@ -456,7 +579,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     <div className="section quiz-section">
       <h2>Test Your Knowledge</h2>
       <div className="quiz-stats">
-        Score: {score} / {questionsAnswered}
+        <div>Score: {score} / {questionsAnswered}</div>
+        <div className="quiz-progress-text">{getProgressText()}</div>
       </div>
       <div className="quiz-card">
         <h3>{currentQuestion.hint}</h3>
@@ -496,7 +620,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           )}
         </div>
         
-        {/* Enhanced instructions for transliteration */}
         {needsRussianKeyboard && (
           <div className="transliteration-instructions">
             <div className="answer-tips">
@@ -516,7 +639,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           </div>
         )}
         
-        {/* Visual flash notification when transliteration happens */}
         {needsRussianKeyboard && (
           <div id="transliteration-notification" className={userAnswer.length > 0 ? "has-content" : ""}>
             Press SPACE to convert to Russian letters
