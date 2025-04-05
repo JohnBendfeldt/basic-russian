@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaVolumeUp } from 'react-icons/fa';
-import { speak, isSpeechSupported, initVoices } from '../utils/speech';
+import { speak, initVoices } from '../utils/speech';
 
 interface PronunciationButtonProps {
   text: string;
@@ -18,7 +18,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   style
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isSupported, setIsSupported] = useState(false); // Default to false until confirmed
+  const [_isSupported, setIsSupported] = useState(false); // Prefix with underscore to indicate it's unused
   const [initialized, setInitialized] = useState(false);
   
   // Create a unique ID for each button instance
@@ -34,25 +34,23 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     
     const init = async () => {
       try {
-        // Check if ResponsiveVoice is supported
-        const supported = isSpeechSupported();
+        // Assume support is available on all devices - we'll handle fallbacks
+        // and show a more user-friendly error if needed
+        setIsSupported(true);
+        
+        // Ensure voices are initialized
+        await initVoices();
         
         // If not mounted anymore, abort
         if (!isMounted.current) return;
         
-        setIsSupported(supported);
-        
-        if (supported) {
-          // Ensure voices are initialized
-          await initVoices();
-          
-          // If not mounted anymore, abort
-          if (!isMounted.current) return;
-          
-          setInitialized(true);
-        }
+        setInitialized(true);
       } catch (err) {
         console.error('Error initializing speech in button:', err);
+        // Still allow the button to be shown, it will handle errors on click
+        if (isMounted.current) {
+          setInitialized(true);
+        }
       }
     };
     
@@ -65,13 +63,8 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     };
   }, []);
 
-  // Update speech supported status whenever component is shown
-  useEffect(() => {
-    setIsSupported(isSpeechSupported());
-  }, []);
-
   const handleSpeak = () => {
-    if (!isSpeechSupported() || isPlaying) return;
+    if (isPlaying) return;
 
     setIsPlaying(true);
     
@@ -90,19 +83,22 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
         console.error(`Pronunciation error for ${buttonId.current}:`, error);
         if (isMounted.current) {
           setIsPlaying(false);
-        }
-        
-        if (error instanceof Error) {
-          alert(`Voice error: ${error.message}`);
+          
+          // Show a user-friendly message for voice errors
+          if (error instanceof Error) {
+            // Check if we're on a mobile device
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+              alert('Voice error: Using English pronunciation as a fallback. For better Russian pronunciation, please use a desktop browser.');
+            } else {
+              alert(`Voice error: ${error.message}`);
+            }
+          }
         }
       }
     );
   };
-
-  // Don't render if ResponsiveVoice is not supported
-  if (!isSupported) {
-    return null;
-  }
 
   return (
     <button
