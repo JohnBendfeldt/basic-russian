@@ -1,17 +1,12 @@
 /**
- * Google Cloud Text-to-Speech API integration with robust fallbacks
+ * Google Cloud Text-to-Speech API integration - debugging version
  */
 
 // Cache for audio to reduce API calls
 const audioCache: Record<string, string> = {};
 
-// API URL for Google Cloud TTS
+// API URL for Google Cloud TTS - Netlify serverless function
 const API_URL = '/.netlify/functions/tts';
-
-// Add preloaded sample audio for common Russian words
-const SAMPLE_AUDIO: Record<string, string> = {
-  'привет': 'SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADrADMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAWEAAAAAAAAA6yq4hqUAAAAAAAAAAAAAAAAAAAA',
-};
 
 /**
  * Available Google Cloud TTS voices for Russian
@@ -28,14 +23,14 @@ export const RUSSIAN_VOICES = [
 ];
 
 /**
- * Check if TTS is configured (always return true so UI works)
+ * Check if TTS is configured (always return true for UI functionality)
  */
 export const isGoogleTTSConfigured = (): boolean => {
   return true;
 };
 
 /**
- * Generate speech with proper error handling
+ * Generate speech using Google Cloud TTS API with improved debugging
  */
 export const generateSpeech = async (
   text: string,
@@ -47,77 +42,83 @@ export const generateSpeech = async (
   
   // Return cached audio if available
   if (audioCache[cacheKey]) {
+    console.log(`Using cached audio for "${text}"`);
     return audioCache[cacheKey];
   }
   
-  // Check if we have preloaded sample audio for this text
-  const normalizedText = text.toLowerCase().trim();
-  if (SAMPLE_AUDIO[normalizedText]) {
-    audioCache[cacheKey] = SAMPLE_AUDIO[normalizedText];
-    return SAMPLE_AUDIO[normalizedText];
-  }
+  console.log(`Requesting TTS for: "${text}" using voice: ${voiceName} via ${API_URL}`);
   
+  // Prepare request payload for debugging
+  const requestPayload = {
+    text,
+    voice: {
+      languageCode,
+      name: voiceName,
+      ssmlGender: voiceName.includes('B') || voiceName.includes('D') ? 'MALE' : 'FEMALE'
+    },
+    audioConfig: {
+      audioEncoding: 'MP3'
+    }
+  };
+  
+  console.log('API request payload:', JSON.stringify(requestPayload, null, 2));
+  
+  // Make the API call with explicit error detection
   try {
-    // Add detailed logging to help diagnose issues
-    console.log(`Requesting TTS from ${API_URL} for: "${text}" with voice ${voiceName}`);
-    
-    // Add timeout to prevent hanging requests
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        text,
-        voice: {
-          languageCode,
-          name: voiceName,
-          ssmlGender: voiceName.includes('B') || voiceName.includes('D') ? 'MALE' : 'FEMALE'
-        },
-        audioConfig: {
-          audioEncoding: 'MP3'
-        }
-      }),
-      signal: controller.signal
-    }).finally(() => clearTimeout(timeoutId));
+      body: JSON.stringify(requestPayload)
+    });
     
-    // Handle response errors
+    // Log detailed information about the response
+    console.log(`API Response status: ${response.status} ${response.statusText}`);
+    console.log('Response headers:', 
+      Array.from(response.headers.entries())
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(', ')
+    );
+    
     if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Could not read error response');
-      console.error(`API error ${response.status}: ${errorText}`);
-      throw new Error(`TTS API error: ${response.status} - ${response.statusText}`);
+      // Try to read and log the error response body
+      const errorBody = await response.text();
+      console.error('API error response body:', errorBody);
+      throw new Error(`Google TTS API error: ${response.status} ${response.statusText}`);
     }
     
+    // Parse the response to get the audio data
     const data = await response.json();
+    console.log('API response structure:', Object.keys(data).join(', '));
     
     if (!data.audioContent) {
-      console.error('Missing audio content in response:', data);
+      console.error('Missing audioContent in response:', data);
       throw new Error('No audio content in API response');
     }
     
-    // Cache and return the audio content
+    // Cache and return the audio data
+    console.log('Successfully received audio data');
     audioCache[cacheKey] = data.audioContent;
     return data.audioContent;
   } catch (error) {
-    console.error(`TTS API error for "${text}":`, error);
+    // Log detailed error information
+    console.error('Google TTS API error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      text,
+      voiceName,
+      languageCode,
+      apiUrl: API_URL
+    });
     
-    // Return sample audio if available as fallback
-    if (SAMPLE_AUDIO.привет) {
-      console.log('Using sample audio as fallback');
-      audioCache[cacheKey] = SAMPLE_AUDIO.привет;
-      return SAMPLE_AUDIO.привет;
-    }
-    
-    // Re-throw for upstream handling
+    // Rethrow the error to be handled by the caller
     throw error;
   }
 };
 
 /**
- * Play audio with increased robustness
+ * Play audio from Google Cloud TTS API
  */
 export const playGoogleTTS = async (
   text: string,
@@ -127,51 +128,38 @@ export const playGoogleTTS = async (
   onError?: (error: Error) => void
 ): Promise<void> => {
   try {
-    // Get the audio content with timeout protection
-    const audioPromise = generateSpeech(text, voiceName, languageCode);
+    // Get the audio content
+    const audioContent = await generateSpeech(text, voiceName, languageCode);
     
-    // Add a timeout to prevent indefinite hanging
-    const timeoutPromise = new Promise<string>((_, reject) => {
-      setTimeout(() => reject(new Error('TTS request timed out')), 5000);
-    });
-    
-    // Race the audio request against the timeout
-    const audioContent = await Promise.race([audioPromise, timeoutPromise]);
-    
-    // Create and configure audio element
+    // Create an audio element and set its source to the audio data
     const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
     
-    // Set up listeners
-    audio.addEventListener('ended', () => {
+    // Set up event handlers
+    audio.onended = () => {
       console.log(`Audio playback completed for "${text}"`);
       if (onEnd) onEnd();
-    });
+    };
     
-    audio.addEventListener('error', (event) => {
-      console.error(`Audio playback error for "${text}":`, event);
-      if (onError) onError(new Error('Audio playback failed'));
-    });
+    audio.onerror = (event) => {
+      console.error('Audio playback error:', event);
+      if (onError) onError(new Error(`Audio playback failed: ${event}`));
+    };
     
-    // Load audio first (important for mobile browsers)
-    audio.load();
-    
-    // Play with proper error handling
-    const playPromise = audio.play();
-    
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.error(`Audio play failed for "${text}":`, error);
-        
-        // Special handling for "user didn't interact" errors on mobile
-        if (error.name === 'NotAllowedError') {
-          console.warn('Audio playback requires user interaction first');
-        }
-        
-        if (onError) onError(new Error(`Audio play failed: ${error.message}`));
-      });
+    // Play the audio with error handling
+    try {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.error('Audio play failed:', error);
+          if (onError) onError(new Error(`Audio play failed: ${error.message}`));
+        });
+      }
+    } catch (playError) {
+      console.error('Error during audio.play():', playError);
+      if (onError) onError(new Error(`Error playing audio: ${playError}`));
     }
   } catch (error) {
-    console.error(`TTS preparation error for "${text}":`, error);
+    console.error('Error in TTS process:', error);
     if (onError) {
       if (error instanceof Error) {
         onError(error);
