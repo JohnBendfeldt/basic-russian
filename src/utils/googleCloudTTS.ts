@@ -1,12 +1,15 @@
 /**
- * Google Cloud Text-to-Speech API integration - debugging version
+ * Direct Google Cloud Text-to-Speech API integration
  */
 
 // Cache for audio to reduce API calls
 const audioCache: Record<string, string> = {};
 
-// API URL for Google Cloud TTS - Netlify serverless function
+// API URL for Google Cloud TTS - same for both dev and production 
 const API_URL = '/.netlify/functions/tts';
+
+// Log which endpoint we're using
+console.log(`Using Google Cloud TTS API via: ${API_URL}`);
 
 /**
  * Available Google Cloud TTS voices for Russian
@@ -30,7 +33,7 @@ export const isGoogleTTSConfigured = (): boolean => {
 };
 
 /**
- * Generate speech using Google Cloud TTS API with improved debugging
+ * Generate speech using Google Cloud TTS API directly
  */
 export const generateSpeech = async (
   text: string,
@@ -48,7 +51,7 @@ export const generateSpeech = async (
   
   console.log(`Requesting TTS for: "${text}" using voice: ${voiceName} via ${API_URL}`);
   
-  // Prepare request payload for debugging
+  // Prepare request payload for Google TTS API
   const requestPayload = {
     text,
     voice: {
@@ -61,60 +64,37 @@ export const generateSpeech = async (
     }
   };
   
-  console.log('API request payload:', JSON.stringify(requestPayload, null, 2));
+  // Make the API call
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestPayload)
+  });
   
-  // Make the API call with explicit error detection
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestPayload)
-    });
-    
-    // Log detailed information about the response
-    console.log(`API Response status: ${response.status} ${response.statusText}`);
-    console.log('Response headers:', 
-      Array.from(response.headers.entries())
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(', ')
-    );
-    
-    if (!response.ok) {
-      // Try to read and log the error response body
-      const errorBody = await response.text();
-      console.error('API error response body:', errorBody);
-      throw new Error(`Google TTS API error: ${response.status} ${response.statusText}`);
-    }
-    
-    // Parse the response to get the audio data
-    const data = await response.json();
-    console.log('API response structure:', Object.keys(data).join(', '));
-    
-    if (!data.audioContent) {
-      console.error('Missing audioContent in response:', data);
-      throw new Error('No audio content in API response');
-    }
-    
-    // Cache and return the audio data
-    console.log('Successfully received audio data');
-    audioCache[cacheKey] = data.audioContent;
-    return data.audioContent;
-  } catch (error) {
-    // Log detailed error information
-    console.error('Google TTS API error details:', {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : 'No stack trace',
-      text,
-      voiceName,
-      languageCode,
-      apiUrl: API_URL
-    });
-    
-    // Rethrow the error to be handled by the caller
-    throw error;
+  // Log information about the response
+  console.log(`API Response status: ${response.status} ${response.statusText}`);
+  
+  if (!response.ok) {
+    // Handle API errors
+    const errorBody = await response.text();
+    console.error('API error response body:', errorBody);
+    throw new Error(`Google TTS API error: ${response.status} ${response.statusText}`);
   }
+  
+  // Parse the response to get the audio data
+  const data = await response.json();
+  
+  if (!data.audioContent) {
+    console.error('Missing audioContent in response:', data);
+    throw new Error('No audio content in API response');
+  }
+  
+  // Cache and return the audio data
+  console.log('Successfully received audio data');
+  audioCache[cacheKey] = data.audioContent;
+  return data.audioContent;
 };
 
 /**
@@ -128,7 +108,7 @@ export const playGoogleTTS = async (
   onError?: (error: Error) => void
 ): Promise<void> => {
   try {
-    // Get the audio content
+    // Get the audio content from Google TTS API
     const audioContent = await generateSpeech(text, voiceName, languageCode);
     
     // Create an audio element and set its source to the audio data
@@ -142,21 +122,17 @@ export const playGoogleTTS = async (
     
     audio.onerror = (event) => {
       console.error('Audio playback error:', event);
-      if (onError) onError(new Error(`Audio playback failed: ${event}`));
+      if (onError) onError(new Error('Audio playback failed'));
     };
     
     // Play the audio with error handling
-    try {
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.error('Audio play failed:', error);
-          if (onError) onError(new Error(`Audio play failed: ${error.message}`));
-        });
-      }
-    } catch (playError) {
-      console.error('Error during audio.play():', playError);
-      if (onError) onError(new Error(`Error playing audio: ${playError}`));
+    const playPromise = audio.play();
+    
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.error('Audio play failed:', error);
+        if (onError) onError(new Error(`Audio play failed: ${error.message}`));
+      });
     }
   } catch (error) {
     console.error('Error in TTS process:', error);

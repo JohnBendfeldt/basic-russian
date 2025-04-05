@@ -1,61 +1,94 @@
-// Local mock server for development testing
+// Local development server using real Google Cloud TTS API
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
+const bodyParser = require('body-parser');
+const { TextToSpeechClient } = require('@google-cloud/text-to-speech');
 const app = express();
 const PORT = 9000;
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// Mock TTS endpoint for local development
-app.post('/.netlify/functions/tts', (req, res) => {
-  const { text, voice } = req.body;
+// TTS API endpoint
+app.post('/.netlify/functions/tts', async (req, res) => {
+  const { text, voice, audioConfig } = req.body;
   
-  console.log(`[DEV SERVER] TTS request for: "${text}" using voice: ${voice?.name || 'default'}`);
+  console.log(`[DEV SERVER] TTS request for: "${text}" using voice:`, voice?.name || 'default');
   
-  // Debug output showing full request
-  console.log('Received request payload:', JSON.stringify(req.body, null, 2));
+  if (!text) {
+    return res.status(400).json({ error: 'Text is required' });
+  }
   
-  // Return a 404 error to show what's happening in the real environment
-  res.status(404).json({
-    error: "Simulating the 404 error you're seeing in production",
-    message: "This is the same error you would see in production. Check your Netlify Function deployment."
-  });
+  try {
+    // Initialize the Google Cloud TTS client
+    const client = new TextToSpeechClient();
+    
+    // Prepare the request
+    const request = {
+      input: { text },
+      voice: voice || {
+        languageCode: 'ru-RU',
+        name: 'ru-RU-Standard-A',
+        ssmlGender: 'FEMALE'
+      },
+      audioConfig: audioConfig || {
+        audioEncoding: 'MP3'
+      }
+    };
+    
+    console.log(`[DEV SERVER] Calling Google TTS API with request:`, {
+      input: request.input,
+      voice: request.voice
+    });
+    
+    // Call Google Cloud TTS API
+    const [response] = await client.synthesizeSpeech(request);
+    
+    if (!response.audioContent) {
+      throw new Error('No audio content returned from Google TTS API');
+    }
+    
+    console.log(`[DEV SERVER] Successfully received ${response.audioContent.length} bytes of audio from Google TTS API`);
+    
+    // Convert audio content to base64
+    const audioContent = Buffer.from(response.audioContent).toString('base64');
+    
+    // Return the audio content
+    return res.json({
+      audioContent,
+      text
+    });
+  } catch (error) {
+    console.error('[DEV SERVER] Google TTS API error:', error);
+    
+    return res.status(500).json({
+      error: 'Failed to generate speech',
+      message: error.message
+    });
+  }
 });
 
-// Information endpoint
+// API status endpoint
 app.get('/', (req, res) => {
   res.send(`
-    <h1>Russian Learning App Dev Server</h1>
-    <p>This mock server simulates the same 404 error that occurs in production to help with debugging.</p>
-    <pre>
-    Available endpoint: POST /.netlify/functions/tts
-    
-    Example request body:
-    {
-      "text": "привет",
-      "voice": {
-        "languageCode": "ru-RU",
-        "name": "ru-RU-Standard-A",
-        "ssmlGender": "FEMALE"
-      }
-    }
-    </pre>
+    <h1>Russian Learning App - Google TTS Development Server</h1>
+    <p>This server is configured to use the real Google Cloud TTS API.</p>
+    <p>Make sure you have the GOOGLE_APPLICATION_CREDENTIALS environment variable set.</p>
+    <p>API endpoint: <code>POST http://localhost:${PORT}/.netlify/functions/tts</code></p>
   `);
 });
 
 // Start the server
 app.listen(PORT, () => {
   console.log(`
-  ┌──────────────────────────────────────────────────┐
-  │                                                  │
-  │   Debug Mock Server running on port ${PORT}         │
-  │   TTS endpoint: http://localhost:${PORT}/.netlify/functions/tts │
-  │                                                  │
-  │   This server simulates the 404 errors to help   │
-  │   with debugging the real API issues.            │
-  │                                                  │
-  └──────────────────────────────────────────────────┘
+  ┌──────────────────────────────────────────────────────┐
+  │                                                      │
+  │   Google TTS Development Server running on port ${PORT}  │
+  │   API endpoint: http://localhost:${PORT}/.netlify/functions/tts  │
+  │                                                      │
+  │   Using REAL Google Cloud TTS API                    │
+  │   (ensure GOOGLE_APPLICATION_CREDENTIALS is set)     │
+  │                                                      │
+  └──────────────────────────────────────────────────────┘
   `);
 });
