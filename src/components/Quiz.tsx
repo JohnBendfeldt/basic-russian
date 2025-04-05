@@ -23,144 +23,230 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   // Helper function to normalize text for comparison
   const normalizeText = (text: string): string => {
-    // Remove content in parentheses first
-    const textWithoutParentheses = text.replace(/\([^)]*\)/g, "");
+    // First extract the main text without explanatory parentheses
+    // This helps accept answers like "вы" when the expected answer is "вы (formal)"
+    let mainText = text;
     
-    // Remove punctuation and extra spaces, convert to lowercase
-    // eslint-disable-next-line no-useless-escape
-    let normalized = textWithoutParentheses.toLowerCase()
+    // Only use the content outside parentheses for comparison
+    const outsideParentheses = text.replace(/\s*\([^)]*\)\s*/g, "");
+    if (outsideParentheses.trim()) {
+      mainText = outsideParentheses;
+    }
+    
+    // Then normalize as usual
+    let normalized = mainText.toLowerCase()
       .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
       .replace(/\s+/g, " ")
       .trim();
     
     // Special normalization for Russian text
-    // Handle common transliteration errors
     normalized = normalized
-      // Replace Latin 'c' with Cyrillic 'с' in Russian words
       .replace(/c(?=[а-яёА-ЯЁ])/g, 'с')
-      // Handle other potential character confusions
-      .replace(/a(?=[а-яёА-ЯЁ])/g, 'а')  // Latin 'a' to Cyrillic 'а'
-      .replace(/e(?=[а-яёА-ЯЁ])/g, 'е')  // Latin 'e' to Cyrillic 'е'
-      .replace(/o(?=[а-яёА-ЯЁ])/g, 'о')  // Latin 'o' to Cyrillic 'о'
-      .replace(/p(?=[а-яёА-ЯЁ])/g, 'р')  // Latin 'p' to Cyrillic 'р'
-      .replace(/x(?=[а-яёА-ЯЁ])/g, 'х')  // Latin 'x' to Cyrillic 'х'
-      .replace(/y(?=[а-яёА-ЯЁ])/g, 'у'); // Latin 'y' to Cyrillic 'у'
+      .replace(/a(?=[а-яёА-ЯЁ])/g, 'а')
+      .replace(/e(?=[а-яёА-ЯЁ])/g, 'е')
+      .replace(/o(?=[а-яёА-ЯЁ])/g, 'о')
+      .replace(/p(?=[а-яёА-ЯЁ])/g, 'р')
+      .replace(/x(?=[а-яёА-ЯЁ])/g, 'х')
+      .replace(/y(?=[а-яёА-ЯЁ])/g, 'у');
       
     return normalized;
   };
 
-  // Add a helper function to calculate string similarity (Levenshtein distance)
-  const levenshteinDistance = (a: string, b: string): number => {
-    // Create a matrix of dimensions (a.length+1) x (b.length+1)
-    const matrix = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+  // Convert number words to digits and vice versa
+  const numberEquivalents: { [key: string]: string[] } = {
+    "0": ["zero", "ноль"],
+    "1": ["one", "один", "одна", "одно"],
+    "2": ["two", "два", "две"],
+    "3": ["three", "три"],
+    "4": ["four", "четыре"],
+    "5": ["five", "пять"],
+    "6": ["six", "шесть"],
+    "7": ["seven", "семь"],
+    "8": ["eight", "восемь"],
+    "9": ["nine", "девять"],
+    "10": ["ten", "десять"],
+    "11": ["eleven", "одиннадцать"],
+    "12": ["twelve", "двенадцать"],
+    "13": ["thirteen", "тринадцать"],
+    "14": ["fourteen", "четырнадцать"],
+    "15": ["fifteen", "пятнадцать"],
+    "16": ["sixteen", "шестнадцать"],
+    "17": ["seventeen", "семнадцать"],
+    "18": ["eighteen", "восемнадцать"],
+    "19": ["nineteen", "девятнадцать"],
+    "20": ["twenty", "двадцать"],
+    "30": ["thirty", "тридцать"],
+    "40": ["forty", "сорок"],
+    "50": ["fifty", "пятьдесят"],
+    "60": ["sixty", "шестьдесят"],
+    "70": ["seventy", "семьдесят"],
+    "80": ["eighty", "восемьдесят"],
+    "90": ["ninety", "девяносто"],
+    "100": ["hundred", "сто"]
+  };
 
-    // Fill the first row and column of the matrix
+  // Check if the answer might be a number
+  const checkNumberEquivalence = (userAnswer: string, correctAnswer: string): boolean => {
+    // If either answer is already a direct match, no need to proceed
+    if (userAnswer === correctAnswer) return true;
+    
+    // Check if user entered a digit and the correct answer is the word form
+    if (/^\d+$/.test(userAnswer)) {
+      // User entered a digit - check if the correct answer is the word form
+      const possibleWordForms = numberEquivalents[userAnswer] || [];
+      return possibleWordForms.some(wordForm => 
+        correctAnswer === wordForm || correctAnswer.includes(wordForm)
+      );
+    } 
+    // Check if user entered a word and the correct answer is the digit form
+    else {
+      // User entered a word - check if it matches any number word
+      for (const [digit, wordForms] of Object.entries(numberEquivalents)) {
+        if (wordForms.includes(userAnswer) && (correctAnswer === digit || correctAnswer.includes(digit))) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  };
+
+  const levenshteinDistance = (a: string, b: string): number => {
+    const matrix = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
     for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
     for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
-
-    // Fill the rest of the matrix
     for (let i = 1; i <= a.length; i++) {
       for (let j = 1; j <= b.length; j++) {
         const cost = a[i - 1] === b[j - 1] ? 0 : 1;
         matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1, // deletion
-          matrix[i][j - 1] + 1, // insertion
-          matrix[i - 1][j - 1] + cost // substitution
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
         );
       }
     }
-
     return matrix[a.length][b.length];
   };
 
-  // Use useCallback to memoize the getRandomQuestion function
   const getRandomQuestion = useCallback(() => {
-    // Reset state for new question
     setUserAnswer('');
     setIsCorrect(null);
     setShowNext(false);
 
-    // Choose a random category
-    const categories = ['alphabet', 'basicPhrases', 'numbers', 'commonWords'];
-    let randomCategory = categories[Math.floor(Math.random() * categories.length)];
-    
-    let itemsList = data[randomCategory];
-    
-    // Safety check: if the category or items aren't loaded yet, try another one or show loading
-    if (!itemsList || itemsList.length === 0) {
-      // Try to find a category that has data
-      const availableCategories = categories.filter(cat => data[cat] && data[cat].length > 0);
-      
-      if (availableCategories.length === 0) {
-        console.error("No quiz data available");
-        return; // Keep current question or let the component show loading
+    try {
+      const categories = ['alphabet', 'basicPhrases', 'numbers', 'commonWords'];
+      let randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      let itemsList = data[randomCategory];
+
+      if (!itemsList || !Array.isArray(itemsList) || itemsList.length === 0) {
+        const availableCategories = categories.filter(cat => 
+          data[cat] && Array.isArray(data[cat]) && data[cat].length > 0
+        );
+        if (availableCategories.length === 0) {
+          console.error("No quiz data available");
+          setCurrentQuestion({
+            type: 'dummy',
+            prompt: 'Loading...',
+            answer: '',
+            hint: 'Please wait while we load questions',
+            russian: ''
+          });
+          return;
+        }
+        randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
+        itemsList = data[randomCategory];
       }
-      
-      // Select from available categories
-      randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
-      itemsList = data[randomCategory];
-    }
-    
-    // For alphabet, we'll quiz on letter sounds
-    if (randomCategory === 'alphabet') {
-      const randomLetter = itemsList[Math.floor(Math.random() * itemsList.length)];
-      
-      // Safety check for a valid letter object
-      if (!randomLetter || !randomLetter.character) {
-        console.error("Invalid letter data:", randomLetter);
-        getRandomQuestion(); // Try again with another question
-        return;
+
+      if (!itemsList || itemsList.length === 0) {
+        throw new Error("No items in the selected category");
       }
-      
-      setCurrentQuestion({
-        type: 'alphabet',
-        prompt: randomLetter.character,
-        answer: randomLetter.pronunciation.toLowerCase(),
-        hint: `How is the letter "${randomLetter.character}" pronounced in Russian?`,
-        russian: randomLetter.character
-      });
-    } else {
-      // For other categories, we'll quiz on Russian phrases/words
-      const randomItem = itemsList[Math.floor(Math.random() * itemsList.length)];
-      
-      // Safety check for a valid phrase/word object
-      if (!randomItem || !randomItem.russian || !randomItem.english) {
-        console.error("Invalid item data:", randomItem);
-        getRandomQuestion(); // Try again with another question
-        return;
+
+      const randomIndex = Math.floor(Math.random() * itemsList.length);
+      const randomItem = itemsList[randomIndex];
+
+      if (!randomItem) {
+        throw new Error("Failed to get random item");
       }
-      
-      const isRussianToEnglish = Math.random() > 0.5;
-      
-      if (isRussianToEnglish) {
+
+      if (randomCategory === 'alphabet') {
+        if (typeof randomItem !== 'object' || randomItem === null) {
+          throw new Error("Invalid alphabet item structure");
+        }
+        const character = randomItem.character?.toString() || '';
+        const pronunciation = randomItem.pronunciation?.toString() || '';
+        if (!character || !pronunciation) {
+          throw new Error("Missing required alphabet properties");
+        }
         setCurrentQuestion({
-          type: randomCategory,
-          prompt: randomItem.russian,
-          answer: randomItem.english.toLowerCase(),
-          hint: 'What does this mean in English?',
-          russian: randomItem.russian
+          type: 'alphabet',
+          prompt: character,
+          answer: pronunciation.toLowerCase(),
+          hint: `How is the letter "${character}" pronounced in Russian?`,
+          russian: character
         });
       } else {
+        const russian = randomItem.russian?.toString() || '';
+        const english = randomItem.english?.toString() || '';
+        if (!russian || !english) {
+          throw new Error(`Invalid ${randomCategory} item: missing russian or english`);
+        }
+        const isRussianToEnglish = Math.random() > 0.5;
+        if (isRussianToEnglish) {
+          setCurrentQuestion({
+            type: randomCategory,
+            prompt: russian,
+            answer: english.toLowerCase(),
+            hint: 'What does this mean in English?',
+            russian: russian
+          });
+        } else {
+          setCurrentQuestion({
+            type: randomCategory,
+            prompt: english,
+            answer: russian.toLowerCase(),
+            hint: 'How do you say this in Russian?',
+            russian: russian
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error generating question:", error);
+      try {
+        if (data.basicPhrases && Array.isArray(data.basicPhrases) && data.basicPhrases.length > 0) {
+          const fallbackItem = data.basicPhrases[0];
+          setCurrentQuestion({
+            type: 'fallback',
+            prompt: fallbackItem.english,
+            answer: fallbackItem.russian.toLowerCase(),
+            hint: 'How do you say this in Russian?',
+            russian: fallbackItem.russian
+          });
+          return;
+        }
         setCurrentQuestion({
-          type: randomCategory,
-          prompt: randomItem.english,
-          answer: randomItem.russian.toLowerCase(),
+          type: 'hardcoded',
+          prompt: 'Hello',
+          answer: 'привет',
           hint: 'How do you say this in Russian?',
-          russian: randomItem.russian
+          russian: 'Привет'
+        });
+      } catch (fallbackError) {
+        console.error("Error creating fallback question:", fallbackError);
+        setCurrentQuestion({
+          type: 'emergency',
+          prompt: 'Hello',
+          answer: 'привет',
+          hint: 'How do you say this in Russian?',
+          russian: 'Привет'
         });
       }
     }
-  }, [data]); // Include data as a dependency
+  }, [data]);
 
-  // Initialize or get a new question
   useEffect(() => {
     getRandomQuestion();
-    
-    // Create audio elements for sounds
     correctSoundRef.current = new Audio('/sounds/correct.mp3');
     incorrectSoundRef.current = new Audio('/sounds/incorrect.mp3');
-    
-    // Cleanup function
     return () => {
       if (correctSoundRef.current) {
         correctSoundRef.current.pause();
@@ -169,7 +255,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         incorrectSoundRef.current.pause();
       }
     };
-  }, [getRandomQuestion]); // Add getRandomQuestion as a dependency
+  }, [getRandomQuestion]);
 
   const checkAnswer = () => {
     if (!userAnswer.trim()) return;
@@ -186,35 +272,55 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         .map((ans: string) => normalizeText(ans));
       
       isAnswerCorrect = possibleAnswers.includes(userAnswerNormalized);
+      
+      // If still not correct, check for number equivalence with each possible answer
+      if (!isAnswerCorrect) {
+        isAnswerCorrect = possibleAnswers.some((possibleAnswer: string) => 
+          checkNumberEquivalence(userAnswerNormalized, possibleAnswer)
+        );
+      }
     } else {
-      // Single answer check with normalization
+      // Normalize the correct answer the same way as the user's answer
       const correctAnswerNormalized = normalizeText(currentQuestion.answer);
       
-      // For Russian answers, add extra tolerance by checking character by character
-      if (containsCyrillic(userAnswerNormalized) || containsCyrillic(correctAnswerNormalized)) {
+      // Check for direct match
+      if (userAnswerNormalized === correctAnswerNormalized) {
+        isAnswerCorrect = true;
+      } 
+      // Check for number equivalence (e.g., "6" vs "six")
+      else if (checkNumberEquivalence(userAnswerNormalized, correctAnswerNormalized)) {
+        isAnswerCorrect = true;
+      }
+      // For Russian answers, use Levenshtein distance for tolerance
+      else if (containsCyrillic(userAnswerNormalized) || containsCyrillic(correctAnswerNormalized)) {
         // Allow for a small error tolerance (1 character difference per 5 characters)
         const maxErrors = Math.floor(correctAnswerNormalized.length / 5) + 1;
         const distance = levenshteinDistance(userAnswerNormalized, correctAnswerNormalized);
         isAnswerCorrect = distance <= maxErrors;
-      } else {
-        // For English, use strict equality
-        isAnswerCorrect = userAnswerNormalized === correctAnswerNormalized;
+      }
+      
+      // Also check if the answer contains the correct text plus the formal/informal note
+      if (!isAnswerCorrect) {
+        const answerWithFormal = `${correctAnswerNormalized} formal`;
+        const answerWithInformal = `${correctAnswerNormalized} informal`;
+        
+        isAnswerCorrect = 
+          userAnswerNormalized.includes(correctAnswerNormalized) || 
+          normalizeText(answerWithFormal).includes(userAnswerNormalized) || 
+          normalizeText(answerWithInformal).includes(userAnswerNormalized);
       }
     }
     
     setIsCorrect(isAnswerCorrect);
     setShowNext(true);
     setQuestionsAnswered(prev => prev + 1);
-    
     if (isAnswerCorrect) {
       setScore(prev => prev + 1);
-      // Play correct sound
       if (correctSoundRef.current) {
         correctSoundRef.current.currentTime = 0;
         correctSoundRef.current.play().catch(e => console.error("Error playing sound:", e));
       }
     } else {
-      // Play incorrect sound
       if (incorrectSoundRef.current) {
         incorrectSoundRef.current.currentTime = 0;
         incorrectSoundRef.current.play().catch(e => console.error("Error playing sound:", e));
@@ -238,7 +344,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   const speakRussian = () => {
     if (!currentQuestion) return;
-    
     const utterance = new SpeechSynthesisUtterance(currentQuestion.russian);
     utterance.lang = 'ru-RU';
     window.speechSynthesis.speak(utterance);
@@ -246,7 +351,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   const handleKeyboardLetterClick = (letter: string) => {
     if (showNext) return;
-    
     if (letter === 'backspace') {
       setUserAnswer(prev => prev.slice(0, -1));
     } else if (letter === 'clear') {
@@ -254,8 +358,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     } else {
       setUserAnswer(prev => prev + letter);
     }
-    
-    // Focus back on the input after clicking a key
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -265,81 +367,47 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     setShowKeyboard(prev => !prev);
   };
 
-  // Determine if the current question requires a Russian answer
   const needsRussianKeyboard = currentQuestion && 
     !currentQuestion.type.includes('alphabet') && 
     currentQuestion.hint.includes('How do you say this in Russian');
 
-  // Handle input change with automatic transliteration
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    
-    // Store cursor position
     const selectionStart = e.target.selectionStart || 0;
-    
-    // Skip transliteration completely for English answers
     if (!needsRussianKeyboard) {
-      // For English answers, just update the state without any transliteration
       setUserAnswer(newValue);
       setLastInput(newValue);
       return;
     }
-    
-    // Only apply transliteration for Russian answers from here on
-    
-    // Determine what changed by comparing with the last input
+    const specialCharsFixed = newValue
+      .replace(/'/g, 'ь')
+      .replace(/`/g, 'ь')
+      .replace(/"/g, 'ъ');
+    if (specialCharsFixed !== newValue) {
+      setUserAnswer(specialCharsFixed);
+      setLastInput(specialCharsFixed);
+      setCursorPosition(selectionStart);
+      return;
+    }
     const isAddition = newValue.length > lastInput.length;
-    
     if (isAddition) {
-      // For additions, only transliterate the newly added text
-      // First, find what was added and where
-      const addedLength = newValue.length - lastInput.length;
-      const additionStartIndex = selectionStart - addedLength;
-      
-      // Get the added text
-      const addedText = newValue.substring(additionStartIndex, selectionStart);
-      
-      // Only transliterate if Latin characters were added
-      if (/[a-zA-Z]/.test(addedText)) {
-        // Prepare context for transliteration (a few characters before the addition)
-        const contextStartIndex = Math.max(0, additionStartIndex - 3);
-        const context = newValue.substring(contextStartIndex, selectionStart);
-        
-        // Transliterate the context
-        const transliteratedContext = transliterate(context);
-        
-        // Calculate length difference caused by transliteration
-        const lenDiff = transliteratedContext.length - context.length;
-        
-        // Construct the new value by combining parts
-        const resultValue = 
-          newValue.substring(0, contextStartIndex) +
-          transliteratedContext +
-          newValue.substring(selectionStart);
-        
-        // Calculate new cursor position - adjust for the transliteration changes
-        const newCursorPosition = selectionStart + lenDiff;
-        
-        // Update state
-        setUserAnswer(resultValue);
-        setLastInput(resultValue);
-        setCursorPosition(newCursorPosition);
+      if (/[a-zA-Z]/.test(newValue)) {
+        const transliteratedValue = transliterate(newValue);
+        const lengthDiff = transliteratedValue.length - newValue.length;
+        const newCursorPosition = selectionStart + lengthDiff;
+        setUserAnswer(transliteratedValue);
+        setLastInput(transliteratedValue);
+        setCursorPosition(Math.min(newCursorPosition, transliteratedValue.length));
         return;
       }
     }
-    
-    // For deletions or non-Latin additions, just update normally
     setUserAnswer(newValue);
     setLastInput(newValue);
     setCursorPosition(selectionStart);
   };
 
-  // Set cursor position after update - with improved reliability
   useEffect(() => {
-    // Only attempt to adjust cursor for Russian inputs
-    // This prevents cursor jumping in English answers
     if (inputRef.current && needsRussianKeyboard) {
-      // Use requestAnimationFrame to ensure the DOM has updated
       requestAnimationFrame(() => {
         if (inputRef.current) {
           inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
@@ -348,7 +416,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     }
   }, [cursorPosition, userAnswer, needsRussianKeyboard]);
 
-  // Add a check to ensure data is ready before rendering
   if (!data || !currentQuestion) {
     return <div className="section quiz-section">
       <h2>Test Your Knowledge</h2>
@@ -362,14 +429,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   return (
     <div className="section quiz-section">
       <h2>Test Your Knowledge</h2>
-      
       <div className="quiz-stats">
         Score: {score} / {questionsAnswered}
       </div>
-      
       <div className="quiz-card">
         <h3>{currentQuestion.hint}</h3>
-        
         <div className="quiz-prompt">
           {currentQuestion.prompt}
           {currentQuestion.type !== 'alphabet' && (
@@ -383,20 +447,18 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             </button>
           )}
         </div>
-        
         <div className="input-container">
           <input
             ref={inputRef}
             type="text"
             className="quiz-input"
             value={userAnswer}
-            onChange={handleInputChange} // Use our new handler
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={needsRussianKeyboard ? "Type in English, get Russian letters" : "Your answer here..."}
             disabled={showNext}
             autoFocus
           />
-          
           {needsRussianKeyboard && !showNext && (
             <button 
               className={`keyboard-toggle-button ${showKeyboard ? 'active' : ''}`}
@@ -407,18 +469,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             </button>
           )}
         </div>
-        
-        {/* Add a hint about punctuation */}
         <div className="answer-tips">
           <small>Tip: Punctuation is ignored when checking answers.</small>
         </div>
-        
         {needsRussianKeyboard && showKeyboard && !showNext && (
           <div className="virtual-keyboard-container">
             <RussianKeyboard onLetterClick={handleKeyboardLetterClick} />
           </div>
         )}
-        
         {isCorrect !== null && (
           <div className={`quiz-result ${isCorrect ? 'correct' : 'incorrect'}`}>
             {isCorrect ? (
@@ -439,7 +497,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             )}
           </div>
         )}
-        
         <div className="quiz-buttons">
           {!showNext ? (
             <button className="check-button" onClick={checkAnswer}>
