@@ -6,6 +6,7 @@ import Navigation from './components/Navigation';
 import Quiz from './components/Quiz';
 import russianData from './data/russianData';
 import { FaBars, FaTimes } from 'react-icons/fa';
+import { initVoices } from './utils/speech';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('alphabet');
@@ -36,6 +37,11 @@ const App: React.FC = () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as any);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
+  }, []);
+
+  useEffect(() => {
+    // Initialize speech synthesis when the app loads
+    initVoices().catch(err => console.error('Failed to initialize speech:', err));
   }, []);
 
   // Function to trigger the install prompt

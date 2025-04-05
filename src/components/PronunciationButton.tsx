@@ -1,69 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import { FaVolumeUp } from 'react-icons/fa';
+import { speak, isSpeechSupported, initVoices } from '../utils/speech';
 
 interface PronunciationButtonProps {
   text: string;
   lang?: string;
-  label?: string; // Add optional label prop
-  className?: string; // Add optional className prop
+  label?: string;
+  className?: string;
+  style?: React.CSSProperties; // Add the style prop to the interface
 }
 
 const PronunciationButton: React.FC<PronunciationButtonProps> = ({ 
   text, 
   lang = 'ru-RU',
   label,
-  className
+  className,
+  style // Add style to the parameter destructuring
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [_isSupported, setIsSupported] = useState(true);
+  const [isSupported, setIsSupported] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
+  // Initialize speech synthesis on component mount
   useEffect(() => {
-    // Check if speech synthesis is supported
-    if (!window.speechSynthesis) {
-      setIsSupported(false);
-    }
+    const init = async () => {
+      setIsSupported(isSpeechSupported());
+      if (isSpeechSupported()) {
+        await initVoices();
+        setInitialized(true);
+      }
+    };
+    
+    init();
   }, []);
 
-  const speak = () => {
-    if (!window.speechSynthesis) {
-      console.error('Speech synthesis not supported');
-      setIsSupported(false);
-      return;
-    }
-
-    if (isPlaying) return;
+  const handleSpeak = () => {
+    if (!isSpeechSupported() || isPlaying) return;
 
     setIsPlaying(true);
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
     
-    utterance.onend = () => {
-      setIsPlaying(false);
-    };
-
-    utterance.onerror = () => {
-      console.error('Speech synthesis error');
-      setIsPlaying(false);
-      setIsSupported(false);
-    };
-
-    window.speechSynthesis.speak(utterance);
+    speak(
+      text, 
+      lang,
+      // onEnd callback
+      () => {
+        setIsPlaying(false);
+      },
+      // onError callback
+      (error) => {
+        console.error('Pronunciation error:', error);
+        setIsPlaying(false);
+        
+        // Show a notification to the user - could be improved with a toast
+        alert('Voice not available. Try installing Russian in your device language settings.');
+      }
+    );
   };
 
   // Don't render if speech synthesis is not supported
-  if (!_isSupported) {
+  if (!isSupported) {
     return null;
   }
 
   return (
     <button
       className={`pronunciation-button ${isPlaying ? 'playing' : ''} ${className || ''}`}
-      onClick={speak}
-      disabled={isPlaying}
-      title={label || "Pronounce"}
-      aria-label={label || "Pronounce"}
+      onClick={handleSpeak}
+      disabled={isPlaying || !initialized}
+      title={isPlaying ? "Speaking..." : (label || "Pronounce")}
+      aria-label={isPlaying ? "Speaking..." : (label || "Pronounce")}
+      style={style} // Pass the style to the button
     >
-      <FaVolumeUp aria-hidden="true" />
+      {isPlaying ? (
+        <FaVolumeUp className="pulse-animation" aria-hidden="true" />
+      ) : (
+        <FaVolumeUp aria-hidden="true" />
+      )}
     </button>
   );
 };

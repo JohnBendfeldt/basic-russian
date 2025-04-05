@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { FaVolumeUp, FaCheck, FaTimes, FaKeyboard } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaKeyboard } from 'react-icons/fa';
 import RussianKeyboard from './RussianKeyboard';
+import PronunciationButton from './PronunciationButton';
 import { transliterate, containsCyrillic } from '../utils/transliteration';
 
 // Define interfaces for the data structure
@@ -428,13 +429,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     }
   };
 
-  const speakRussian = () => {
-    if (!currentQuestion) return;
-    const utterance = new SpeechSynthesisUtterance(currentQuestion.russian);
-    utterance.lang = 'ru-RU';
-    window.speechSynthesis.speak(utterance);
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     const selectionStart = e.target.selectionStart || 0;
@@ -587,14 +581,10 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         <div className="quiz-prompt">
           {currentQuestion.prompt}
           {currentQuestion.type !== 'alphabet' && (
-            <button 
-              className="pronunciation-button" 
-              onClick={speakRussian}
-              style={{ marginLeft: '12px' }}
-            >
-              <FaVolumeUp aria-hidden="true" />
-              <span className="visually-hidden">Pronounce</span>
-            </button>
+            <PronunciationButton 
+              text={currentQuestion.russian}
+              className="margin-left" // Use a class instead of inline style
+            />
           )}
         </div>
         <div className="input-container">
