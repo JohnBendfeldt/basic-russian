@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaVolumeUp } from 'react-icons/fa';
 import { speak, isSpeechSupported, initVoices } from '../utils/speech';
 
@@ -7,7 +7,7 @@ interface PronunciationButtonProps {
   lang?: string;
   label?: string;
   className?: string;
-  style?: React.CSSProperties; // Add the style prop to the interface
+  style?: React.CSSProperties;
 }
 
 const PronunciationButton: React.FC<PronunciationButtonProps> = ({ 
@@ -15,11 +15,14 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   lang = 'ru-RU',
   label,
   className,
-  style // Add style to the parameter destructuring
+  style
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  
+  // Create a unique ID for each button instance
+  const buttonId = useRef(`btn-${Math.random().toString(36).substring(2, 9)}`);
 
   // Initialize speech synthesis on component mount
   useEffect(() => {
@@ -42,17 +45,24 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     speak(
       text, 
       lang,
+      // Pass the buttonId to the speak function so it knows which button to enable
+      buttonId.current,
       // onEnd callback
       () => {
         setIsPlaying(false);
       },
       // onError callback
-      (error) => {
-        console.error('Pronunciation error:', error);
+      (error: unknown) => {
+        console.error(`Pronunciation error for ${buttonId.current}:`, error);
         setIsPlaying(false);
         
-        // Show a notification to the user - could be improved with a toast
-        alert('Voice not available. Try installing Russian in your device language settings.');
+        // Properly check error.message by first ensuring it's an Error object
+        if (
+          error instanceof Error && 
+          error.message === 'Speech synthesis not supported'
+        ) {
+          alert('Voice not available. Try installing Russian in your device language settings.');
+        }
       }
     );
   };
@@ -69,7 +79,8 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
       disabled={isPlaying || !initialized}
       title={isPlaying ? "Speaking..." : (label || "Pronounce")}
       aria-label={isPlaying ? "Speaking..." : (label || "Pronounce")}
-      style={style} // Pass the style to the button
+      style={style}
+      data-button-id={buttonId.current}
     >
       {isPlaying ? (
         <FaVolumeUp className="pulse-animation" aria-hidden="true" />
