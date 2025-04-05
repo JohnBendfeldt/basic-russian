@@ -87,8 +87,45 @@ const transliterationMap: { [key: string]: string } = {
   'Kh': 'Х',
 };
 
-// Order combinations from longest to shortest to prevent partial matches
-const orderedCombinations = Object.keys(transliterationMap).sort((a, b) => b.length - a.length);
+// Define all possible letter combinations for transliteration
+const combinations = [
+  { latin: 'shch', cyrillic: 'щ' },
+  { latin: 'sh', cyrillic: 'ш' },
+  { latin: 'ch', cyrillic: 'ч' },
+  { latin: 'ts', cyrillic: 'ц' },
+  { latin: 'ya', cyrillic: 'я' },
+  { latin: 'yu', cyrillic: 'ю' },
+  { latin: 'yo', cyrillic: 'ё' },
+  { latin: 'zh', cyrillic: 'ж' },
+  { latin: 'ye', cyrillic: 'е' },
+  { latin: 'kh', cyrillic: 'х' },
+  // Add uppercase versions
+  { latin: 'Shch', cyrillic: 'Щ' },
+  { latin: 'SHCH', cyrillic: 'Щ' },
+  { latin: 'SHch', cyrillic: 'Щ' },
+  { latin: 'Sh', cyrillic: 'Ш' },
+  { latin: 'SH', cyrillic: 'Ш' },
+  { latin: 'Ch', cyrillic: 'Ч' },
+  { latin: 'CH', cyrillic: 'Ч' },
+  { latin: 'Ts', cyrillic: 'Ц' },
+  { latin: 'TS', cyrillic: 'Ц' },
+  { latin: 'Ya', cyrillic: 'Я' },
+  { latin: 'YA', cyrillic: 'Я' },
+  { latin: 'Yu', cyrillic: 'Ю' },
+  { latin: 'YU', cyrillic: 'Ю' },
+  { latin: 'Yo', cyrillic: 'Ё' },
+  { latin: 'YO', cyrillic: 'Ё' },
+  { latin: 'Zh', cyrillic: 'Ж' },
+  { latin: 'ZH', cyrillic: 'Ж' },
+  { latin: 'Ye', cyrillic: 'Е' },
+  { latin: 'YE', cyrillic: 'Е' },
+  { latin: 'Kh', cyrillic: 'Х' },
+  { latin: 'KH', cyrillic: 'Х' },
+];
+
+// Define characters that could be at the start of a combination
+// We need to delay processing these until we know they're not part of a combination
+const comboStarterChars = ['y', 'Y', 's', 'S', 'c', 'C', 'z', 'Z', 't', 'T', 'k', 'K'];
 
 /**
  * Transliterates English input to Russian Cyrillic characters
@@ -96,64 +133,91 @@ const orderedCombinations = Object.keys(transliterationMap).sort((a, b) => b.len
  * @returns Transliterated text in Russian
  */
 export const transliterate = (input: string): string => {
-  // Don't attempt to transliterate if input is empty
   if (!input) return input;
+
+  // Replace special characters immediately
+  let processedInput = input
+    .replace(/'/g, 'ь')
+    .replace(/`/g, 'ь')
+    .replace(/"/g, 'ъ');
   
-  let result = input;
+  // Build result
+  let result = '';
   let i = 0;
   
-  while (i < result.length) {
+  while (i < processedInput.length) {
     // Skip existing Cyrillic characters and spaces
-    if (isCyrillic(result[i]) || result[i] === ' ') {
+    if (isCyrillic(processedInput[i]) || processedInput[i] === ' ') {
+      result += processedInput[i];
       i++;
       continue;
     }
     
-    let replaced = false;
+    let foundCombination = false;
     
-    // Special handling for apostrophes and quotes to ensure they become soft/hard signs
-    if (result[i] === "'" || result[i] === "`") {
-      result = result.substring(0, i) + 'ь' + result.substring(i + 1);
-      i += 1;
-      replaced = true;
-    } 
-    else if (result[i] === '"') {
-      result = result.substring(0, i) + 'ъ' + result.substring(i + 1);
-      i += 1;
-      replaced = true;
-    }
-    else {
-      // Try to match longer combinations first to prevent partial matches
-      for (const combo of orderedCombinations) {
-        // Only check if we have enough characters left
-        if (i + combo.length <= result.length) {
-          const substr = result.substring(i, i + combo.length);
-          
-          // Case insensitive match
-          if (substr.toLowerCase() === combo.toLowerCase()) {
-            // Determine appropriate case for replacement
-            let replacement = transliterationMap[combo];
-            
-            // Apply casing based on the original text
-            if (substr[0] === substr[0].toUpperCase()) {
-              // First letter is uppercase
-              replacement = replacement.charAt(0).toUpperCase() + replacement.slice(1);
-            }
-            
-            // Replace the text
-            result = result.substring(0, i) + replacement + result.substring(i + combo.length);
-            
-            // Move index past the replacement
-            i += replacement.length;
-            replaced = true;
-            break;
-          }
+    // Look for combinations at current position
+    for (const combo of combinations) {
+      const comboLength = combo.latin.length;
+      
+      // Check if we have enough characters left and they match the combo
+      if (i + comboLength <= processedInput.length) {
+        const potentialCombo = processedInput.substring(i, i + comboLength);
+        
+        if (potentialCombo === combo.latin) {
+          // Found a combination, add its Cyrillic equivalent
+          result += combo.cyrillic;
+          i += comboLength;
+          foundCombination = true;
+          break;
         }
       }
     }
     
-    // If no replacement was made, move to the next character
-    if (!replaced) {
+    // If no combination was found
+    if (!foundCombination) {
+      // Check if current character might be start of a combination
+      const currentChar = processedInput[i].toLowerCase();
+      
+      if (comboStarterChars.includes(processedInput[i]) && i + 1 < processedInput.length) {
+        // This could be the start of a combination, look ahead
+        let shouldDelay = false;
+        
+        // Look for specific combinations based on the current character
+        if (currentChar === 'y') {
+          // Check if 'y' is followed by 'a', 'u', 'o', 'e'
+          const nextChar = processedInput[i + 1].toLowerCase();
+          shouldDelay = ['a', 'u', 'o', 'e'].includes(nextChar);
+        } else if (currentChar === 's') {
+          // Check if 's' is followed by 'h'
+          shouldDelay = processedInput[i + 1].toLowerCase() === 'h';
+        } else if (currentChar === 'z') {
+          // Check if 'z' is followed by 'h'
+          shouldDelay = processedInput[i + 1].toLowerCase() === 'h';
+        } else if (currentChar === 'c') {
+          // Check if 'c' is followed by 'h'
+          shouldDelay = processedInput[i + 1].toLowerCase() === 'h';
+        } else if (currentChar === 't') {
+          // Check if 't' is followed by 's'
+          shouldDelay = processedInput[i + 1].toLowerCase() === 's';
+        } else if (currentChar === 'k') {
+          // Check if 'k' is followed by 'h'
+          shouldDelay = processedInput[i + 1].toLowerCase() === 'h';
+        }
+        
+        if (shouldDelay) {
+          // It's part of a valid combination but we didn't match a full one
+          // This means we're likely missing the complete combo due to in-progress typing
+          // Just output the original Latin character for now
+          result += processedInput[i];
+          i++;
+          continue;
+        }
+      }
+      
+      // It's a single character, not part of a combination
+      const char = processedInput[i];
+      // Use transliteration map if available, otherwise keep original
+      result += transliterationMap[char] || char;
       i++;
     }
   }
