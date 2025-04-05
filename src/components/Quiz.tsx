@@ -309,15 +309,106 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     window.speechSynthesis.speak(utterance);
   };
 
+  const handleSpecialChars = (input: string): string => {
+    return input
+      .replace(/'/g, 'ь')
+      .replace(/`/g, 'ь')
+      .replace(/"/g, 'ъ');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    const selectionStart = e.target.selectionStart || 0;
+    
+    // Skip transliteration for English answers
+    if (!needsRussianKeyboard) {
+      setUserAnswer(newValue);
+      setLastInput(newValue);
+      return;
+    }
+    
+    // First check for special characters that should be replaced immediately
+    if (["'", "`", '"'].includes(newValue.charAt(selectionStart - 1))) {
+      const withSpecials = handleSpecialChars(newValue);
+      setUserAnswer(withSpecials);
+      setLastInput(withSpecials);
+      setCursorPosition(selectionStart);
+      return;
+    }
+    
+    // Always update the user's input immediately
+    setUserAnswer(newValue);
+    
+    // Check if we should transliterate now
+    const shouldTransliterateNow = 
+      // Space was added (completed a word)
+      newValue.includes(' ') && (lastInput.length === 0 || !lastInput.includes(' ') || 
+                                 newValue.split(' ').length > lastInput.split(' ').length) ||
+      // Punctuation was added
+      /[.,!?;:]/.test(newValue) && !/[.,!?;:]/.test(lastInput) ||
+      // When the user is done typing (cursor at end and paused)
+      selectionStart === newValue.length && selectionStart > lastInput.length;
+    
+    // For combination letters, only transliterate after we've seen enough characters
+    const lastChar = newValue.charAt(selectionStart - 1);
+    const secondLastChar = selectionStart >= 2 ? newValue.charAt(selectionStart - 2) : '';
+    
+    // Transliterate immediately if we completed a combination
+    if (combinationStarters.includes(secondLastChar) && 
+        combinationFollowers[secondLastChar as keyof typeof combinationFollowers]?.includes(lastChar)) {
+      // We have a complete combination like "ya", "zh", etc.
+      const transliteratedValue = transliterate(newValue);
+      setUserAnswer(transliteratedValue);
+      const lengthDiff = transliteratedValue.length - newValue.length;
+      setCursorPosition(selectionStart + lengthDiff);
+    }
+    // Otherwise, transliterate at normal triggers
+    else if (shouldTransliterateNow) {
+      // Debug log to see when transliteration is happening
+      console.log('Transliterating:', newValue);
+      const transliteratedValue = transliterate(newValue);
+      setUserAnswer(transliteratedValue);
+      const lengthDiff = transliteratedValue.length - newValue.length;
+      setCursorPosition(selectionStart + lengthDiff);
+    } else {
+      // Just update cursor position
+      setCursorPosition(selectionStart);
+    }
+    
+    // Always save the last input to compare with next change
+    setLastInput(newValue);
+  };
+
+  const handleCheckAnswer = () => {
+    // Always do a final transliteration before checking answer
+    if (needsRussianKeyboard && userAnswer) {
+      const transliteratedValue = transliterate(userAnswer);
+      setUserAnswer(transliteratedValue);
+    }
+    
+    // Now proceed with checking the answer
+    checkAnswer();
+  };
+
   const handleKeyboardLetterClick = (letter: string) => {
     if (showNext) return;
+    
     if (letter === 'backspace') {
       setUserAnswer(prev => prev.slice(0, -1));
     } else if (letter === 'clear') {
       setUserAnswer('');
     } else {
-      setUserAnswer(prev => prev + letter);
+      // When using the virtual keyboard, we should transliterate immediately
+      const newInput = userAnswer + letter;
+      // If it's a space, we should transliterate the whole input
+      if (letter === ' ') {
+        const transliteratedValue = transliterate(newInput);
+        setUserAnswer(transliteratedValue);
+      } else {
+        setUserAnswer(newInput);
+      }
     }
+    
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -348,91 +439,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     'T': ['s', 'S'],
     'k': ['h', 'H'],
     'K': ['h', 'H']
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    const selectionStart = e.target.selectionStart || 0;
-    
-    // Skip transliteration for English answers
-    if (!needsRussianKeyboard) {
-      setUserAnswer(newValue);
-      setLastInput(newValue);
-      return;
-    }
-    
-    // Store the current input in the state immediately
-    setUserAnswer(newValue);
-    
-    // Check if we should transliterate
-    // This is a more robust way to handle transliteration triggers
-    const transliterationTriggers = [
-      // Space - end of a word
-      newValue.endsWith(' ') && !lastInput.endsWith(' '),
-      // Punctuation added
-      /[.,!?;:]/.test(newValue.charAt(selectionStart - 1)) && 
-        (lastInput.length === 0 || newValue.charAt(selectionStart - 1) !== lastInput.charAt(selectionStart - 1)),
-      // Check button clicked
-      (e as any).isSubmit === true,
-      // End of sentence (newline)
-      newValue.includes('\n') && !lastInput.includes('\n')
-    ];
-    
-    // Special handling for partial combination detection
-    let pendingCombination = false;
-    
-    // Check if the last character is a combination starter (like 'y')
-    // and the cursor is at the end (user is actively typing)
-    const lastChar = newValue.charAt(selectionStart - 1);
-    const isAtEnd = selectionStart === newValue.length;
-    
-    if (isAtEnd && combinationStarters.includes(lastChar)) {
-      // This might be the start of a combination, so we should wait
-      pendingCombination = true;
-    } 
-    // If the last character is a potential second part of a combination (like 'a' after 'y')
-    else if (isAtEnd && selectionStart >= 2) {
-      const secondLastChar = newValue.charAt(selectionStart - 2);
-      const lastChar = newValue.charAt(selectionStart - 1);
-      
-      // Check if this completes a pending combination (e.g., "ya")
-      if (
-        combinationStarters.includes(secondLastChar) && 
-        combinationFollowers[secondLastChar as keyof typeof combinationFollowers]?.includes(lastChar)
-      ) {
-        // This completes a combination, so we should transliterate now
-        transliterationTriggers.push(true);
-      }
-    }
-    
-    // If any trigger condition is true and we don't have a pending combination
-    if (transliterationTriggers.some(trigger => trigger === true) && !pendingCombination) {
-      console.log("Transliterating:", newValue);
-      const transliteratedValue = transliterate(newValue);
-      setUserAnswer(transliteratedValue);
-      
-      // Update cursor position
-      const lengthDiff = transliteratedValue.length - newValue.length;
-      setCursorPosition(selectionStart + lengthDiff);
-    } else {
-      // Just update cursor position without transliterating
-      setCursorPosition(selectionStart);
-    }
-    
-    // Always update last input to track what's changed
-    setLastInput(newValue);
-  };
-
-  // Add a submit handler to force transliteration before checking
-  const handleCheckAnswer = () => {
-    // Force transliteration of any pending input
-    if (needsRussianKeyboard && userAnswer) {
-      const transliteratedValue = transliterate(userAnswer);
-      setUserAnswer(transliteratedValue);
-    }
-    
-    // Then check the answer
-    checkAnswer();
   };
 
   useEffect(() => {
