@@ -1,4 +1,4 @@
-// Local development server for testing the app without the Netlify function
+// Local mock server for development testing
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -8,27 +8,53 @@ const PORT = 9000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Mock TTS endpoint
+// Mock TTS endpoint for local development
 app.post('/.netlify/functions/tts', (req, res) => {
-  const { text } = req.body;
-  console.log(`[DEV SERVER] TTS request for: "${text}"`);
+  const { text, voice } = req.body;
   
-  // Always return a valid base64 audio response (beep sound)
-  setTimeout(() => {
-    res.json({
-      audioContent: 'SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tAwAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADSADh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAYVAAAAAAAAA0io6zCuAAAAAAAAAAAAAAAAAAAAAP/7UMQAAAf4XkAUAAABF4DJVBAAACiImUo7TYd9J1gOPtJ0Ti/qQXG/qATNiIeT4nvMN+y3NRUTx90PkPYLvLEXUw0AyP0eW7uofR+Ilyjdx6m///pJ0YA/Fw8f0RAG4EF2cAIAgIALe2/8EBYf8P////CAoJh3//+EPCT/18CAoBwgAZIOUEf////////CEXKKioqK4XCxMQEBAQEwuJ//////ggLC4qlP//////gQEBIQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==',
-      text: text,
-      source: 'dev-server'
-    });
-  }, 300); // Simulate a short delay
+  console.log(`[DEV SERVER] TTS request for: "${text}" using voice: ${voice?.name || 'default'}`);
+  
+  // Debug output showing full request
+  console.log('Received request payload:', JSON.stringify(req.body, null, 2));
+  
+  // Return a 404 error to show what's happening in the real environment
+  res.status(404).json({
+    error: "Simulating the 404 error you're seeing in production",
+    message: "This is the same error you would see in production. Check your Netlify Function deployment."
+  });
 });
 
+// Information endpoint
+app.get('/', (req, res) => {
+  res.send(`
+    <h1>Russian Learning App Dev Server</h1>
+    <p>This mock server simulates the same 404 error that occurs in production to help with debugging.</p>
+    <pre>
+    Available endpoint: POST /.netlify/functions/tts
+    
+    Example request body:
+    {
+      "text": "привет",
+      "voice": {
+        "languageCode": "ru-RU",
+        "name": "ru-RU-Standard-A",
+        "ssmlGender": "FEMALE"
+      }
+    }
+    </pre>
+  `);
+});
+
+// Start the server
 app.listen(PORT, () => {
   console.log(`
   ┌──────────────────────────────────────────────────┐
   │                                                  │
-  │   Local development server running on port ${PORT}   │
+  │   Debug Mock Server running on port ${PORT}         │
   │   TTS endpoint: http://localhost:${PORT}/.netlify/functions/tts │
+  │                                                  │
+  │   This server simulates the 404 errors to help   │
+  │   with debugging the real API issues.            │
   │                                                  │
   └──────────────────────────────────────────────────┘
   `);
