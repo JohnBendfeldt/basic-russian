@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('alphabet');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [speechInitialized, setSpeechInitialized] = useState(false);
 
   useEffect(() => {
     // Handle the install prompt
@@ -41,7 +42,17 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Initialize speech synthesis when the app loads
-    initVoices().catch(err => console.error('Failed to initialize speech:', err));
+    const initSpeech = async () => {
+      try {
+        await initVoices();
+        setSpeechInitialized(true);
+        console.log('Speech initialization completed successfully');
+      } catch (err) {
+        console.error('Failed to initialize speech:', err);
+      }
+    };
+    
+    initSpeech();
   }, []);
 
   // Function to trigger the install prompt
@@ -77,6 +88,18 @@ const App: React.FC = () => {
   };
 
   const renderActiveSection = () => {
+    // Add a check to only render sections if speech is initialized
+    if (!speechInitialized) {
+      // Show loading state while speech initializes
+      return (
+        <div className="section loading-section">
+          <h2>Loading Speech Functionality</h2>
+          <p className="loading-message">Initializing voice capabilities. This may take a moment...</p>
+          <div className="loading-spinner"></div>
+        </div>
+      );
+    }
+    
     switch (activeSection) {
       case 'alphabet':
         return <Alphabet data={russianData.alphabet} />;
