@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FaVolumeUp, FaCheck, FaTimes, FaKeyboard } from 'react-icons/fa';
 import RussianKeyboard from './RussianKeyboard';
-import { transliterate } from '../utils/transliteration';
+import { transliterate, containsCyrillic } from '../utils/transliteration';
 
 interface QuizProps {
   data: any;
@@ -28,10 +28,49 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     
     // Remove punctuation and extra spaces, convert to lowercase
     // eslint-disable-next-line no-useless-escape
-    return textWithoutParentheses.toLowerCase()
+    let normalized = textWithoutParentheses.toLowerCase()
       .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
       .replace(/\s+/g, " ")
       .trim();
+    
+    // Special normalization for Russian text
+    // Handle common transliteration errors
+    normalized = normalized
+      // Replace Latin 'c' with Cyrillic 'с' in Russian words
+      .replace(/c(?=[а-яёА-ЯЁ])/g, 'с')
+      // Handle other potential character confusions
+      .replace(/a(?=[а-яёА-ЯЁ])/g, 'а')  // Latin 'a' to Cyrillic 'а'
+      .replace(/e(?=[а-яёА-ЯЁ])/g, 'е')  // Latin 'e' to Cyrillic 'е'
+      .replace(/o(?=[а-яёА-ЯЁ])/g, 'о')  // Latin 'o' to Cyrillic 'о'
+      .replace(/p(?=[а-яёА-ЯЁ])/g, 'р')  // Latin 'p' to Cyrillic 'р'
+      .replace(/x(?=[а-яёА-ЯЁ])/g, 'х')  // Latin 'x' to Cyrillic 'х'
+      .replace(/y(?=[а-яёА-ЯЁ])/g, 'у'); // Latin 'y' to Cyrillic 'у'
+      
+    return normalized;
+  };
+
+  // Add a helper function to calculate string similarity (Levenshtein distance)
+  const levenshteinDistance = (a: string, b: string): number => {
+    // Create a matrix of dimensions (a.length+1) x (b.length+1)
+    const matrix = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
+
+    // Fill the first row and column of the matrix
+    for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+    for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+    // Fill the rest of the matrix
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1, // deletion
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j - 1] + cost // substitution
+        );
+      }
+    }
+
+    return matrix[a.length][b.length];
   };
 
   // Use useCallback to memoize the getRandomQuestion function
@@ -135,7 +174,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const checkAnswer = () => {
     if (!userAnswer.trim()) return;
     
-    // Normalize user answer to ignore parentheses, punctuation and case
+    // Normalize user answer to ignore parentheses, punctuation, case, and common transliteration errors
     const userAnswerNormalized = normalizeText(userAnswer);
     let isAnswerCorrect = false;
     
@@ -149,7 +188,18 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       isAnswerCorrect = possibleAnswers.includes(userAnswerNormalized);
     } else {
       // Single answer check with normalization
-      isAnswerCorrect = userAnswerNormalized === normalizeText(currentQuestion.answer);
+      const correctAnswerNormalized = normalizeText(currentQuestion.answer);
+      
+      // For Russian answers, add extra tolerance by checking character by character
+      if (containsCyrillic(userAnswerNormalized) || containsCyrillic(correctAnswerNormalized)) {
+        // Allow for a small error tolerance (1 character difference per 5 characters)
+        const maxErrors = Math.floor(correctAnswerNormalized.length / 5) + 1;
+        const distance = levenshteinDistance(userAnswerNormalized, correctAnswerNormalized);
+        isAnswerCorrect = distance <= maxErrors;
+      } else {
+        // For English, use strict equality
+        isAnswerCorrect = userAnswerNormalized === correctAnswerNormalized;
+      }
     }
     
     setIsCorrect(isAnswerCorrect);

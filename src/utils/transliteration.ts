@@ -22,8 +22,9 @@ const transliterationMap: { [key: string]: string } = {
   'u': 'у',
   'f': 'ф',
   'h': 'х',
-  "'": 'ь',
-  "`": 'ь', // Add backtick as alternative
+  "'": 'ь', // Soft sign
+  "`": 'ь', // Alternative for soft sign
+  '"': 'ъ', // Hard sign
   'y': 'ы',
   
   // Special combinations (these must be checked first)
@@ -110,12 +111,18 @@ export const transliterate = (input: string): string => {
     
     let replaced = false;
     
-    // Special handling for apostrophes to ensure they become soft signs
+    // Special handling for apostrophes and quotes to ensure they become soft/hard signs
     if (result[i] === "'" || result[i] === "`") {
       result = result.substring(0, i) + 'ь' + result.substring(i + 1);
       i += 1;
       replaced = true;
-    } else {
+    } 
+    else if (result[i] === '"') {
+      result = result.substring(0, i) + 'ъ' + result.substring(i + 1);
+      i += 1;
+      replaced = true;
+    }
+    else {
       // Try to match longer combinations first to prevent partial matches
       for (const combo of orderedCombinations) {
         // Only check if we have enough characters left
