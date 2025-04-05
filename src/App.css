@@ -295,6 +295,28 @@ footer {
   margin-left: 0.5rem;
 }
 
+/* Alphabet Component - Updated for uppercase/lowercase display */
+.letter-pair {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-right: 0.5rem;
+}
+
+.letter-uppercase {
+  font-size: 2.8rem;
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.letter-lowercase {
+  font-size: 2.4rem;
+  color: var(--primary-color);
+  opacity: 0.8;
+  font-weight: 400;
+}
+
 /* Phrases Component */
 .phrases-container {
   display: grid;

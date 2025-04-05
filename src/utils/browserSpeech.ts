@@ -1,5 +1,5 @@
 /**
- * Browser Speech Synthesis for Russian language with local audio fallback
+ * Browser Speech Synthesis for Russian language with audio file fallback
  */
 
 // Audio file mapping
@@ -146,7 +146,7 @@ const getAudioFileForText = async (text: string): Promise<string | null> => {
 
 /**
  * Speaks the text using browser speech synthesis
- * Falls back to local audio files if available
+ * Falls back to local audio files only if no Russian voice is available
  */
 export const speakText = async (
   text: string, 
@@ -155,7 +155,16 @@ export const speakText = async (
   onError?: (error: Error) => void
 ): Promise<void> => {
   try {
-    // First, try to use a local audio file
+    // Check if a Russian voice is available in the browser
+    const hasRussianVoice = isRussianVoiceAvailable();
+    
+    if (hasRussianVoice) {
+      // If Russian voice is available, use browser's speech synthesis
+      playWithBrowserTTS(text, lang, onEnd, onError);
+      return;
+    }
+    
+    // If no Russian voice is available, try to use a local audio file
     const audioFilePath = await getAudioFileForText(text);
     
     if (audioFilePath) {
@@ -167,7 +176,8 @@ export const speakText = async (
       };
       
       audio.onerror = () => {
-        // If local audio fails, fall back to browser TTS
+        // If local audio fails, fall back to browser TTS as last resort
+        console.log('Audio file playback failed, falling back to browser TTS without Russian voice');
         playWithBrowserTTS(text, lang, onEnd, onError);
       };
       
@@ -175,7 +185,7 @@ export const speakText = async (
       return;
     }
     
-    // If no local audio found, use browser TTS
+    // If no audio file available either, use browser TTS as last resort
     playWithBrowserTTS(text, lang, onEnd, onError);
   } catch (error) {
     console.error('Speech error:', error);
