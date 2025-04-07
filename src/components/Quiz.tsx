@@ -385,6 +385,13 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         askedQuestionsRef.current.add(questionId);
         setAskedQuestionsCount(askedQuestionsRef.current.size);
       }
+
+      // Focus the input field after a short delay to ensure the DOM has updated
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 100);
     } catch (error) {
       console.error("Error generating question:", error);
       setCurrentQuestion({
@@ -424,6 +431,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     };
   }, [showNext]);
 
+  // Also add useEffect to focus the input when a new question is shown
+  useEffect(() => {
+    // Focus the input when currentQuestion changes and we're not showing the next button
+    if (currentQuestion && !showNext && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [currentQuestion, showNext]);
+
   const isInitialMount = useRef(true);
   useEffect(() => {
     if (isInitialMount.current) {
@@ -447,7 +462,15 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   const checkAnswer = () => {
     if (!userAnswer.trim()) return;
-    const userAnswerNormalized = normalizeText(userAnswer);
+    
+    // Automatically transliterate if needed for Russian answers
+    let processedAnswer = userAnswer;
+    if (needsRussianKeyboard && !containsCyrillic(processedAnswer)) {
+      processedAnswer = transliterate(processedAnswer);
+      setUserAnswer(processedAnswer); // Update the input field to show the transliterated text
+    }
+    
+    const userAnswerNormalized = normalizeText(processedAnswer);
     let isAnswerCorrect = false;
     
     // Check for special signs first
@@ -585,7 +608,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   };
 
   const handleCheckAnswer = () => {
-    if (needsRussianKeyboard && userAnswer) {
+    // Automatically transliterate if this is a Russian question and the input contains Latin characters
+    if (needsRussianKeyboard && userAnswer && !containsCyrillic(userAnswer)) {
       const transliteratedValue = transliterate(userAnswer);
       setUserAnswer(transliteratedValue);
     }
@@ -697,7 +721,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             onKeyDown={handleKeyDown}
             placeholder={needsRussianKeyboard ? "Type in English, press SPACE to convert" : "Your answer here..."}
             disabled={showNext}
-            autoFocus
+            autoFocus // Keep the autoFocus attribute
           />
           {needsRussianKeyboard && !showNext && (
             <button 
