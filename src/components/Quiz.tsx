@@ -43,6 +43,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [_lastInput, setLastInput] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [correctFormatted, setCorrectFormatted] = useState('');
   
   // Instead of using state for askedQuestions, use a ref to prevent re-renders
   const askedQuestionsRef = useRef<Set<string>>(new Set());
@@ -89,7 +90,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     "15": ["fifteen", "пятнадцать"],
     "16": ["sixteen", "шестнадцать"],
     "17": ["seventeen", "семнадцать"],
-    "18": ["eighteen", "восемнадцать"],
+    "18": ["eighteen", "восемьнадцать"],
     "19": ["nineteen", "девятнадцать"],
     "20": ["twenty", "двадцать"],
     "30": ["thirty", "тридцать"],
@@ -136,12 +137,27 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     return matrix[a.length][b.length];
   };
 
-  // Fix the getRandomQuestion function to prevent infinite loops
+  const highlightDifferences = (userInput: string, correctAnswer: string): string => {
+    if (!containsCyrillic(correctAnswer)) return correctAnswer;
+    
+    let result = '';
+    for (let i = 0; i < correctAnswer.length; i++) {
+      if (i >= userInput.length || userInput[i] !== correctAnswer[i]) {
+        result += `<span class="diff-char">${correctAnswer[i]}</span>`;
+      } else {
+        result += correctAnswer[i];
+      }
+    }
+    
+    return result;
+  };
+
   const getRandomQuestion = useCallback(() => {
     console.log("getRandomQuestion called");
     setUserAnswer('');
     setIsCorrect(null);
     setShowNext(false);
+    setCorrectFormatted('');
 
     // Don't continue if data isn't loaded yet
     if (!data) {
@@ -151,7 +167,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
     try {
       const categories = ['alphabet', 'basicPhrases', 'numbers', 'commonWords'];
-      // Filter to only include categories that actually have data
       const availableCategories = categories.filter(cat => 
         data[cat] && Array.isArray(data[cat]) && data[cat].length > 0
       );
@@ -168,15 +183,12 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         return;
       }
       
-      // Pick a random category from available ones
       const randomCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
       const itemsList = data[randomCategory];
 
-      // Look for unasked questions using the ref instead of state
       const questionPool: Array<{item: AlphabetItem | PhraseItem, isRussianToEnglish: boolean}> = [];
       
       if (randomCategory === 'alphabet') {
-        // Add alphabet items that haven't been asked yet
         (itemsList as AlphabetItem[]).forEach((item: AlphabetItem) => {
           const id = `alphabet-${item.character}`;
           if (!askedQuestionsRef.current.has(id)) {
@@ -184,7 +196,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           }
         });
       } else {
-        // Add phrase items that haven't been asked yet in either direction
         (itemsList as PhraseItem[]).forEach((item: PhraseItem) => {
           const russianToEnglishId = `${randomCategory}-${item.russian}-to-en`;
           const englishToRussianId = `${randomCategory}-${item.english}-to-ru`;
@@ -199,31 +210,47 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         });
       }
       
-      // If we've asked all questions, reset the history
       if (questionPool.length === 0) {
         console.log("All questions have been asked. Resetting question history.");
         askedQuestionsRef.current = new Set();
         setAskedQuestionsCount(0);
         
-        // After resetting, run the same logic again to get a new question
-        // But this time use direct selection rather than recursion
         if (randomCategory === 'alphabet' && itemsList.length > 0) {
           const randomIndex = Math.floor(Math.random() * itemsList.length);
           const item = (itemsList as AlphabetItem[])[randomIndex];
           const questionId = `alphabet-${item.character}`;
           
-          // Add to the asked questions without triggering re-render
           askedQuestionsRef.current.add(questionId);
-          setAskedQuestionsCount(1); // Only update the count for UI
+          setAskedQuestionsCount(1);
           
-          setCurrentQuestion({
-            type: 'alphabet',
-            prompt: item.character,
-            answer: item.pronunciation.toLowerCase(),
-            hint: `How is the letter "${item.character}" pronounced in Russian?`,
-            russian: item.character,
-            id: questionId
-          });
+          if (item.character === 'Ь' || item.character === 'ь') {
+            setCurrentQuestion({
+              type: 'alphabet',
+              prompt: item.character,
+              answer: 'soft sign/soft',
+              hint: `What type of sign is "${item.character}"?`,
+              russian: item.character,
+              id: questionId
+            });
+          } else if (item.character === 'Ъ' || item.character === 'ъ') {
+            setCurrentQuestion({
+              type: 'alphabet',
+              prompt: item.character,
+              answer: 'hard sign/hard',
+              hint: `What type of sign is "${item.character}"?`,
+              russian: item.character,
+              id: questionId
+            });
+          } else {
+            setCurrentQuestion({
+              type: 'alphabet',
+              prompt: item.character,
+              answer: item.pronunciation.toLowerCase(),
+              hint: `How is the letter "${item.character}" pronounced in Russian?`,
+              russian: item.character,
+              id: questionId
+            });
+          }
           return;
         } else if (itemsList.length > 0) {
           const randomIndex = Math.floor(Math.random() * itemsList.length);
@@ -253,20 +280,16 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             });
           }
           
-          // Add to the asked questions without triggering re-render
           askedQuestionsRef.current.add(questionId);
-          setAskedQuestionsCount(1); // Only update the count for UI
+          setAskedQuestionsCount(1);
           return;
         }
       }
       
-      // Pick a random question from the pool
       const randomIndex = Math.floor(Math.random() * questionPool.length);
       const { item: randomItem, isRussianToEnglish } = questionPool[randomIndex];
 
-      // Process the chosen question based on its type
       if (randomCategory === 'alphabet') {
-        // Process alphabet question
         const alphabetItem = randomItem as AlphabetItem;
         const character = alphabetItem.character?.toString() || '';
         const pronunciation = alphabetItem.pronunciation?.toString() || '';
@@ -277,21 +300,38 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         
         const questionId = `alphabet-${character}`;
         
-        // Update the asked questions set using the ref
         askedQuestionsRef.current.add(questionId);
         setAskedQuestionsCount(askedQuestionsRef.current.size);
         
-        // Set the current question
-        setCurrentQuestion({
-          type: 'alphabet',
-          prompt: character,
-          answer: pronunciation.toLowerCase(),
-          hint: `How is the letter "${character}" pronounced in Russian?`,
-          russian: character,
-          id: questionId
-        });
+        if (character === 'Ь' || character === 'ь') {
+          setCurrentQuestion({
+            type: 'alphabet',
+            prompt: character,
+            answer: 'soft sign/soft',
+            hint: `What type of sign is "${character}"?`,
+            russian: character,
+            id: questionId
+          });
+        } else if (character === 'Ъ' || character === 'ъ') {
+          setCurrentQuestion({
+            type: 'alphabet',
+            prompt: character,
+            answer: 'hard sign/hard',
+            hint: `What type of sign is "${character}"?`,
+            russian: character,
+            id: questionId
+          });
+        } else {
+          setCurrentQuestion({
+            type: 'alphabet',
+            prompt: character,
+            answer: pronunciation.toLowerCase(),
+            hint: `How is the letter "${character}" pronounced in Russian?`,
+            russian: character,
+            id: questionId
+          });
+        }
       } else {
-        // Process phrase question
         const phraseItem = randomItem as PhraseItem;
         const russian = phraseItem.russian?.toString() || '';
         const english = phraseItem.english?.toString() || '';
@@ -324,13 +364,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           });
         }
         
-        // Update the asked questions set using the ref
         askedQuestionsRef.current.add(questionId);
         setAskedQuestionsCount(askedQuestionsRef.current.size);
       }
     } catch (error) {
       console.error("Error generating question:", error);
-      // Fallback to a static question to prevent loops
       setCurrentQuestion({
         type: 'emergency',
         prompt: 'Hello',
@@ -339,9 +377,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         russian: 'Привет'
       });
     }
-  }, [data]); // Only depend on data, not on any state that changes with each question
+  }, [data]);
 
-  // Initial question loading - wrap in its own effect
   const isInitialMount = useRef(true);
   useEffect(() => {
     if (isInitialMount.current) {
@@ -349,7 +386,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       isInitialMount.current = false;
       getRandomQuestion();
       
-      // Load sounds
       correctSoundRef.current = new Audio('/sounds/correct.mp3');
       incorrectSoundRef.current = new Audio('/sounds/incorrect.mp3');
       
@@ -372,7 +408,15 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       const possibleAnswers = currentQuestion.answer
         .split('/')
         .map((ans: string) => normalizeText(ans));
-      isAnswerCorrect = possibleAnswers.includes(userAnswerNormalized);
+      isAnswerCorrect = possibleAnswers.some((possibleAnswer: string) => {
+        if (possibleAnswer === 'soft sign' || possibleAnswer === 'soft') {
+          return userAnswerNormalized === 'soft sign' || userAnswerNormalized === 'soft';
+        } else if (possibleAnswer === 'hard sign' || possibleAnswer === 'hard') {
+          return userAnswerNormalized === 'hard sign' || userAnswerNormalized === 'hard';
+        } else {
+          return userAnswerNormalized === possibleAnswer;
+        }
+      });
       if (!isAnswerCorrect) {
         isAnswerCorrect = possibleAnswers.some((possibleAnswer: string) => 
           checkNumberEquivalence(userAnswerNormalized, possibleAnswer)
@@ -380,7 +424,12 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       }
     } else {
       const correctAnswerNormalized = normalizeText(currentQuestion.answer);
-      if (userAnswerNormalized === correctAnswerNormalized) {
+      
+      if (currentQuestion.prompt === 'Ь' || currentQuestion.prompt === 'ь') {
+        isAnswerCorrect = userAnswerNormalized === 'soft sign' || userAnswerNormalized === 'soft';
+      } else if (currentQuestion.prompt === 'Ъ' || currentQuestion.prompt === 'ъ') {
+        isAnswerCorrect = userAnswerNormalized === 'hard sign' || userAnswerNormalized === 'hard';
+      } else if (userAnswerNormalized === correctAnswerNormalized) {
         isAnswerCorrect = true;
       } else if (checkNumberEquivalence(userAnswerNormalized, correctAnswerNormalized)) {
         isAnswerCorrect = true;
@@ -388,6 +437,12 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         const maxErrors = Math.floor(correctAnswerNormalized.length / 5) + 1;
         const distance = levenshteinDistance(userAnswerNormalized, correctAnswerNormalized);
         isAnswerCorrect = distance <= maxErrors;
+        
+        if (containsCyrillic(correctAnswerNormalized)) {
+          setCorrectFormatted(highlightDifferences(userAnswerNormalized, correctAnswerNormalized));
+        } else {
+          setCorrectFormatted('');
+        }
       }
       if (!isAnswerCorrect) {
         const answerWithFormal = `${correctAnswerNormalized} formal`;
@@ -583,7 +638,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           {currentQuestion.type !== 'alphabet' && (
             <PronunciationButton 
               text={currentQuestion.russian}
-              className="margin-left" // Use a class instead of inline style
+              className="margin-left"
             />
           )}
         </div>
@@ -646,7 +701,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             {isCorrect ? (
               <div className="correct-answer-container">
                 <FaCheck className="result-icon correct-icon" />
-                <span>Correct!</span>
+                <span>
+                  Correct!
+                  {correctFormatted && (
+                    <div className="spelling-note">
+                      Correct spelling: <span dangerouslySetInnerHTML={{ __html: correctFormatted }}></span>
+                    </div>
+                  )}
+                </span>
               </div>
             ) : (
               <div className="incorrect-answer-container">
@@ -668,7 +730,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             </button>
           ) : (
             <button className="next-button" onClick={nextQuestion}>
-              Next Question
+              Next Question 
+              <span className="button-hint">(or press Enter)</span>
             </button>
           )}
         </div>
