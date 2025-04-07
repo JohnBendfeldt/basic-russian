@@ -4,8 +4,9 @@ import Alphabet from './components/Alphabet';
 import Phrases from './components/Phrases';
 import Navigation from './components/Navigation';
 import Quiz from './components/Quiz';
+import BottomNavigation from './components/BottomNavigation';
 import russianData from './data/russianData';
-import { FaBars, FaTimes, FaInfoCircle } from 'react-icons/fa';
+import { FaTimes, FaInfoCircle } from 'react-icons/fa';
 import { initVoices, isRussianVoiceAvailable } from './utils/speech';
 import { getRussianVoiceInstallInstructions } from './utils/browserSpeech';
 
@@ -17,19 +18,13 @@ const App: React.FC = () => {
   const [showVoicePrompt, setShowVoicePrompt] = useState(false);
 
   useEffect(() => {
-    // Handle the install prompt
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Store the event for later use
       setInstallPrompt(e);
     };
 
-    // Check if the app is already installed
     const handleAppInstalled = () => {
-      // Clear the install prompt state
       setInstallPrompt(null);
-      // Optionally log or track the install
       console.log('App was installed');
     };
 
@@ -43,47 +38,40 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Initialize speech synthesis when the app loads
     const initSpeech = async () => {
       try {
         await initVoices();
         
-        // Check if a Russian voice is available
         if (!isRussianVoiceAvailable()) {
           setShowVoicePrompt(true);
         }
         
         setSpeechInitialized(true);
-        console.log('Speech initialization completed successfully');
       } catch (err) {
         console.error('Failed to initialize speech:', err);
-        setSpeechInitialized(true); // Still set as initialized to allow app to function
+        setSpeechInitialized(true);
       }
     };
     
     initSpeech();
   }, []);
 
-  // Function to trigger the install prompt
   const handleInstallClick = () => {
     if (!installPrompt) return;
 
-    // Show the install prompt
     (installPrompt as any).prompt();
 
-    // Wait for the user to respond to the prompt
     (installPrompt as any).userChoice.then((choiceResult: { outcome: string }) => {
       if (choiceResult.outcome === 'accepted') {
         console.log('User accepted the install prompt');
       } else {
         console.log('User dismissed the install prompt');
       }
-      // Clear the prompt state
       setInstallPrompt(null);
     });
   };
 
-  const toggleMenu = () => {
+  const _toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
 
@@ -97,9 +85,7 @@ const App: React.FC = () => {
   };
 
   const renderActiveSection = () => {
-    // Add a check to only render sections if speech is initialized
     if (!speechInitialized) {
-      // Show loading state while speech initializes
       return (
         <div className="section loading-section">
           <h2>Loading Speech Functionality</h2>
@@ -138,9 +124,6 @@ const App: React.FC = () => {
     <div className="app">
       <header>
         <div className="header-content">
-          <button className="menu-toggle" onClick={toggleMenu} aria-label="Toggle menu">
-            {menuOpen ? <FaTimes /> : <FaBars />}
-          </button>
           <h1>Basic Russian</h1>
           {installPrompt && (
             <button onClick={handleInstallClick} className="install-button">
@@ -151,11 +134,10 @@ const App: React.FC = () => {
         <Navigation 
           activeSection={activeSection} 
           setActiveSection={handleSectionChange} 
-          isOpen={menuOpen}
-          _onClose={closeMenu}  // Updated to match the new property name
+          isOpen={false}
+          _onClose={closeMenu}
         />
       </header>
-      {menuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
       
       {showVoicePrompt && (
         <div className="voice-prompt-banner">
@@ -174,9 +156,15 @@ const App: React.FC = () => {
         </div>
       )}
       
-      <main>
+      <main tabIndex={-1}>
         {renderActiveSection()}
       </main>
+      
+      <BottomNavigation 
+        activeSection={activeSection} 
+        setActiveSection={handleSectionChange} 
+      />
+      
       <footer>
         <p>© {new Date().getFullYear()} Basic Russian Learning</p>
       </footer>
