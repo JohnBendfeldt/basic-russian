@@ -29,6 +29,18 @@ interface QuizProps {
   };
 }
 
+// Constants for special characters
+const SOFT_SIGN_CHARS = ['Ь', 'ь'];
+const HARD_SIGN_CHARS = ['Ъ', 'ъ'];
+
+// Helper functions for soft and hard signs
+const isSoftSign = (char: string): boolean => SOFT_SIGN_CHARS.includes(char);
+const isHardSign = (char: string): boolean => HARD_SIGN_CHARS.includes(char);
+const isSoftSignAnswer = (answer: string): boolean => 
+  ['soft sign', 'soft'].includes(answer.toLowerCase().trim());
+const isHardSignAnswer = (answer: string): boolean => 
+  ['hard sign', 'hard'].includes(answer.toLowerCase().trim());
+
 // Use a ref to track askedQuestions to prevent re-renders
 const Quiz: React.FC<QuizProps> = ({ data }) => {
   const [currentQuestion, setCurrentQuestion] = useState<any>(null);
@@ -49,6 +61,12 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const askedQuestionsRef = useRef<Set<string>>(new Set());
   // Only use this state for UI updates, not for logic that would trigger re-renders
   const [askedQuestionsCount, setAskedQuestionsCount] = useState(0);
+  
+  // Keep track of the nextQuestion function with a proper initialization
+  const nextQuestionRef = useRef<() => void>(() => {
+    console.log("Default next question function called before initialization");
+    // This will be replaced with the real implementation
+  });
 
   const normalizeText = (text: string): string => {
     let mainText = text;
@@ -223,7 +241,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           askedQuestionsRef.current.add(questionId);
           setAskedQuestionsCount(1);
           
-          if (item.character === 'Ь' || item.character === 'ь') {
+          if (isSoftSign(item.character)) {
             setCurrentQuestion({
               type: 'alphabet',
               prompt: item.character,
@@ -232,7 +250,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
               russian: item.character,
               id: questionId
             });
-          } else if (item.character === 'Ъ' || item.character === 'ъ') {
+          } else if (isHardSign(item.character)) {
             setCurrentQuestion({
               type: 'alphabet',
               prompt: item.character,
@@ -303,7 +321,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         askedQuestionsRef.current.add(questionId);
         setAskedQuestionsCount(askedQuestionsRef.current.size);
         
-        if (character === 'Ь' || character === 'ь') {
+        if (isSoftSign(character)) {
           setCurrentQuestion({
             type: 'alphabet',
             prompt: character,
@@ -312,7 +330,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             russian: character,
             id: questionId
           });
-        } else if (character === 'Ъ' || character === 'ъ') {
+        } else if (isHardSign(character)) {
           setCurrentQuestion({
             type: 'alphabet',
             prompt: character,
@@ -379,6 +397,33 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     }
   }, [data]);
 
+  // Store the nextQuestion function in a ref to access it in event listeners
+  const nextQuestion = useCallback(() => {
+    getRandomQuestion();
+  }, [getRandomQuestion]);
+  
+  // Update the ref whenever the function changes
+  useEffect(() => {
+    nextQuestionRef.current = nextQuestion;
+  }, [nextQuestion]);
+  
+  // Global event listener for Enter key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only allow the Enter key to move to next question when we're showing the next button
+      // and the key event didn't originate from within an input field
+      if (e.key === 'Enter' && showNext && !(e.target instanceof HTMLInputElement)) {
+        nextQuestionRef.current();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showNext]);
+
   const isInitialMount = useRef(true);
   useEffect(() => {
     if (isInitialMount.current) {
@@ -404,47 +449,43 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     if (!userAnswer.trim()) return;
     const userAnswerNormalized = normalizeText(userAnswer);
     let isAnswerCorrect = false;
-    if (currentQuestion.answer.includes('/')) {
+    
+    // Check for special signs first
+    if (isSoftSign(currentQuestion.prompt) && isSoftSignAnswer(userAnswerNormalized)) {
+      isAnswerCorrect = true;
+    } else if (isHardSign(currentQuestion.prompt) && isHardSignAnswer(userAnswerNormalized)) {
+      isAnswerCorrect = true;
+    } else if (currentQuestion.answer.includes('/')) {
+      // Handle multiple possible answers (like soft sign/soft)
       const possibleAnswers = currentQuestion.answer
         .split('/')
         .map((ans: string) => normalizeText(ans));
-      isAnswerCorrect = possibleAnswers.some((possibleAnswer: string) => {
-        if (possibleAnswer === 'soft sign' || possibleAnswer === 'soft') {
-          return userAnswerNormalized === 'soft sign' || userAnswerNormalized === 'soft';
-        } else if (possibleAnswer === 'hard sign' || possibleAnswer === 'hard') {
-          return userAnswerNormalized === 'hard sign' || userAnswerNormalized === 'hard';
-        } else {
-          return userAnswerNormalized === possibleAnswer;
-        }
-      });
-      if (!isAnswerCorrect) {
-        isAnswerCorrect = possibleAnswers.some((possibleAnswer: string) => 
-          checkNumberEquivalence(userAnswerNormalized, possibleAnswer)
-        );
-      }
+      
+      isAnswerCorrect = possibleAnswers.some((possibleAnswer: string) => 
+        userAnswerNormalized === possibleAnswer || 
+        checkNumberEquivalence(userAnswerNormalized, possibleAnswer)
+      );
     } else {
       const correctAnswerNormalized = normalizeText(currentQuestion.answer);
       
-      if (currentQuestion.prompt === 'Ь' || currentQuestion.prompt === 'ь') {
-        isAnswerCorrect = userAnswerNormalized === 'soft sign' || userAnswerNormalized === 'soft';
-      } else if (currentQuestion.prompt === 'Ъ' || currentQuestion.prompt === 'ъ') {
-        isAnswerCorrect = userAnswerNormalized === 'hard sign' || userAnswerNormalized === 'hard';
-      } else if (userAnswerNormalized === correctAnswerNormalized) {
+      if (userAnswerNormalized === correctAnswerNormalized) {
         isAnswerCorrect = true;
       } else if (checkNumberEquivalence(userAnswerNormalized, correctAnswerNormalized)) {
         isAnswerCorrect = true;
       } else if (containsCyrillic(userAnswerNormalized) || containsCyrillic(correctAnswerNormalized)) {
+        // Flexible checking for Cyrillic answers
         const maxErrors = Math.floor(correctAnswerNormalized.length / 5) + 1;
         const distance = levenshteinDistance(userAnswerNormalized, correctAnswerNormalized);
         isAnswerCorrect = distance <= maxErrors;
         
-        if (containsCyrillic(correctAnswerNormalized)) {
+        // Show correct spelling if it's Cyrillic and generally correct
+        if (containsCyrillic(correctAnswerNormalized) && distance <= maxErrors) {
           setCorrectFormatted(highlightDifferences(userAnswerNormalized, correctAnswerNormalized));
         } else {
           setCorrectFormatted('');
         }
-      }
-      if (!isAnswerCorrect) {
+      } else {
+        // Check for informal/formal variations
         const answerWithFormal = `${correctAnswerNormalized} formal`;
         const answerWithInformal = `${correctAnswerNormalized} informal`;
         isAnswerCorrect = 
@@ -453,9 +494,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           normalizeText(answerWithInformal).includes(userAnswerNormalized);
       }
     }
+    
     setIsCorrect(isAnswerCorrect);
     setShowNext(true);
     setQuestionsAnswered(prev => prev + 1);
+    
     if (isAnswerCorrect) {
       setScore(prev => prev + 1);
       if (correctSoundRef.current) {
@@ -470,16 +513,18 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     }
   };
 
-  const nextQuestion = () => {
-    getRandomQuestion();
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       if (!showNext) {
+        // Prevent form submission
+        e.preventDefault();
+        // Check the answer
         checkAnswer();
       } else {
+        // If we're already showing the next button, pressing Enter within the input
+        // should also advance to the next question
         nextQuestion();
+        e.preventDefault();
       }
     }
   };
@@ -716,7 +761,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
                 <span>
                   Not quite. The correct answer is: {" "}
                   {currentQuestion.answer.includes('/') 
-                    ? currentQuestion.answer.split('/').join(' or ') 
+                    ? currentQuestion.answer.split('/')[0] // Just show the first preferred answer
                     : currentQuestion.answer}
                 </span>
               </div>
@@ -729,7 +774,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
               Check Answer
             </button>
           ) : (
-            <button className="next-button" onClick={nextQuestion}>
+            <button className="next-button" onClick={nextQuestion} autoFocus>
               Next Question 
               <span className="button-hint">(or press Enter)</span>
             </button>
