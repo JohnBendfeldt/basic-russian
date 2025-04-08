@@ -41,6 +41,23 @@ const isSoftSignAnswer = (answer: string): boolean =>
 const isHardSignAnswer = (answer: string): boolean => 
   ['hard sign', 'hard'].includes(answer.toLowerCase().trim());
 
+// Helper function to determine the audio category based on question type
+const getAudioCategory = (questionType: string): 'alphabet' | 'phrases' | 'numbers' | 'words' | 'examples' => {
+  switch (questionType) {
+    case 'alphabet':
+      return 'alphabet';
+    case 'basicPhrases':
+      return 'phrases';
+    case 'numbers':
+      return 'numbers';
+    case 'commonWords':
+      return 'words';
+    default:
+      // Fall back to the question type, which might be "alphabet", "numbers", etc.
+      return questionType as any;
+  }
+};
+
 // Use a ref to track askedQuestions to prevent re-renders
 const Quiz: React.FC<QuizProps> = ({ data }) => {
   const [currentQuestion, setCurrentQuestion] = useState<any>(null);
@@ -708,6 +725,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             <PronunciationButton 
               text={currentQuestion.russian}
               className="margin-left"
+              audioCategory={getAudioCategory(currentQuestion.type)}
             />
           )}
         </div>

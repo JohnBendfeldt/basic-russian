@@ -11,7 +11,7 @@ interface PronunciationButtonProps {
   style?: React.CSSProperties;
   useLocalAudio?: boolean;
   isAlphabet?: boolean;
-  audioCategory?: 'alphabet' | 'words' | 'phrases' | 'numbers' | 'examples';
+  audioCategory?: 'alphabet' | 'words' | 'phrases' | 'numbers' | 'examples' | 'basicPhrases' | 'commonWords';
 }
 
 const PronunciationButton: React.FC<PronunciationButtonProps> = ({ 
@@ -81,7 +81,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     
     const normalizedText = text.toLowerCase().trim();
     
-    // If category is explicitly set, use it without auto-detection
+    // Use provided audioCategory if available
     let category = audioCategory;
     if (!category) {
       // Simple heuristic to determine category
@@ -95,6 +95,10 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
         category = 'words';
       }
     }
+    
+    // Convert any non-standard category names to our standard folders
+    if (category === 'basicPhrases') category = 'phrases';
+    if (category === 'commonWords') category = 'words';
     
     // Format filename - replace spaces with underscores
     const fileName = normalizedText.replace(/\s+/g, '_');
