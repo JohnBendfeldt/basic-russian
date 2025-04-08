@@ -463,19 +463,24 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       isInitialMount.current = false;
       getRandomQuestion();
       
-      correctSoundRef.current = new Audio('/sounds/correct.mp3');
-      incorrectSoundRef.current = new Audio('/sounds/incorrect.mp3');
-      
-      return () => {
-        if (correctSoundRef.current) {
-          correctSoundRef.current.pause();
-        }
-        if (incorrectSoundRef.current) {
-          incorrectSoundRef.current.pause();
-        }
-      };
+      // Initialize sounds during first mount
+      correctSoundRef.current = new Audio('audio/sounds/correct.mp3');
+      incorrectSoundRef.current = new Audio('audio/sounds/incorrect.mp3');
     }
   }, [getRandomQuestion]);
+
+  // Add a cleanup effect for audio when unmounting
+  useEffect(() => {
+    return () => {
+      // This effect will run when the component unmounts
+      if (correctSoundRef.current) {
+        correctSoundRef.current.pause();
+      }
+      if (incorrectSoundRef.current) {
+        incorrectSoundRef.current.pause();
+      }
+    };
+  }, []);
 
   const checkAnswer = () => {
     if (!userAnswer.trim()) return;
@@ -541,15 +546,33 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     
     if (isAnswerCorrect) {
       setScore(prev => prev + 1);
-      if (correctSoundRef.current) {
-        correctSoundRef.current.currentTime = 0;
-        correctSoundRef.current.play().catch(e => console.error("Error playing sound:", e));
-      }
+      // Play correct sound with improved error handling
+      playSound(correctSoundRef.current, "correct");
     } else {
-      if (incorrectSoundRef.current) {
-        incorrectSoundRef.current.currentTime = 0;
-        incorrectSoundRef.current.play().catch(e => console.error("Error playing sound:", e));
+      // Play incorrect sound with improved error handling
+      playSound(incorrectSoundRef.current, "incorrect");
+    }
+  };
+
+  // Simplified sound playing function to be more reliable
+  const playSound = (audio: HTMLAudioElement | null, type: string) => {
+    if (!audio) return;
+    
+    try {
+      // Ensure the audio is reset
+      audio.pause();
+      audio.currentTime = 0;
+      
+      // Play the sound
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.warn(`Could not play ${type} sound`, e);
+        });
       }
+    } catch (e) {
+      console.warn(`Error playing ${type} sound`, e);
     }
   };
 

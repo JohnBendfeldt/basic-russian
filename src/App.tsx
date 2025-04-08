@@ -6,16 +6,13 @@ import Navigation from './components/Navigation';
 import Quiz from './components/Quiz';
 import BottomNavigation from './components/BottomNavigation';
 import russianData from './data/russianData';
-import { FaTimes, FaInfoCircle } from 'react-icons/fa';
-import { initVoices, isRussianVoiceAvailable } from './utils/speech';
-import { getRussianVoiceInstallInstructions } from './utils/browserSpeech';
+import { initVoices, cancelAllSpeech } from './utils/speech';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('alphabet');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechInitialized, setSpeechInitialized] = useState(false);
-  const [showVoicePrompt, setShowVoicePrompt] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -41,11 +38,6 @@ const App: React.FC = () => {
     const initSpeech = async () => {
       try {
         await initVoices();
-        
-        if (!isRussianVoiceAvailable()) {
-          setShowVoicePrompt(true);
-        }
-        
         setSpeechInitialized(true);
       } catch (err) {
         console.error('Failed to initialize speech:', err);
@@ -80,6 +72,18 @@ const App: React.FC = () => {
   };
 
   const handleSectionChange = (section: string) => {
+    // Cancel any ongoing speech or audio when changing sections
+    cancelAllSpeech();
+    
+    // Stop any potentially playing audio elements
+    document.querySelectorAll('audio').forEach(audio => {
+      try {
+        audio.pause();
+      } catch (e) {
+        console.warn('Error pausing audio:', e);
+      }
+    });
+    
     setActiveSection(section);
     closeMenu();
   };
@@ -150,23 +154,6 @@ const App: React.FC = () => {
           _onClose={closeMenu}
         />
       </header>
-      
-      {showVoicePrompt && (
-        <div className="voice-prompt-banner">
-          <FaInfoCircle className="voice-prompt-icon" />
-          <div className="voice-prompt-text">
-            <p><strong>Russian voice not detected!</strong> Pronunciation features require a Russian voice pack.</p>
-            <p className="voice-instructions">{getRussianVoiceInstallInstructions()}</p>
-          </div>
-          <button 
-            className="voice-prompt-close" 
-            onClick={() => setShowVoicePrompt(false)}
-            aria-label="Close voice prompt"
-          >
-            <FaTimes />
-          </button>
-        </div>
-      )}
       
       <main tabIndex={-1}>
         {renderActiveSection()}
