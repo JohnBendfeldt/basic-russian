@@ -4,10 +4,7 @@
 import { 
   speakText, 
   isSpeechSupported as isBrowserSpeechSupported,
-  initVoices as initBrowserVoices,
-  getRussianVoices,
-  getBestRussianVoice,
-  isRussianVoiceAvailable
+  initVoices as initBrowserVoices
 } from './browserSpeech';
 
 // Track currently speaking items by button ID
@@ -37,16 +34,6 @@ export const initVoices = async (): Promise<void> => {
   
   await initBrowserVoices();
   isInitialized = true;
-  
-  // Log voice information for debugging
-  const russianVoices = getRussianVoices();
-  console.log(`Speech system initialized with browser speech synthesis`);
-  console.log(`Found ${russianVoices.length} Russian voices`);
-  if (russianVoices.length > 0) {
-    console.log('Available Russian voices:', russianVoices.map(v => v.name).join(', '));
-  } else {
-    console.log('No Russian voices found. Users will be prompted to install one.');
-  }
   
   return Promise.resolve();
 };
@@ -125,17 +112,26 @@ export const speak = (
   processSpeechQueue(buttonId);
 };
 
-// Export functions from browserSpeech
-export { getRussianVoices, getBestRussianVoice, isRussianVoiceAvailable };
+// Add a function to cancel all speaking for cleanup purposes
+export const cancelAllSpeech = (): void => {
+  // Clear all speech queues
+  speechQueues.clear();
+  
+  // Reset all speaking states
+  speakingButtons.clear();
+  
+  // Cancel any ongoing speech synthesis
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+};
 
 // Create a named export object to avoid ESLint warning
 const speechUtils = {
   isSpeechSupported,
   speak,
-  getRussianVoices,
   initVoices,
-  getBestRussianVoice,
-  isRussianVoiceAvailable
+  cancelAllSpeech
 };
 
 export default speechUtils;

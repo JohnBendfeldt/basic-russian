@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaVolumeUp, FaDownload } from 'react-icons/fa';
-import { speak, initVoices, isRussianVoiceAvailable } from '../utils/speech';
-import { getRussianVoiceInstallInstructions } from '../utils/browserSpeech';
+import { FaVolumeUp } from 'react-icons/fa';
+import { speak, initVoices } from '../utils/speech';
 
 interface PronunciationButtonProps {
   text: string;
@@ -20,11 +19,9 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   label,
   className,
   style,
-  useLocalAudio = true, 
   audioCategory
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showVoicePrompt, setShowVoicePrompt] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioPathRef = useRef<string>('');
@@ -43,15 +40,11 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     
     const init = async () => {
       try {
+        // Initialize voices but don't worry about Russian voice availability
         await initVoices();
         
         // If not mounted anymore, abort
         if (!isMounted.current) return;
-        
-        // Check if a Russian voice is available
-        if (!isRussianVoiceAvailable() && !useLocalAudio) {
-          setShowVoicePrompt(true);
-        }
         
         setInitialized(true);
       } catch (err) {
@@ -65,16 +58,53 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     // Execute initialization
     init();
     
-    // Cleanup function
+    // Enhanced cleanup function
     return () => {
       isMounted.current = false;
+      
+      // Properly cleanup audio resources
       if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
+        try {
+          // Remove all event listeners
+          audioRef.current.onended = null;
+          audioRef.current.onerror = null;
+          audioRef.current.oncanplay = null;
+          audioRef.current.onloadedmetadata = null;
+          
+          // Pause and reset the audio
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          
+          // Clear the source
+          audioRef.current.src = '';
+          
+          // Force the browser to release resources
+          audioRef.current.load();
+          audioRef.current = null;
+        } catch (error) {
+          console.warn('Error during audio cleanup:', error);
+        }
+      }
+      
+      // Clear audio path reference
+      audioPathRef.current = '';
+    };
+  }, []);
+
+  // Also cleanup audio when text or category changes
+  useEffect(() => {
+    // Cleanup previous audio if text or category changes
+    return () => {
+      if (audioRef.current && audioRef.current.src) {
+        try {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        } catch (error) {
+          console.warn('Error pausing audio on text/category change:', error);
+        }
       }
     };
-  }, [useLocalAudio]);
+  }, [text, audioCategory]);
 
   const getAudioPath = (): string => {
     if (!text) return '';
@@ -112,8 +142,8 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     // Reset fallback attempt tracker for new playback
     fallbackAttemptedRef.current = false;
     
-    // Try to play local audio first when useLocalAudio is true
-    if (useLocalAudio && text) {
+    // Always try to play local audio first (since we have files for everything now)
+    if (text) {
       setIsPlaying(true);
       
       const audioPath = getAudioPath();
@@ -165,20 +195,12 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
       return;
     }
     
-    // Show installation instructions if no Russian voice is available
-    if (showVoicePrompt) {
-      const instructions = getRussianVoiceInstallInstructions();
-      alert(`No Russian voice found. ${instructions}`);
-      return;
-    }
-    
-    // If not using local audio or no text provided, use speech synthesis directly
+    // If no text provided, use speech synthesis directly
     setIsPlaying(true);
     playSpeechSynthesis();
   };
   
-  // Separate function to use speech synthesis (to avoid duplication)
-  // Renamed from "useSpeechSynthesis" to "playSpeechSynthesis" to avoid React hooks linting error
+  // Speech synthesis fallback
   const playSpeechSynthesis = () => {
     speak(
       text, 
@@ -198,7 +220,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
           
           // Show a user-friendly message for voice errors
           if (error instanceof Error && !fallbackAttemptedRef.current) {
-            alert(`Voice error: ${error.message}`);
+            console.warn(`Speech synthesis error: ${error.message}`);
           }
         }
       }
@@ -207,17 +229,15 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
 
   return (
     <button
-      className={`pronunciation-button ${isPlaying ? 'playing' : ''} ${showVoicePrompt ? 'needs-voice' : ''} ${className || ''}`}
+      className={`pronunciation-button ${isPlaying ? 'playing' : ''} ${className || ''}`}
       onClick={handleSpeak}
       disabled={isPlaying || !initialized}
-      title={showVoicePrompt ? "Russian voice required" : (isPlaying ? "Speaking..." : (label || "Pronounce"))}
-      aria-label={showVoicePrompt ? "Install Russian voice" : (isPlaying ? "Speaking..." : (label || "Pronounce"))}
+      title={isPlaying ? "Speaking..." : (label || "Pronounce")}
+      aria-label={isPlaying ? "Speaking..." : (label || "Pronounce")}
       style={style}
       data-button-id={buttonId.current}
     >
-      {showVoicePrompt ? (
-        <FaDownload aria-hidden="true" />
-      ) : isPlaying ? (
+      {isPlaying ? (
         <FaVolumeUp className="pulse-animation" aria-hidden="true" />
       ) : (
         <FaVolumeUp aria-hidden="true" />
