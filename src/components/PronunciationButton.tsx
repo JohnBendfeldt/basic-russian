@@ -28,6 +28,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   const [initialized, setInitialized] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioPathRef = useRef<string>('');
+  const fallbackAttemptedRef = useRef<boolean>(false);
   
   // Create a unique ID for each button instance
   const buttonId = useRef(`btn-${Math.random().toString(36).substring(2, 9)}`);
@@ -69,6 +70,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
       isMounted.current = false;
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
         audioRef.current = null;
       }
     };
@@ -103,6 +105,9 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   const handleSpeak = () => {
     if (isPlaying) return;
     
+    // Reset fallback attempt tracker for new playback
+    fallbackAttemptedRef.current = false;
+    
     // Try to play local audio first when useLocalAudio is true
     if (useLocalAudio && text) {
       setIsPlaying(true);
@@ -115,6 +120,8 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.src = '';
+          audioRef.current.onended = null;
+          audioRef.current.onerror = null;
         }
         
         audioRef.current = new Audio(audioPath);
@@ -128,11 +135,11 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
         
         audioRef.current.onerror = () => {
           console.log(`Audio file not found: ${audioPath}, falling back to speech synthesis`);
-          if (isMounted.current) {
-            setIsPlaying(false);
-            
+          
+          if (isMounted.current && !fallbackAttemptedRef.current) {
+            fallbackAttemptedRef.current = true;
             // Fall back to speech synthesis
-            fallbackToSpeechSynthesis();
+            playSpeechSynthesis();
           }
         };
       } else {
@@ -143,11 +150,11 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
       // Play the audio
       audioRef.current.play().catch(error => {
         console.error('Error playing audio:', error);
-        if (isMounted.current) {
-          setIsPlaying(false);
-          
+        
+        if (isMounted.current && !fallbackAttemptedRef.current) {
+          fallbackAttemptedRef.current = true;
           // Fall back to speech synthesis
-          fallbackToSpeechSynthesis();
+          playSpeechSynthesis();
         }
       });
       
@@ -161,11 +168,14 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
       return;
     }
     
-    fallbackToSpeechSynthesis();
+    // If not using local audio or no text provided, use speech synthesis directly
+    setIsPlaying(true);
+    playSpeechSynthesis();
   };
   
-  const fallbackToSpeechSynthesis = () => {
-    setIsPlaying(true);
+  // Separate function to use speech synthesis (to avoid duplication)
+  // Renamed from "useSpeechSynthesis" to "playSpeechSynthesis" to avoid React hooks linting error
+  const playSpeechSynthesis = () => {
     speak(
       text, 
       lang,
@@ -183,7 +193,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
           setIsPlaying(false);
           
           // Show a user-friendly message for voice errors
-          if (error instanceof Error) {
+          if (error instanceof Error && !fallbackAttemptedRef.current) {
             alert(`Voice error: ${error.message}`);
           }
         }
