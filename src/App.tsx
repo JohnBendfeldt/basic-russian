@@ -99,11 +99,23 @@ const App: React.FC = () => {
       case 'alphabet':
         return <Alphabet data={russianData.alphabet} />;
       case 'phrases':
-        return <Phrases data={russianData.basicPhrases} title="Basic Phrases" />;
+        return <Phrases 
+          data={russianData.basicPhrases} 
+          title="Basic Phrases" 
+          contentType="phrases"
+        />;
       case 'numbers':
-        return <Phrases data={russianData.numbers} title="Numbers" />;
+        return <Phrases 
+          data={russianData.numbers} 
+          title="Numbers" 
+          contentType="numbers"
+        />;
       case 'words':
-        return <Phrases data={russianData.commonWords} title="Common Words" />;
+        return <Phrases 
+          data={russianData.commonWords} 
+          title="Common Words" 
+          contentType="words"
+        />;
       case 'quiz':
         return <Quiz data={{
           alphabet: russianData.alphabet.map(item => ({

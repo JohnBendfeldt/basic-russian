@@ -81,7 +81,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     
     const normalizedText = text.toLowerCase().trim();
     
-    // Determine the category if not explicitly provided
+    // If category is explicitly set, use it without auto-detection
     let category = audioCategory;
     if (!category) {
       // Simple heuristic to determine category
