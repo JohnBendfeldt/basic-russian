@@ -1,0 +1,192 @@
+[
+  {
+    "originalFile": "speech_20250408010227598.mp3",
+    "word": "мужчина",
+    "newFile": "мужчина.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010235783.mp3",
+    "word": "женщина",
+    "newFile": "женщина.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010246114.mp3",
+    "word": "ребенок",
+    "newFile": "ребенок.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010329587.mp3",
+    "word": "мальчик",
+    "newFile": "мальчик.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010339432.mp3",
+    "word": "девочка",
+    "newFile": "девочка.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010352037.mp3",
+    "word": "друг",
+    "newFile": "друг.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010409659.mp3",
+    "word": "еда",
+    "newFile": "еда.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010419776.mp3",
+    "word": "вода",
+    "newFile": "вода.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010433235.mp3",
+    "word": "хлеб",
+    "newFile": "хлеб.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010442599.mp3",
+    "word": "молоко",
+    "newFile": "молоко.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010451347.mp3",
+    "word": "мясо",
+    "newFile": "мясо.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010500197.mp3",
+    "word": "рыба",
+    "newFile": "рыба.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010515231.mp3",
+    "word": "овощи",
+    "newFile": "овощи.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010524257.mp3",
+    "word": "фрукты",
+    "newFile": "фрукты.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010533233.mp3",
+    "word": "кофе",
+    "newFile": "кофе.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010546112.mp3",
+    "word": "чай",
+    "newFile": "чай.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010554384.mp3",
+    "word": "пиво",
+    "newFile": "пиво.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010602754.mp3",
+    "word": "вино",
+    "newFile": "вино.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010617032.mp3",
+    "word": "магазин",
+    "newFile": "магазин.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010626831.mp3",
+    "word": "ресторан",
+    "newFile": "ресторан.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010635733.mp3",
+    "word": "гостиница",
+    "newFile": "гостиница.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010646789.mp3",
+    "word": "станция",
+    "newFile": "станция.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010657030.mp3",
+    "word": "аэропорт",
+    "newFile": "аэропорт.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010706112.mp3",
+    "word": "улица",
+    "newFile": "улица.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010714983.mp3",
+    "word": "площадь",
+    "newFile": "площадь.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010724419.mp3",
+    "word": "парк",
+    "newFile": "парк.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010733417.mp3",
+    "word": "больница",
+    "newFile": "больница.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010742221.mp3",
+    "word": "аптека",
+    "newFile": "аптека.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010750452.mp3",
+    "word": "банк",
+    "newFile": "банк.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010759005.mp3",
+    "word": "почта",
+    "newFile": "почта.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010810080.mp3",
+    "word": "полиция",
+    "newFile": "полиция.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010818380.mp3",
+    "word": "музей",
+    "newFile": "музей.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010826735.mp3",
+    "word": "театр",
+    "newFile": "театр.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010837359.mp3",
+    "word": "кино",
+    "newFile": "кино.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010846989.mp3",
+    "word": "билет",
+    "newFile": "билет.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010858018.mp3",
+    "word": "деньги",
+    "newFile": "деньги.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010908786.mp3",
+    "word": "паспорт",
+    "newFile": "паспорт.mp3"
+  },
+  {
+    "originalFile": "speech_20250408010919785.mp3",
+    "word": "виза",
+    "newFile": "виза.mp3"
+  }
+]
