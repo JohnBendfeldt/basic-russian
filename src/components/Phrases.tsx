@@ -19,6 +19,8 @@ const PhraseCard: React.FC<PhraseCardProps> = ({
   onToggleReveal,
   animationKey
 }) => {
+  const audioCategory = /\d/.test(russian) ? 'numbers' : 'phrases';
+  
   return (
     <div className={`phrase-card ${isRevealed ? 'revealed' : 'hidden'}`} 
          key={`card-${animationKey}`}>
@@ -28,6 +30,8 @@ const PhraseCard: React.FC<PhraseCardProps> = ({
           text={russian} 
           label={`Pronounce phrase ${russian}`}
           className="phrase-pronunciation"
+          audioCategory={audioCategory}
+          useLocalAudio={true}
         />
       </div>
       <div className="phrase-content" onClick={onToggleReveal}>

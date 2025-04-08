@@ -31,7 +31,11 @@ const Alphabet: React.FC<AlphabetProps> = ({ data }) => {
               <div className="letter-underline"></div>
               
               <div className="pronunciation-button-wrapper">
-                <PronunciationButton text={item.letter.toLowerCase()} />
+                <PronunciationButton 
+                  text={item.letter.toLowerCase()} 
+                  audioCategory="alphabet"
+                  useLocalAudio={true}
+                />
               </div>
             </div>
             
@@ -47,6 +51,8 @@ const Alphabet: React.FC<AlphabetProps> = ({ data }) => {
                   <PronunciationButton 
                     text={item.russianWord} 
                     className="example-pronunciation"
+                    audioCategory="examples"
+                    useLocalAudio={true}
                   />
                 )}
               </div>

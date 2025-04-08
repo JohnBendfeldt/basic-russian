@@ -9,6 +9,9 @@ interface PronunciationButtonProps {
   label?: string;
   className?: string;
   style?: React.CSSProperties;
+  useLocalAudio?: boolean;
+  isAlphabet?: boolean;
+  audioCategory?: 'alphabet' | 'words' | 'phrases' | 'numbers' | 'examples';
 }
 
 const PronunciationButton: React.FC<PronunciationButtonProps> = ({ 
@@ -16,11 +19,15 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   lang = 'ru-RU',
   label,
   className,
-  style
+  style,
+  useLocalAudio = true, 
+  audioCategory
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVoicePrompt, setShowVoicePrompt] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioPathRef = useRef<string>('');
   
   // Create a unique ID for each button instance
   const buttonId = useRef(`btn-${Math.random().toString(36).substring(2, 9)}`);
@@ -41,7 +48,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
         if (!isMounted.current) return;
         
         // Check if a Russian voice is available
-        if (!isRussianVoiceAvailable()) {
+        if (!isRussianVoiceAvailable() && !useLocalAudio) {
           setShowVoicePrompt(true);
         }
         
@@ -60,11 +67,92 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     // Cleanup function
     return () => {
       isMounted.current = false;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
-  }, []);
+  }, [useLocalAudio]);
+
+  const getAudioPath = (): string => {
+    if (!text) return '';
+    
+    const normalizedText = text.toLowerCase().trim();
+    
+    // Determine the category if not explicitly provided
+    let category = audioCategory;
+    if (!category) {
+      // Simple heuristic to determine category
+      if (normalizedText.length === 1) {
+        category = 'alphabet';
+      } else if (/\s/.test(normalizedText)) {
+        category = 'phrases';
+      } else if (/^\d+$/.test(normalizedText) || ['один', 'два', 'три'].includes(normalizedText)) {
+        category = 'numbers';
+      } else {
+        category = 'words';
+      }
+    }
+    
+    // Format filename - replace spaces with underscores
+    const fileName = normalizedText.replace(/\s+/g, '_');
+    
+    return `/audio/${category}/${fileName}.mp3`;
+  };
 
   const handleSpeak = () => {
     if (isPlaying) return;
+    
+    // Try to play local audio first when useLocalAudio is true
+    if (useLocalAudio && text) {
+      setIsPlaying(true);
+      
+      const audioPath = getAudioPath();
+      
+      // Create a new audio instance if we need one or if the path changed
+      if (!audioRef.current || audioPathRef.current !== audioPath) {
+        // Clean up previous audio if it exists
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+        }
+        
+        audioRef.current = new Audio(audioPath);
+        audioPathRef.current = audioPath;
+        
+        audioRef.current.onended = () => {
+          if (isMounted.current) {
+            setIsPlaying(false);
+          }
+        };
+        
+        audioRef.current.onerror = () => {
+          console.log(`Audio file not found: ${audioPath}, falling back to speech synthesis`);
+          if (isMounted.current) {
+            setIsPlaying(false);
+            
+            // Fall back to speech synthesis
+            fallbackToSpeechSynthesis();
+          }
+        };
+      } else {
+        // Reset audio position to the beginning if reusing
+        audioRef.current.currentTime = 0;
+      }
+      
+      // Play the audio
+      audioRef.current.play().catch(error => {
+        console.error('Error playing audio:', error);
+        if (isMounted.current) {
+          setIsPlaying(false);
+          
+          // Fall back to speech synthesis
+          fallbackToSpeechSynthesis();
+        }
+      });
+      
+      return;
+    }
     
     // Show installation instructions if no Russian voice is available
     if (showVoicePrompt) {
@@ -72,9 +160,12 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
       alert(`No Russian voice found. ${instructions}`);
       return;
     }
-
-    setIsPlaying(true);
     
+    fallbackToSpeechSynthesis();
+  };
+  
+  const fallbackToSpeechSynthesis = () => {
+    setIsPlaying(true);
     speak(
       text, 
       lang,
