@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PhraseItem } from '../types/index';
 import PronunciationButton from './PronunciationButton';
+import { FaLock, FaLockOpen } from 'react-icons/fa';
 
 interface PhraseCardProps {
   russian: string;
@@ -41,7 +42,7 @@ const PhraseCard: React.FC<PhraseCardProps> = ({
             <p className="pronunciation">Pronunciation: {pronunciation}</p>
           </>
         ) : (
-          <p className="hint">Click to reveal translation</p>
+          <p className="hint" title="Click to reveal translation"><FaLock aria-hidden="true" /></p>
         )}
       </div>
     </div>

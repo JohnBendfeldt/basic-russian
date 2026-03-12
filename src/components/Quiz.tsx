@@ -778,12 +778,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         {needsRussianKeyboard && (
           <div className="transliteration-instructions">
             <div className="answer-tips">
-              <strong>Typing in Russian:</strong> Type in English letters and press <span className="instruction-highlight">SPACE</span> or <span className="instruction-highlight">punctuation</span> to convert to Russian.
-            </div>
-            <div className="answer-tips examples">
-              Type <span className="example-text">ya</span> + <span className="key-badge">space</span> → <span className="example-result">я</span>
-              <span className="example-divider">|</span>
-              Type <span className="example-text">zh</span> + <span className="key-badge">space</span> → <span className="example-result">ж</span>
+              Phonetic mapping: <span className="example-text">ya</span> → <span className="example-result">я</span>, <span className="example-text">zh</span> → <span className="example-result">ж</span>, <span className="example-text">sh</span> → <span className="example-result">ш</span>, <span className="example-text">ch</span> → <span className="example-result">ч</span>
             </div>
           </div>
         )}
@@ -794,11 +789,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           </div>
         )}
         
-        {needsRussianKeyboard && (
-          <div id="transliteration-notification" className={userAnswer.length > 0 ? "has-content" : ""}>
-            Press SPACE to convert to Russian letters
-          </div>
-        )}
+
         
         {needsRussianKeyboard && showKeyboard && !showNext && (
           <div className="virtual-keyboard-container">
