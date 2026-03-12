@@ -7,7 +7,6 @@ interface PronunciationButtonProps {
   lang?: string;
   label?: string;
   className?: string;
-  style?: React.CSSProperties;
   useLocalAudio?: boolean;
   isAlphabet?: boolean;
   audioCategory?: 'alphabet' | 'words' | 'phrases' | 'numbers' | 'examples' | 'basicPhrases' | 'commonWords';
@@ -18,7 +17,6 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
   lang = 'ru-RU',
   label,
   className,
-  style,
   audioCategory
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -91,9 +89,14 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     };
   }, []);
 
-  // Also cleanup audio when text or category changes
+  // Also cleanup audio when text or category changes (happens when React reuses
+  // the same component instance across tabs)
   useEffect(() => {
-    // Cleanup previous audio if text or category changes
+    // Reset playing state immediately when text/category changes so the button
+    // doesn't stay stuck in the "playing" / disabled state on the new page
+    setIsPlaying(false);
+    fallbackAttemptedRef.current = false;
+
     return () => {
       if (audioRef.current && audioRef.current.src) {
         try {
@@ -234,7 +237,6 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
       disabled={isPlaying || !initialized}
       title={isPlaying ? "Speaking..." : (label || "Pronounce")}
       aria-label={isPlaying ? "Speaking..." : (label || "Pronounce")}
-      style={style}
       data-button-id={buttonId.current}
     >
       {isPlaying ? (

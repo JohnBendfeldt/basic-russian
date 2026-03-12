@@ -22,7 +22,7 @@ const PhraseCard: React.FC<PhraseCardProps> = ({
   contentType = 'phrases' // Default to phrases
 }) => {
   return (
-    <div className={`phrase-card ${isRevealed ? 'revealed' : 'hidden'}`} 
+    <div className={`phrase-card ${isRevealed ? 'phrase-revealed' : 'phrase-hidden'}`} 
          key={`card-${animationKey}`}>
       <div className="phrase-header">
         <h3 className="russian">{russian}</h3>
