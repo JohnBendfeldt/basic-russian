@@ -72,9 +72,6 @@ const RussianKeyboard: React.FC<RussianKeyboardProps> = ({ onLetterClick }) => {
 
   return (
     <div className="russian-keyboard">
-      <div className="keyboard-guide">
-        <span className="guide-text">Phonetic keyboard: Type like English, get Russian letters (A → А, D → Д)</span>
-      </div>
       
       {keyboardRows.map((row, rowIndex) => (
         <div key={rowIndex} className="keyboard-row">
