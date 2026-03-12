@@ -140,7 +140,14 @@ const App: React.FC = () => {
     <div className="app">
       <header>
         <div className="header-content">
-          <h1>Basic Russian</h1>
+          <h1>
+            <svg className="russia-flag" viewBox="0 0 45 30" xmlns="http://www.w3.org/2000/svg" aria-label="Russian flag" role="img">
+              <rect width="45" height="10" y="0"  fill="#FFFFFF"/>
+              <rect width="45" height="10" y="10" fill="#0039A6"/>
+              <rect width="45" height="10" y="20" fill="#D52B1E"/>
+            </svg>
+            Basic Russian
+          </h1>
           {installPrompt && (
             <button onClick={handleInstallClick} className="install-button">
               Install App
