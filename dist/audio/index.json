@@ -1,0 +1,796 @@
+{
+  "generated": "2025-04-05T20:36:29.968Z",
+  "count": 156,
+  "files": {
+    "alphabet": [
+      {
+        "filename": "а.mp3",
+        "path": "/audio/alphabet/а.mp3",
+        "size": 28
+      },
+      {
+        "filename": "б.mp3",
+        "path": "/audio/alphabet/б.mp3",
+        "size": 28
+      },
+      {
+        "filename": "в.mp3",
+        "path": "/audio/alphabet/в.mp3",
+        "size": 28
+      },
+      {
+        "filename": "г.mp3",
+        "path": "/audio/alphabet/г.mp3",
+        "size": 28
+      },
+      {
+        "filename": "д.mp3",
+        "path": "/audio/alphabet/д.mp3",
+        "size": 28
+      },
+      {
+        "filename": "е.mp3",
+        "path": "/audio/alphabet/е.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ж.mp3",
+        "path": "/audio/alphabet/ж.mp3",
+        "size": 28
+      },
+      {
+        "filename": "з.mp3",
+        "path": "/audio/alphabet/з.mp3",
+        "size": 28
+      },
+      {
+        "filename": "и.mp3",
+        "path": "/audio/alphabet/и.mp3",
+        "size": 28
+      },
+      {
+        "filename": "й.mp3",
+        "path": "/audio/alphabet/й.mp3",
+        "size": 28
+      },
+      {
+        "filename": "к.mp3",
+        "path": "/audio/alphabet/к.mp3",
+        "size": 28
+      },
+      {
+        "filename": "л.mp3",
+        "path": "/audio/alphabet/л.mp3",
+        "size": 28
+      },
+      {
+        "filename": "м.mp3",
+        "path": "/audio/alphabet/м.mp3",
+        "size": 28
+      },
+      {
+        "filename": "н.mp3",
+        "path": "/audio/alphabet/н.mp3",
+        "size": 28
+      },
+      {
+        "filename": "о.mp3",
+        "path": "/audio/alphabet/о.mp3",
+        "size": 28
+      },
+      {
+        "filename": "п.mp3",
+        "path": "/audio/alphabet/п.mp3",
+        "size": 28
+      },
+      {
+        "filename": "р.mp3",
+        "path": "/audio/alphabet/р.mp3",
+        "size": 28
+      },
+      {
+        "filename": "с.mp3",
+        "path": "/audio/alphabet/с.mp3",
+        "size": 28
+      },
+      {
+        "filename": "т.mp3",
+        "path": "/audio/alphabet/т.mp3",
+        "size": 28
+      },
+      {
+        "filename": "у.mp3",
+        "path": "/audio/alphabet/у.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ф.mp3",
+        "path": "/audio/alphabet/ф.mp3",
+        "size": 28
+      },
+      {
+        "filename": "х.mp3",
+        "path": "/audio/alphabet/х.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ц.mp3",
+        "path": "/audio/alphabet/ц.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ч.mp3",
+        "path": "/audio/alphabet/ч.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ш.mp3",
+        "path": "/audio/alphabet/ш.mp3",
+        "size": 28
+      },
+      {
+        "filename": "щ.mp3",
+        "path": "/audio/alphabet/щ.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ъ.mp3",
+        "path": "/audio/alphabet/ъ.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ы.mp3",
+        "path": "/audio/alphabet/ы.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ь.mp3",
+        "path": "/audio/alphabet/ь.mp3",
+        "size": 28
+      },
+      {
+        "filename": "э.mp3",
+        "path": "/audio/alphabet/э.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ю.mp3",
+        "path": "/audio/alphabet/ю.mp3",
+        "size": 28
+      },
+      {
+        "filename": "я.mp3",
+        "path": "/audio/alphabet/я.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ё.mp3",
+        "path": "/audio/alphabet/ё.mp3",
+        "size": 28
+      }
+    ],
+    "examples": [
+      {
+        "filename": "автобус.mp3",
+        "path": "/audio/examples/автобус.mp3",
+        "size": 28
+      },
+      {
+        "filename": "брат.mp3",
+        "path": "/audio/examples/брат.mp3",
+        "size": 28
+      },
+      {
+        "filename": "вода.mp3",
+        "path": "/audio/examples/вода.mp3",
+        "size": 28
+      },
+      {
+        "filename": "город.mp3",
+        "path": "/audio/examples/город.mp3",
+        "size": 28
+      },
+      {
+        "filename": "дом.mp3",
+        "path": "/audio/examples/дом.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ем.mp3",
+        "path": "/audio/examples/ем.mp3",
+        "size": 28
+      },
+      {
+        "filename": "журнал.mp3",
+        "path": "/audio/examples/журнал.mp3",
+        "size": 28
+      },
+      {
+        "filename": "завод.mp3",
+        "path": "/audio/examples/завод.mp3",
+        "size": 28
+      },
+      {
+        "filename": "имя.mp3",
+        "path": "/audio/examples/имя.mp3",
+        "size": 28
+      },
+      {
+        "filename": "йогурт.mp3",
+        "path": "/audio/examples/йогурт.mp3",
+        "size": 28
+      },
+      {
+        "filename": "кошка.mp3",
+        "path": "/audio/examples/кошка.mp3",
+        "size": 28
+      },
+      {
+        "filename": "любовь.mp3",
+        "path": "/audio/examples/любовь.mp3",
+        "size": 28
+      },
+      {
+        "filename": "мама.mp3",
+        "path": "/audio/examples/мама.mp3",
+        "size": 28
+      },
+      {
+        "filename": "мать.mp3",
+        "path": "/audio/examples/мать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "мы.mp3",
+        "path": "/audio/examples/мы.mp3",
+        "size": 28
+      },
+      {
+        "filename": "нос.mp3",
+        "path": "/audio/examples/нос.mp3",
+        "size": 28
+      },
+      {
+        "filename": "объект.mp3",
+        "path": "/audio/examples/объект.mp3",
+        "size": 28
+      },
+      {
+        "filename": "окно.mp3",
+        "path": "/audio/examples/окно.mp3",
+        "size": 28
+      },
+      {
+        "filename": "папа.mp3",
+        "path": "/audio/examples/папа.mp3",
+        "size": 28
+      },
+      {
+        "filename": "рыба.mp3",
+        "path": "/audio/examples/рыба.mp3",
+        "size": 28
+      },
+      {
+        "filename": "собака.mp3",
+        "path": "/audio/examples/собака.mp3",
+        "size": 28
+      },
+      {
+        "filename": "телефон.mp3",
+        "path": "/audio/examples/телефон.mp3",
+        "size": 28
+      },
+      {
+        "filename": "утро.mp3",
+        "path": "/audio/examples/утро.mp3",
+        "size": 28
+      },
+      {
+        "filename": "фото.mp3",
+        "path": "/audio/examples/фото.mp3",
+        "size": 28
+      },
+      {
+        "filename": "хлеб.mp3",
+        "path": "/audio/examples/хлеб.mp3",
+        "size": 28
+      },
+      {
+        "filename": "центр.mp3",
+        "path": "/audio/examples/центр.mp3",
+        "size": 28
+      },
+      {
+        "filename": "чай.mp3",
+        "path": "/audio/examples/чай.mp3",
+        "size": 28
+      },
+      {
+        "filename": "школа.mp3",
+        "path": "/audio/examples/школа.mp3",
+        "size": 28
+      },
+      {
+        "filename": "щека.mp3",
+        "path": "/audio/examples/щека.mp3",
+        "size": 28
+      },
+      {
+        "filename": "это.mp3",
+        "path": "/audio/examples/это.mp3",
+        "size": 28
+      },
+      {
+        "filename": "юг.mp3",
+        "path": "/audio/examples/юг.mp3",
+        "size": 28
+      },
+      {
+        "filename": "яблоко.mp3",
+        "path": "/audio/examples/яблоко.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ёлка.mp3",
+        "path": "/audio/examples/ёлка.mp3",
+        "size": 28
+      }
+    ],
+    "phrases": [
+      {
+        "filename": "где_туалет.mp3",
+        "path": "/audio/phrases/где_туалет.mp3",
+        "size": 28
+      },
+      {
+        "filename": "говорите_медленнее.mp3",
+        "path": "/audio/phrases/говорите_медленнее.mp3",
+        "size": 28
+      },
+      {
+        "filename": "да.mp3",
+        "path": "/audio/phrases/да.mp3",
+        "size": 28
+      },
+      {
+        "filename": "до_свидания.mp3",
+        "path": "/audio/phrases/до_свидания.mp3",
+        "size": 28
+      },
+      {
+        "filename": "здравствуйте.mp3",
+        "path": "/audio/phrases/здравствуйте.mp3",
+        "size": 28
+      },
+      {
+        "filename": "извините.mp3",
+        "path": "/audio/phrases/извините.mp3",
+        "size": 28
+      },
+      {
+        "filename": "как_дела.mp3",
+        "path": "/audio/phrases/как_дела.mp3",
+        "size": 28
+      },
+      {
+        "filename": "меня_зовут.mp3",
+        "path": "/audio/phrases/меня_зовут.mp3",
+        "size": 28
+      },
+      {
+        "filename": "нет.mp3",
+        "path": "/audio/phrases/нет.mp3",
+        "size": 28
+      },
+      {
+        "filename": "плохо.mp3",
+        "path": "/audio/phrases/плохо.mp3",
+        "size": 28
+      },
+      {
+        "filename": "повторите_пожалуйста.mp3",
+        "path": "/audio/phrases/повторите_пожалуйста.mp3",
+        "size": 28
+      },
+      {
+        "filename": "пожалуйста.mp3",
+        "path": "/audio/phrases/пожалуйста.mp3",
+        "size": 28
+      },
+      {
+        "filename": "помогите.mp3",
+        "path": "/audio/phrases/помогите.mp3",
+        "size": 28
+      },
+      {
+        "filename": "привет.mp3",
+        "path": "/audio/phrases/привет.mp3",
+        "size": 28
+      },
+      {
+        "filename": "сколько_стоит.mp3",
+        "path": "/audio/phrases/сколько_стоит.mp3",
+        "size": 28
+      },
+      {
+        "filename": "спасибо.mp3",
+        "path": "/audio/phrases/спасибо.mp3",
+        "size": 28
+      },
+      {
+        "filename": "хорошо.mp3",
+        "path": "/audio/phrases/хорошо.mp3",
+        "size": 28
+      },
+      {
+        "filename": "я_не_понимаю.mp3",
+        "path": "/audio/phrases/я_не_понимаю.mp3",
+        "size": 28
+      },
+      {
+        "filename": "я_хочу_есть.mp3",
+        "path": "/audio/phrases/я_хочу_есть.mp3",
+        "size": 28
+      },
+      {
+        "filename": "я_хочу_пить.mp3",
+        "path": "/audio/phrases/я_хочу_пить.mp3",
+        "size": 28
+      }
+    ],
+    "numbers": [
+      {
+        "filename": "восемнадцать.mp3",
+        "path": "/audio/numbers/восемнадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "восемь.mp3",
+        "path": "/audio/numbers/восемь.mp3",
+        "size": 28
+      },
+      {
+        "filename": "восемьдесят.mp3",
+        "path": "/audio/numbers/восемьдесят.mp3",
+        "size": 28
+      },
+      {
+        "filename": "два.mp3",
+        "path": "/audio/numbers/два.mp3",
+        "size": 28
+      },
+      {
+        "filename": "двадцать.mp3",
+        "path": "/audio/numbers/двадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "двенадцать.mp3",
+        "path": "/audio/numbers/двенадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "девяносто.mp3",
+        "path": "/audio/numbers/девяносто.mp3",
+        "size": 28
+      },
+      {
+        "filename": "девятнадцать.mp3",
+        "path": "/audio/numbers/девятнадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "девять.mp3",
+        "path": "/audio/numbers/девять.mp3",
+        "size": 28
+      },
+      {
+        "filename": "десять.mp3",
+        "path": "/audio/numbers/десять.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ноль.mp3",
+        "path": "/audio/numbers/ноль.mp3",
+        "size": 28
+      },
+      {
+        "filename": "один.mp3",
+        "path": "/audio/numbers/один.mp3",
+        "size": 28
+      },
+      {
+        "filename": "одиннадцать.mp3",
+        "path": "/audio/numbers/одиннадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "пятнадцать.mp3",
+        "path": "/audio/numbers/пятнадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "пять.mp3",
+        "path": "/audio/numbers/пять.mp3",
+        "size": 28
+      },
+      {
+        "filename": "пятьдесят.mp3",
+        "path": "/audio/numbers/пятьдесят.mp3",
+        "size": 28
+      },
+      {
+        "filename": "семнадцать.mp3",
+        "path": "/audio/numbers/семнадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "семь.mp3",
+        "path": "/audio/numbers/семь.mp3",
+        "size": 28
+      },
+      {
+        "filename": "семьдесят.mp3",
+        "path": "/audio/numbers/семьдесят.mp3",
+        "size": 28
+      },
+      {
+        "filename": "сорок.mp3",
+        "path": "/audio/numbers/сорок.mp3",
+        "size": 28
+      },
+      {
+        "filename": "сто.mp3",
+        "path": "/audio/numbers/сто.mp3",
+        "size": 28
+      },
+      {
+        "filename": "три.mp3",
+        "path": "/audio/numbers/три.mp3",
+        "size": 28
+      },
+      {
+        "filename": "тридцать.mp3",
+        "path": "/audio/numbers/тридцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "тринадцать.mp3",
+        "path": "/audio/numbers/тринадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "тысяча.mp3",
+        "path": "/audio/numbers/тысяча.mp3",
+        "size": 28
+      },
+      {
+        "filename": "четыре.mp3",
+        "path": "/audio/numbers/четыре.mp3",
+        "size": 28
+      },
+      {
+        "filename": "четырнадцать.mp3",
+        "path": "/audio/numbers/четырнадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "шестнадцать.mp3",
+        "path": "/audio/numbers/шестнадцать.mp3",
+        "size": 28
+      },
+      {
+        "filename": "шесть.mp3",
+        "path": "/audio/numbers/шесть.mp3",
+        "size": 28
+      },
+      {
+        "filename": "шестьдесят.mp3",
+        "path": "/audio/numbers/шестьдесят.mp3",
+        "size": 28
+      }
+    ],
+    "words": [
+      {
+        "filename": "аптека.mp3",
+        "path": "/audio/words/аптека.mp3",
+        "size": 28
+      },
+      {
+        "filename": "аэропорт.mp3",
+        "path": "/audio/words/аэропорт.mp3",
+        "size": 28
+      },
+      {
+        "filename": "банк.mp3",
+        "path": "/audio/words/банк.mp3",
+        "size": 28
+      },
+      {
+        "filename": "билет.mp3",
+        "path": "/audio/words/билет.mp3",
+        "size": 28
+      },
+      {
+        "filename": "больница.mp3",
+        "path": "/audio/words/больница.mp3",
+        "size": 28
+      },
+      {
+        "filename": "виза.mp3",
+        "path": "/audio/words/виза.mp3",
+        "size": 28
+      },
+      {
+        "filename": "вино.mp3",
+        "path": "/audio/words/вино.mp3",
+        "size": 28
+      },
+      {
+        "filename": "вода.mp3",
+        "path": "/audio/words/вода.mp3",
+        "size": 28
+      },
+      {
+        "filename": "гостиница.mp3",
+        "path": "/audio/words/гостиница.mp3",
+        "size": 28
+      },
+      {
+        "filename": "девочка.mp3",
+        "path": "/audio/words/девочка.mp3",
+        "size": 28
+      },
+      {
+        "filename": "деньги.mp3",
+        "path": "/audio/words/деньги.mp3",
+        "size": 28
+      },
+      {
+        "filename": "друг.mp3",
+        "path": "/audio/words/друг.mp3",
+        "size": 28
+      },
+      {
+        "filename": "еда.mp3",
+        "path": "/audio/words/еда.mp3",
+        "size": 28
+      },
+      {
+        "filename": "женщина.mp3",
+        "path": "/audio/words/женщина.mp3",
+        "size": 28
+      },
+      {
+        "filename": "кино.mp3",
+        "path": "/audio/words/кино.mp3",
+        "size": 28
+      },
+      {
+        "filename": "кофе.mp3",
+        "path": "/audio/words/кофе.mp3",
+        "size": 28
+      },
+      {
+        "filename": "магазин.mp3",
+        "path": "/audio/words/магазин.mp3",
+        "size": 28
+      },
+      {
+        "filename": "мальчик.mp3",
+        "path": "/audio/words/мальчик.mp3",
+        "size": 28
+      },
+      {
+        "filename": "молоко.mp3",
+        "path": "/audio/words/молоко.mp3",
+        "size": 28
+      },
+      {
+        "filename": "мужчина.mp3",
+        "path": "/audio/words/мужчина.mp3",
+        "size": 28
+      },
+      {
+        "filename": "музей.mp3",
+        "path": "/audio/words/музей.mp3",
+        "size": 28
+      },
+      {
+        "filename": "мясо.mp3",
+        "path": "/audio/words/мясо.mp3",
+        "size": 28
+      },
+      {
+        "filename": "овощи.mp3",
+        "path": "/audio/words/овощи.mp3",
+        "size": 28
+      },
+      {
+        "filename": "парк.mp3",
+        "path": "/audio/words/парк.mp3",
+        "size": 28
+      },
+      {
+        "filename": "паспорт.mp3",
+        "path": "/audio/words/паспорт.mp3",
+        "size": 28
+      },
+      {
+        "filename": "пиво.mp3",
+        "path": "/audio/words/пиво.mp3",
+        "size": 28
+      },
+      {
+        "filename": "площадь.mp3",
+        "path": "/audio/words/площадь.mp3",
+        "size": 28
+      },
+      {
+        "filename": "полиция.mp3",
+        "path": "/audio/words/полиция.mp3",
+        "size": 28
+      },
+      {
+        "filename": "почта.mp3",
+        "path": "/audio/words/почта.mp3",
+        "size": 28
+      },
+      {
+        "filename": "привет.mp3",
+        "path": "/audio/words/привет.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ребенок.mp3",
+        "path": "/audio/words/ребенок.mp3",
+        "size": 28
+      },
+      {
+        "filename": "ресторан.mp3",
+        "path": "/audio/words/ресторан.mp3",
+        "size": 28
+      },
+      {
+        "filename": "рыба.mp3",
+        "path": "/audio/words/рыба.mp3",
+        "size": 28
+      },
+      {
+        "filename": "станция.mp3",
+        "path": "/audio/words/станция.mp3",
+        "size": 28
+      },
+      {
+        "filename": "театр.mp3",
+        "path": "/audio/words/театр.mp3",
+        "size": 28
+      },
+      {
+        "filename": "улица.mp3",
+        "path": "/audio/words/улица.mp3",
+        "size": 28
+      },
+      {
+        "filename": "фрукты.mp3",
+        "path": "/audio/words/фрукты.mp3",
+        "size": 28
+      },
+      {
+        "filename": "хлеб.mp3",
+        "path": "/audio/words/хлеб.mp3",
+        "size": 28
+      },
+      {
+        "filename": "чай.mp3",
+        "path": "/audio/words/чай.mp3",
+        "size": 28
+      }
+    ],
+    "default": {
+      "filename": "default.mp3",
+      "path": "/audio/default.mp3",
+      "size": 28
+    }
+  }
+}
