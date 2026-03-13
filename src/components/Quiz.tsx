@@ -79,11 +79,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   // Only use this state for UI updates, not for logic that would trigger re-renders
   const [askedQuestionsCount, setAskedQuestionsCount] = useState(0);
   
-  // Keep track of the nextQuestion function with a proper initialization
-  const nextQuestionRef = useRef<() => void>(() => {
-    console.log("Default next question function called before initialization");
-    // This will be replaced with the real implementation
-  });
+  // Ref to always access the latest nextQuestion function inside event listeners
+  const nextQuestionRef = useRef<() => void>(() => {});
 
   const normalizeText = (text: string): string => {
     let mainText = text;
@@ -245,7 +242,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       }
       
       if (questionPool.length === 0) {
-        console.log("All questions have been asked. Resetting question history.");
+
         askedQuestionsRef.current = new Set();
         setAskedQuestionsCount(0);
         
@@ -458,7 +455,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const isInitialMount = useRef(true);
   useEffect(() => {
     if (isInitialMount.current) {
-      console.log("Initial mount - loading first question");
+
       isInitialMount.current = false;
       getRandomQuestion();
       

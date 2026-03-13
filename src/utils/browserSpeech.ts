@@ -118,7 +118,7 @@ const getAudioFileForText = async (text: string): Promise<string | null> => {
         });
       }
     } catch (e) {
-      console.log('Could not load audio index, falling back to browser TTS');
+      // Could not load audio index, falling back to browser TTS
     } finally {
       audioFilesFetched = true;
     }
@@ -177,7 +177,6 @@ export const speakText = async (
       
       audio.onerror = () => {
         // If local audio fails, fall back to browser TTS as last resort
-        console.log('Audio file playback failed, falling back to browser TTS without Russian voice');
         playWithBrowserTTS(text, lang, onEnd, onError);
       };
       
