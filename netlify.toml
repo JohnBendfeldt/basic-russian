@@ -5,6 +5,13 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Sitemap must be served as XML
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+
 # Service worker and HTML must never be HTTP-cached
 # Otherwise Android Chrome won't detect new deployments
 [[headers]]
