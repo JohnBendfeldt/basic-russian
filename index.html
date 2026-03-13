@@ -5,10 +5,22 @@
     <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#282c34" />
-    <meta
-      name="description"
-      content="Learn Basic Russian with interactive exercises including alphabet, vocabulary, and pronunciation practice"
-    />
+
+    <!-- Primary SEO -->
+    <title>Basic Russian | Free Online Russian for Beginners</title>
+    <meta name="description" content="Learn basic Russian online for free. Study the Russian alphabet (Cyrillic), essential phrases, common words, and numbers with interactive exercises and audio pronunciation. Perfect for beginners." />
+    <meta name="keywords" content="basic russian, learn russian online, free russian, russian for beginners, russian alphabet, cyrillic alphabet, basic russian online, free basic russian, russian phrases, russian vocabulary, russian numbers, free russian lessons" />
+    <link rel="canonical" href="https://basicrussian.org" />
+
+    <!-- Open Graph (Facebook, LinkedIn, etc.) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://basicrussian.org" />
+    <meta property="og:site_name" content="Basic Russian" />
+    <meta property="og:title" content="Basic Russian | Free Online Russian for Beginners" />
+    <meta property="og:description" content="Learn basic Russian online for free. Study the Russian alphabet (Cyrillic), essential phrases, common words, and numbers with interactive exercises and audio pronunciation. Perfect for beginners." />
+    <meta property="og:image" content="https://basicrussian.org/logo512.png" />
+
+    <!-- PWA -->
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -16,10 +28,53 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Basic Russian" />
     <link rel="apple-touch-startup-image" href="/splash-screen.png" />
-    <title>Basic Russian</title>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Basic Russian",
+      "alternateName": "Basic Russian Online",
+      "url": "https://basicrussian.org",
+      "description": "Learn basic Russian online for free. Study the Russian alphabet (Cyrillic), essential phrases, common words, and numbers with interactive exercises and audio pronunciation. Perfect for beginners.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript",
+      "inLanguage": "en",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "educationalLevel": "Beginner",
+      "teaches": "Russian language",
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "student",
+        "audienceType": "Russian language beginners"
+      },
+      "featureList": [
+        "Russian Alphabet (Cyrillic) with pronunciation",
+        "Basic Russian Phrases with audio",
+        "Russian Numbers",
+        "Common Russian Words and vocabulary",
+        "Interactive Quiz",
+        "Audio pronunciation guides"
+      ]
+    }
+    </script>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      <h1>Basic Russian – Free Online Russian for Beginners</h1>
+      <p>
+        Learn basic Russian online for free at BasicRussian.org. Study the Russian alphabet (Cyrillic),
+        essential Russian phrases, common Russian words, numbers, and pronunciation with interactive
+        exercises. Free Russian lessons for beginners. Please enable JavaScript to use the full app.
+      </p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/index.tsx"></script>
   </body>
