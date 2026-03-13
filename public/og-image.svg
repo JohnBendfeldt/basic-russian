@@ -46,7 +46,7 @@
   <text x="83" y="458" font-family="'Helvetica Neue', Arial, sans-serif" font-size="32" fill="white" opacity="0.80" letter-spacing="1">Free online Russian for beginners</text>
 
   <!-- Underline accent -->
-  <rect x="80" y="476" width="520" height="4" rx="2" fill="url(#accent)"/>
+  <rect x="80" y="476" width="570" height="4" rx="2" fill="url(#accent)"/>
 
   <!-- Feature pills -->
   <rect x="80" y="510" width="148" height="44" rx="22" fill="white" opacity="0.15"/>
