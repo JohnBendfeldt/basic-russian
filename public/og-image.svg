@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a5af4"/>
+      <stop offset="100%" style="stop-color:#2c3584"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4a5af4"/>
+      <stop offset="100%" style="stop-color:#ff526c"/>
+    </linearGradient>
+    <!-- Subtle grid pattern -->
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#3b44c4"/>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Russian flag stripe accent - top -->
+  <rect x="0" y="0" width="1200" height="5" fill="#ffffff" opacity="0.9"/>
+  <rect x="0" y="5" width="1200" height="5" fill="#4a5af4" opacity="0.9"/>
+  <rect x="0" y="10" width="1200" height="5" fill="#ff526c" opacity="0.9"/>
+
+  <!-- Russian flag stripe accent - bottom -->
+  <rect x="0" y="615" width="1200" height="5" fill="#ff526c" opacity="0.9"/>
+  <rect x="0" y="620" width="1200" height="5" fill="#4a5af4" opacity="0.9"/>
+  <rect x="0" y="625" width="1200" height="5" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Left column: branding -->
+  <!-- BR monogram -->
+  <text x="80" y="220" font-family="Georgia, serif" font-size="180" font-weight="bold" fill="white" opacity="0.15">BR</text>
+
+  <!-- Russian flag (3:2 ratio, 90×60) -->
+  <rect x="80" y="235" width="90" height="20" fill="#ffffff"/>
+  <rect x="80" y="255" width="90" height="20" fill="#1a2bbf"/>
+  <rect x="80" y="275" width="90" height="20" fill="#ff526c"/>
+  <rect x="80" y="235" width="90" height="60" fill="none" stroke="white" stroke-opacity="0.25" stroke-width="1.5"/>
+
+  <!-- App name -->
+  <text x="80" y="400" font-family="Georgia, 'Times New Roman', serif" font-size="80" font-weight="bold" fill="white" letter-spacing="-1">Basic Russian</text>
+
+  <!-- Tagline -->
+  <text x="83" y="458" font-family="'Helvetica Neue', Arial, sans-serif" font-size="32" fill="white" opacity="0.80" letter-spacing="1">Free online Russian for beginners</text>
+
+  <!-- Underline accent -->
+  <rect x="80" y="476" width="520" height="4" rx="2" fill="url(#accent)"/>
+
+  <!-- Feature pills -->
+  <rect x="80" y="510" width="148" height="44" rx="22" fill="white" opacity="0.15"/>
+  <text x="154" y="538" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="white" text-anchor="middle">Alphabet</text>
+
+  <rect x="244" y="510" width="140" height="44" rx="22" fill="white" opacity="0.15"/>
+  <text x="314" y="538" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="white" text-anchor="middle">Phrases</text>
+
+  <rect x="400" y="510" width="130" height="44" rx="22" fill="white" opacity="0.15"/>
+  <text x="465" y="538" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="white" text-anchor="middle">Numbers</text>
+
+  <rect x="546" y="510" width="104" height="44" rx="22" fill="white" opacity="0.15"/>
+  <text x="598" y="538" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="white" text-anchor="middle">Quiz</text>
+
+  <!-- Divider -->
+  <rect x="720" y="80" width="2" height="470" fill="white" opacity="0.12" rx="1"/>
+
+  <!-- Right column: Cyrillic showcase -->
+  <!-- Large decorative letters -->
+  <text x="790" y="250" font-family="Georgia, serif" font-size="200" fill="white" opacity="0.95" font-weight="bold">А</text>
+  <text x="960" y="330" font-family="Georgia, serif" font-size="200" fill="white" opacity="0.60" font-weight="bold">Б</text>
+  <text x="860" y="490" font-family="Georgia, serif" font-size="160" fill="white" opacity="0.35" font-weight="bold">В</text>
+
+  <!-- Label -->
+  <text x="975" y="575" font-family="'Helvetica Neue', Arial, sans-serif" font-size="22" fill="white" opacity="0.55" text-anchor="middle" letter-spacing="3">CYRILLIC ALPHABET</text>
+</svg>
