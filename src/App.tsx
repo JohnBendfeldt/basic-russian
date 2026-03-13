@@ -22,7 +22,6 @@ const App: React.FC = () => {
 
     const handleAppInstalled = () => {
       setInstallPrompt(null);
-      console.log('App was installed');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as any);
@@ -55,9 +54,7 @@ const App: React.FC = () => {
 
     (installPrompt as any).userChoice.then((choiceResult: { outcome: string }) => {
       if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
       } else {
-        console.log('User dismissed the install prompt');
       }
       setInstallPrompt(null);
     });

@@ -171,7 +171,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
         };
         
         audioRef.current.onerror = () => {
-          console.log(`Audio file not found: ${audioPath}, falling back to speech synthesis`);
+          // fall back to speech synthesis
           
           if (isMounted.current && !fallbackAttemptedRef.current) {
             fallbackAttemptedRef.current = true;

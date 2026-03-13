@@ -188,7 +188,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   };
 
   const getRandomQuestion = useCallback(() => {
-    console.log("getRandomQuestion called");
+    
     setUserAnswer('');
     setIsCorrect(null);
     setShowNext(false);
@@ -196,7 +196,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
     // Don't continue if data isn't loaded yet
     if (!data) {
-      console.log("No data available yet");
       return;
     }
 
