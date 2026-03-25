@@ -262,15 +262,22 @@ export const initVoices = async (): Promise<void> => {
     return;
   }
   
-  // Wait for voices to be loaded
-  const onVoicesChanged = () => {
-    synth.removeEventListener('voiceschanged', onVoicesChanged);
-  };
-  
-  synth.addEventListener('voiceschanged', onVoicesChanged);
-  
-  // Fallback timeout in case the event doesn't fire
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Resolve as soon as voices load OR after a short fallback timeout
+  await new Promise<void>(resolve => {
+    const onVoicesChanged = () => {
+      synth.removeEventListener('voiceschanged', onVoicesChanged);
+      clearTimeout(fallbackTimer);
+      resolve();
+    };
+    
+    synth.addEventListener('voiceschanged', onVoicesChanged);
+    
+    // Fallback timeout in case the event doesn't fire
+    const fallbackTimer = setTimeout(() => {
+      synth.removeEventListener('voiceschanged', onVoicesChanged);
+      resolve();
+    }, 300);
+  });
 };
 
 /**
