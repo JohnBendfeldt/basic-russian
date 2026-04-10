@@ -8,11 +8,84 @@ import BottomNavigation from './components/BottomNavigation';
 import russianData from './data/russianData';
 import { initVoices, cancelAllSpeech } from './utils/speech';
 
+// Map URL paths to section IDs and SEO metadata
+const SECTION_META: Record<string, { title: string; description: string }> = {
+  alphabet: {
+    title: 'Russian Alphabet (Cyrillic) | Basic Russian',
+    description: 'Learn the 33 letters of the Russian alphabet (Cyrillic) with pronunciation guides, audio examples, and transliteration. Free interactive Russian alphabet chart for beginners.',
+  },
+  phrases: {
+    title: 'Basic Russian Phrases | Basic Russian',
+    description: 'Learn essential Russian phrases for beginners with audio pronunciation. Greetings, introductions, common expressions, and everyday Russian phrases with English translations.',
+  },
+  numbers: {
+    title: 'Russian Numbers | Basic Russian',
+    description: 'Learn Russian numbers with pronunciation and audio. Count in Russian from 1 to 100 and beyond. Free interactive number lessons for beginners.',
+  },
+  words: {
+    title: 'Common Russian Words | Basic Russian',
+    description: 'Learn the most common Russian words with audio pronunciation and English translations. Build your Russian vocabulary with essential everyday words for beginners.',
+  },
+  quiz: {
+    title: 'Russian Quiz | Basic Russian',
+    description: 'Test your Russian knowledge with interactive quizzes covering the alphabet, phrases, numbers, and vocabulary. Free Russian language practice for beginners.',
+  },
+};
+
+const PATH_TO_SECTION: Record<string, string> = {
+  '/': 'alphabet',
+  '/alphabet': 'alphabet',
+  '/phrases': 'phrases',
+  '/numbers': 'numbers',
+  '/words': 'words',
+  '/quiz': 'quiz',
+};
+
+const SECTION_TO_PATH: Record<string, string> = {
+  alphabet: '/alphabet',
+  phrases: '/phrases',
+  numbers: '/numbers',
+  words: '/words',
+  quiz: '/quiz',
+};
+
+const getSectionFromPath = (): string => {
+  const path = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  return PATH_TO_SECTION[path] || 'alphabet';
+};
+
+const updateMeta = (section: string) => {
+  const meta = SECTION_META[section] || SECTION_META.alphabet;
+  document.title = meta.title;
+  const descTag = document.querySelector('meta[name="description"]');
+  if (descTag) descTag.setAttribute('content', meta.description);
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', meta.title);
+  const ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc) ogDesc.setAttribute('content', meta.description);
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.setAttribute('href', `https://basicrussian.org${SECTION_TO_PATH[section] || '/alphabet'}`);
+};
+
 const App: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<string>('alphabet');
+  const [activeSection, setActiveSection] = useState<string>(getSectionFromPath);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [speechInitialized, setSpeechInitialized] = useState(false);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const onPopState = () => {
+      const section = getSectionFromPath();
+      setActiveSection(section);
+      updateMeta(section);
+    };
+    window.addEventListener('popstate', onPopState);
+    // Set initial meta
+    updateMeta(activeSection);
+    return () => window.removeEventListener('popstate', onPopState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -80,6 +153,13 @@ const App: React.FC = () => {
         console.warn('Error pausing audio:', e);
       }
     });
+    
+    // Update URL without full page reload
+    const newPath = SECTION_TO_PATH[section] || '/alphabet';
+    if (window.location.pathname !== newPath) {
+      window.history.pushState({ section }, '', newPath);
+    }
+    updateMeta(section);
     
     setActiveSection(section);
     closeMenu();
