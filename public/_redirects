@@ -1,2 +1,1 @@
-/sitemap.xml /sitemap.xml 200
-/* /index.html 200
+# Redirects are managed in netlify.toml
