@@ -5,6 +5,7 @@ An interactive, responsive Russian language learning application featuring nativ
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-basicrussian.org-22c55e?style=for-the-badge&logo=google-chrome&logoColor=white)](https://basicrussian.org)
 [![React](https://img.shields.io/badge/React%2018-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22%20LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Vite](https://img.shields.io/badge/Vite%206-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![PWA](https://img.shields.io/badge/PWA-Ready-f59e0b?style=for-the-badge&logo=pwa&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![Netlify](https://img.shields.io/badge/Hosted%20on-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://basicrussian.org)
@@ -67,8 +68,8 @@ We are currently engineering a serverless backend layer to support user accounts
 ## 💻 Local Development
 
 ### Prerequisites
-* **Node.js** (v18.0.0 or later)
-* **npm** (v9.0.0 or later)
+* **Node.js**: `v22.x` (Active LTS) or later
+* **npm**: `v10.x` / `v11.x` or later
 
 ### Setup & Running
 ```bash
