@@ -1,115 +1,104 @@
 # 🇷🇺 Russian Learning App
 
-An interactive web application designed to help users learn the Russian language through various engaging learning modules.
+An interactive, responsive Russian language learning application featuring native audio pronunciation, adaptive quizzes, an on-screen Cyrillic keyboard, and Progressive Web App (PWA) support.
 
-![Russian Learning App](https://img.shields.io/badge/Language-Russian-blue)
-![React](https://img.shields.io/badge/Framework-React-61DAFB)
-![TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6)
-
-## ✨ Features
-
-- **Russian Alphabet** - Learn the Cyrillic alphabet with pronunciation guides and examples
-- **Basic Phrases** - Common Russian phrases with English translations and pronunciation
-- **Numbers** - Learn to count in Russian
-- **Common Words** - Essential vocabulary for beginners
-- **Interactive Quiz** - Test your knowledge with a dynamic quiz that adapts to your learning
-
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (v14.0.0 or later)
-- npm (v6.0.0 or later)
-
-### Installation
-
-1. Clone the repository
-   ```bash
-   git clone https://github.com/yourusername/russian-learning-app.git
-   cd russian-learning-app
-   ```
-
-2. Install dependencies
-   ```bash
-   npm install
-   ```
-
-3. Start the development server
-   ```bash
-   npm start
-   ```
-
-4. Open your browser and navigate to [http://localhost:3000](http://localhost:3000)
-
-## 🛠️ Built With
-
-- [React](https://reactjs.org/) - UI library
-- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
-- [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS) - Styling with modern CSS features
-
-## 📱 Mobile Responsive
-
-The app is fully responsive and works on all device sizes:
-- Desktop computers
-- Tablets
-- Mobile phones
-
-## 📖 How to Use
-
-1. **Explore the Alphabet**: Learn each Cyrillic letter with its pronunciation
-2. **Study Basic Phrases**: Memorize essential Russian phrases for travelers
-3. **Learn Numbers**: Practice counting in Russian
-4. **Build Vocabulary**: Expand your Russian vocabulary with common words
-5. **Test Your Knowledge**: Take the interactive quiz to measure your progress
-
-## 📝 Code Structure
-
-```
-src/
-├── components/       # React components
-│   ├── Alphabet.tsx  # Alphabet learning component
-│   ├── Navigation.tsx# Navigation bar component
-│   ├── Phrases.tsx   # Phrases learning component
-│   └── Quiz.tsx      # Interactive quiz component
-├── data/
-│   └── russianData.ts# Data for Russian language content
-├── types/
-│   └── index.ts      # TypeScript type definitions
-├── App.tsx           # Main application component
-└── index.tsx         # Application entry point
-```
-
-## 🧪 Running Tests
-
-```bash
-npm test
-```
-
-## 📦 Building for Production
-
-```bash
-npm run build
-```
-
-This creates an optimized production build in the `build` folder that you can deploy to any static hosting service.
-
-## 🔮 Future Enhancements
-
-- Adding audio pronunciations
-- Expanding vocabulary sections
-- Progress tracking
-- User accounts to save progress
-- Advanced grammar lessons
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 👤 Author
-
-John Bendfeldt with Claude Sonnet 3.7
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-basicrussian.org-22c55e?style=for-the-badge&logo=google-chrome&logoColor=white)](https://basicrussian.org)
+[![React](https://img.shields.io/badge/React%2018-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite%206-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![PWA](https://img.shields.io/badge/PWA-Ready-f59e0b?style=for-the-badge&logo=pwa&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+[![Netlify](https://img.shields.io/badge/Hosted%20on-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://basicrussian.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 ---
 
-*Feel free to contribute to this project by submitting pull requests or reporting issues!*
+## 🌟 Overview
+
+**Russian Learning App** is built for English speakers to rapidly learn Cyrillic and foundational Russian phrases. Designed with modern web performance in mind, it provides instant audio feedback, an adaptive quiz engine, and offline learning capabilities.
+
+🚀 **Live Application**: [https://basicrussian.org](https://basicrussian.org)
+
+---
+
+## 🚀 Key Features
+
+* **🔊 Native Audio Pronunciation**: High-quality audio playback for alphabet letters, pronunciation examples, common vocabulary, and survival phrases.
+* **⌨️ Integrated Cyrillic Keyboard & Transliteration**: Allows users without a physical Russian keyboard to type in Russian directly, featuring phonetic auto-transliteration mapping.
+* **🎯 Adaptive Quiz Engine with Fuzzy Matching**:
+  * Employs Levenshtein-distance string matching to forgive minor typos while learning Cyrillic.
+  * Real-time answer validation, phonetic soft/hard sign checks, and dual Russian-to-English / English-to-Russian testing modes.
+  * Audio reinforcement on correct and incorrect responses.
+* **📱 Progressive Web App (PWA)**: Installable on iOS, Android, and Desktop with offline caching via Workbox and modern Service Workers.
+* **🎨 Responsive Design**: Fluid mobile-first interface optimized for touchscreen phones, tablets, and desktop displays.
+
+---
+
+## 🤖 Built with Google Antigravity & Gemini
+
+This project is actively developed and architected using **Google Antigravity** paired with **Google Gemini / Advanced Agentic AI**.
+
+* **Agentic Pair Programming**: Used Antigravity's multi-step autonomous workflows to modernize the build system to Vite 6, configure Vitest testing suites, and manage continuous deployment.
+* **Architectural Planning**: Leveraged Gemini for full-stack data modeling, designing normalized PostgreSQL schemas, and planning serverless Netlify Functions with OAuth 2.0 (Google & Microsoft Entra ID).
+* **Modern Developer Velocity**: Demonstrates cutting-edge AI-accelerated software engineering practices—accelerating iteration speed while maintaining strict code quality, type safety, and testing standards.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Frontend**: React 18, TypeScript, Modern CSS (CSS Variables, Flexbox, CSS Grid)
+* **Build Tool & Bundler**: Vite 6, `@vitejs/plugin-react`, `vite-plugin-pwa`
+* **Testing**: Vitest, React Testing Library, JSDOM
+* **Deployment & Hosting**: Netlify (Automated CI/CD from `master`, custom security headers, SSL, service worker caching rules)
+* **Audio & Assets**: Compressed audio files with custom automated asset generator scripts
+
+---
+
+## 🗺️ Roadmap & In-Progress Architecture
+
+We are currently engineering a serverless backend layer to support user accounts and progress synchronization:
+* **Database**: PostgreSQL (Serverless via Supabase/Neon) with Drizzle ORM.
+* **Enterprise & Consumer Authentication**: OAuth 2.0 / OIDC sign-in via **Google** and **Microsoft Entra ID (Azure AD)**.
+* **Cloud Sync**: Cross-device sync for quiz sessions, accuracy trends, and spaced-repetition mastery tracking per word.
+
+*Detailed design and SQL schemas are documented in [docs/BACKEND_PLAN.md](docs/BACKEND_PLAN.md).*
+
+---
+
+## 💻 Local Development
+
+### Prerequisites
+* **Node.js** (v18.0.0 or later)
+* **npm** (v9.0.0 or later)
+
+### Setup & Running
+```bash
+# 1. Clone the repository
+git clone https://github.com/JohnBendfeldt/russian-learning-app.git
+cd russian-learning-app
+
+# 2. Install dependencies
+npm install
+
+# 3. Start development server (runs with Vite HMR)
+npm start
+
+# 4. Run automated test suite
+npm test
+
+# 5. Production build & preview
+npm run build
+npm run preview
+```
+
+---
+
+## 👤 Author
+
+**John Bendfeldt**  
+* GitHub: [@JohnBendfeldt](https://github.com/JohnBendfeldt)  
+* Live App: [basicrussian.org](https://basicrussian.org)
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
