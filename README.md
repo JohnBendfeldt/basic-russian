@@ -97,7 +97,8 @@ npm run preview
 
 **John Bendfeldt**  
 * GitHub: [@JohnBendfeldt](https://github.com/JohnBendfeldt)  
-* Live App: [basicrussian.org](https://basicrussian.org)
+* Live App: [basicrussian.org](https://basicrussian.org)  
+* Contact: [dev@basicrussian.org](mailto:dev@basicrussian.org)
 
 ---
 
