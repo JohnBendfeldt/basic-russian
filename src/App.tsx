@@ -5,6 +5,9 @@ import Phrases from './components/Phrases';
 import Navigation from './components/Navigation';
 import Quiz from './components/Quiz';
 import BottomNavigation from './components/BottomNavigation';
+import UserMenu from './components/UserMenu';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 import russianData from './data/russianData';
 import { initVoices, cancelAllSpeech } from './utils/speech';
 
@@ -30,6 +33,14 @@ const SECTION_META: Record<string, { title: string; description: string }> = {
     title: 'Russian Quiz | Basic Russian',
     description: 'Test your Russian knowledge with interactive quizzes covering the alphabet, phrases, numbers, and vocabulary. Free Russian language practice for beginners.',
   },
+  privacy: {
+    title: 'Privacy Policy | Basic Russian',
+    description: 'Privacy Policy for Basic Russian (basicrussian.org). Learn how we handle your data, quiz progress, and account information with privacy and security.',
+  },
+  terms: {
+    title: 'Terms of Service | Basic Russian',
+    description: 'Terms of Service for Basic Russian (basicrussian.org). Free Russian language learning application terms and guidelines.',
+  },
 };
 
 const PATH_TO_SECTION: Record<string, string> = {
@@ -39,6 +50,8 @@ const PATH_TO_SECTION: Record<string, string> = {
   '/numbers': 'numbers',
   '/words': 'words',
   '/quiz': 'quiz',
+  '/privacy': 'privacy',
+  '/terms': 'terms',
 };
 
 const SECTION_TO_PATH: Record<string, string> = {
@@ -47,6 +60,8 @@ const SECTION_TO_PATH: Record<string, string> = {
   numbers: '/numbers',
   words: '/words',
   quiz: '/quiz',
+  privacy: '/privacy',
+  terms: '/terms',
 };
 
 const getSectionFromPath = (): string => {
@@ -79,6 +94,7 @@ const App: React.FC = () => {
       const section = getSectionFromPath();
       setActiveSection(section);
       updateMeta(section);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
     window.addEventListener('popstate', onPopState);
     // Set initial meta
@@ -163,6 +179,7 @@ const App: React.FC = () => {
     
     setActiveSection(section);
     closeMenu();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const renderActiveSection = () => {
@@ -208,6 +225,10 @@ const App: React.FC = () => {
           numbers: russianData.numbers,
           commonWords: russianData.commonWords
         }} />;
+      case 'privacy':
+        return <PrivacyPolicy onNavigate={handleSectionChange} />;
+      case 'terms':
+        return <TermsOfService onNavigate={handleSectionChange} />;
       default:
         return <Alphabet data={russianData.alphabet} />;
     }
@@ -217,7 +238,7 @@ const App: React.FC = () => {
     <div className="app">
       <header>
         <div className="header-content">
-          <h1>
+          <h1 onClick={() => handleSectionChange('alphabet')} style={{ cursor: 'pointer' }} title="Return to alphabet lessons">
             <svg className="russia-flag" viewBox="0 0 45 30" xmlns="http://www.w3.org/2000/svg" aria-label="Russian flag" role="img">
               <rect width="45" height="10" y="0"  fill="#FFFFFF"/>
               <rect width="45" height="10" y="10" fill="#0039A6"/>
@@ -225,11 +246,14 @@ const App: React.FC = () => {
             </svg>
             Basic Russian
           </h1>
-          {installPrompt && (
-            <button onClick={handleInstallClick} className="install-button">
-              Install App
-            </button>
-          )}
+          <div className="header-actions">
+            {installPrompt && (
+              <button onClick={handleInstallClick} className="install-button">
+                Install App
+              </button>
+            )}
+            <UserMenu />
+          </div>
         </div>
         <Navigation 
           activeSection={activeSection} 
@@ -249,7 +273,30 @@ const App: React.FC = () => {
       />
       
       <footer>
-        <p>© {new Date().getFullYear()} Basic Russian Learning</p>
+        <p>
+          © {new Date().getFullYear()} Basic Russian Learning ·{' '}
+          <a
+            href="/privacy"
+            className="footer-link"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSectionChange('privacy');
+            }}
+          >
+            Privacy Policy
+          </a>{' '}
+          ·{' '}
+          <a
+            href="/terms"
+            className="footer-link"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSectionChange('terms');
+            }}
+          >
+            Terms of Service
+          </a>
+        </p>
       </footer>
     </div>
   );
