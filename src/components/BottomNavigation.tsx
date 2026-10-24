@@ -28,23 +28,8 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
       }, 200);
     }
     
-    // Change the section first
+    // Switch to the selected section immediately without delayed scroll jerk
     setActiveSection(id);
-    
-    // Universal scrolling behavior: scroll so header is out of view
-    setTimeout(() => {
-      // Get relevant elements for positioning
-      const header = document.querySelector('header');
-      const sectionElement = document.querySelector('.section');
-      
-      if (header && sectionElement) {
-        // Scroll directly to the section, bypassing the header
-        window.scrollTo({
-          top: sectionElement.getBoundingClientRect().top + window.pageYOffset - 10, // Small offset for visual comfort
-          behavior: 'smooth'
-        });
-      }
-    }, 50);
   };
 
   return (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaArrowLeft } from 'react-icons/fa';
 
 interface TermsOfServiceProps {
   onNavigate: (section: string) => void;
@@ -14,7 +15,8 @@ const TermsOfService: React.FC<TermsOfServiceProps> = ({ onNavigate }) => {
             onClick={() => onNavigate('alphabet')}
             aria-label="Back to practice lessons"
           >
-            ← Back to Practice
+            <FaArrowLeft className="back-btn-icon" aria-hidden="true" />
+            <span>Back to Practice</span>
           </button>
         </div>
 

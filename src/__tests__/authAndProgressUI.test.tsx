@@ -68,6 +68,31 @@ describe('UserMenu Component', () => {
       expect(screen.getByText('Your Learning Progress')).toBeInTheDocument();
     });
   });
+
+  it('renders dropdown with Privacy Policy, Terms, and Stats when user is logged in', async () => {
+    const mockUser = {
+      email: 'test@example.com',
+      user_metadata: { full_name: 'Test User' },
+      app_metadata: { provider: 'google' }
+    };
+
+    const onNavigate = vi.fn();
+    render(<UserMenu onNavigate={onNavigate} initialUser={mockUser} />);
+
+    expect(screen.getByRole('button', { name: /user menu for Test User/i })).toBeInTheDocument();
+
+    // Click trigger to open menu
+    fireEvent.click(screen.getByRole('button', { name: /user menu for Test User/i }));
+
+    // Verify items
+    expect(screen.getByText('My Progress & Stats')).toBeInTheDocument();
+    expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
+    expect(screen.getByText('Terms of Service')).toBeInTheDocument();
+
+    // Click Privacy Policy
+    fireEvent.click(screen.getByText('Privacy Policy'));
+    expect(onNavigate).toHaveBeenCalledWith('privacy');
+  });
 });
 
 describe('ProgressModal Component', () => {

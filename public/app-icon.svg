@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="50%" style="stop-color:#1e40af"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fde047"/>
+      <stop offset="60%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0f172a" flood-opacity="0.38"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle App Icon Base -->
+  <rect x="16" y="16" width="480" height="480" rx="110" fill="url(#iconBg)"/>
+
+  <!-- Subtle Inner Border -->
+  <rect x="20" y="20" width="472" height="472" rx="106" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="6"/>
+
+  <!-- Russian Flag Accent Ribbon (Tricolor Mini Badge in Top-Left) -->
+  <g transform="translate(64, 48)">
+    <rect x="0" y="0" width="44" height="6" rx="3" fill="#ffffff" opacity="0.95"/>
+    <rect x="0" y="7" width="44" height="6" rx="3" fill="#3b82f6"/>
+    <rect x="0" y="14" width="44" height="6" rx="3" fill="#ef4444"/>
+  </g>
+
+  <!-- Center Artwork: Academic Graduation Cap -->
+  <g filter="url(#shadow)" transform="translate(0, 10)">
+    <!-- Graduation Cap Top Diamond -->
+    <path d="M256 120 L76 200 L256 280 L436 200 Z" fill="url(#goldGrad)"/>
+
+    <!-- Graduation Cap Under-Brim -->
+    <path d="M150 244 V330 C150 365 195 395 256 395 C317 395 362 365 362 330 V244 L256 292 Z" fill="#ffffff" fill-opacity="0.95"/>
+
+    <!-- Graduation Cap Inner Skull Shadow -->
+    <ellipse cx="256" cy="275" rx="80" ry="24" fill="#1e3a8a" fill-opacity="0.22"/>
+
+    <!-- Tassel String -->
+    <path d="M436 205 V325" stroke="url(#goldGrad)" stroke-width="12" stroke-linecap="round"/>
+    <!-- Tassel Bulb -->
+    <circle cx="436" cy="336" r="14" fill="url(#goldGrad)"/>
+    <path d="M430 342 L424 372 M436 342 L436 376 M442 342 L448 372" stroke="url(#goldGrad)" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Bold 'R' Monogram on Cap Body -->
+    <text x="256" y="360" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="78" font-weight="900" fill="#1d4ed8" text-anchor="middle" letter-spacing="-1">R</text>
+  </g>
+
+  <!-- Stars / Academic Accents -->
+  <circle cx="415" cy="115" r="8" fill="#fde047" opacity="0.8"/>
+  <circle cx="100" cy="115" r="8" fill="#fde047" opacity="0.8"/>
+</svg>
