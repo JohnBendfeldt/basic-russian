@@ -94,7 +94,7 @@ const App: React.FC = () => {
       const section = getSectionFromPath();
       setActiveSection(section);
       updateMeta(section);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo(0, 0);
     };
     window.addEventListener('popstate', onPopState);
     // Set initial meta
@@ -179,7 +179,7 @@ const App: React.FC = () => {
     
     setActiveSection(section);
     closeMenu();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
   const renderActiveSection = () => {
@@ -252,7 +252,7 @@ const App: React.FC = () => {
                 Install App
               </button>
             )}
-            <UserMenu />
+            <UserMenu onNavigate={handleSectionChange} />
           </div>
         </div>
         <Navigation 

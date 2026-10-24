@@ -143,6 +143,7 @@ describe('Quiz Component - Session Goals & Mastery Filtering', () => {
   });
 
   it('accepts conversational synonyms and contractions for English phrases (e.g., wheres the restroom for where is the bathroom)', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.2); // Selects 'What does this mean in English?'
     render(<Quiz data={{
       basicPhrases: [
         { english: 'Where is the bathroom', russian: 'Где туалет', pronunciation: 'gdye too-ah-lyet' }
@@ -150,9 +151,87 @@ describe('Quiz Component - Session Goals & Mastery Filtering', () => {
     }} />);
 
     // Wait for question to render
-    const input = await screen.findByPlaceholderText(/Your answer here/i);
+    const input = await screen.findByRole('textbox');
     // User types contraction + synonym "wheres the restroom"
     fireEvent.change(input, { target: { value: 'wheres the restroom' } });
+    fireEvent.click(screen.getByRole('button', { name: /Check Answer/i }));
+
+    expect(screen.getByText(/Correct!/i)).toBeInTheDocument();
+  });
+
+  it('renders the fluid bottom feedback drawer on answer check', async () => {
+    render(<Quiz data={{
+      alphabet: [{ character: 'А', pronunciation: 'ah' }]
+    }} />);
+
+    const input = await screen.findByPlaceholderText(/Your answer here/i);
+    fireEvent.change(input, { target: { value: 'wrong' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Check Answer' }));
+
+    // Bottom feedback sheet should be present with Not quite
+    const drawer = document.querySelector('.quiz-feedback-drawer');
+    expect(drawer).toBeInTheDocument();
+    expect(drawer).toHaveClass('feedback-incorrect');
+    expect(screen.getByText('Not quite')).toBeInTheDocument();
+    expect(screen.getByText(/The correct answer is:/i)).toBeInTheDocument();
+  });
+
+  it('accepts numeric equivalents including formatted digits like 1,000 for one thousand (тысяча)', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.2); // Selects 'What does this mean in English?'
+    render(<Quiz data={{
+      numbers: [
+        { english: 'One thousand', russian: 'тысяча', pronunciation: 'tih-see-cha' }
+      ]
+    }} />);
+
+    const input = await screen.findByRole('textbox');
+    fireEvent.change(input, { target: { value: '1,000' } });
+    fireEvent.click(screen.getByRole('button', { name: /Check Answer/i }));
+
+    expect(screen.getByText(/Correct!/i)).toBeInTheDocument();
+  });
+
+  it('does NOT accept digits like 1 for alphabet pronunciation questions like M', async () => {
+    render(<Quiz data={{
+      alphabet: [
+        { character: 'М', pronunciation: 'm', example: 'as in man' }
+      ]
+    }} />);
+
+    const input = await screen.findByRole('textbox');
+    fireEvent.change(input, { target: { value: '1' } });
+    fireEvent.click(screen.getByRole('button', { name: /Check Answer/i }));
+
+    expect(screen.getByText('Not quite')).toBeInTheDocument();
+    expect(screen.queryByText(/Correct!/i)).not.toBeInTheDocument();
+  });
+
+  it('accepts common 1-letter typos on short words like чаи for чай (tea) with spelling guidance', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.99); // Selects index 1: English-to-Russian ("HOW DO YOU SAY THIS IN RUSSIAN? tea")
+    render(<Quiz data={{
+      commonWords: [
+        { english: 'tea', russian: 'чай', pronunciation: 'chay' }
+      ]
+    }} />);
+
+    const input = await screen.findByRole('textbox');
+    fireEvent.change(input, { target: { value: 'чаи' } });
+    fireEvent.click(screen.getByRole('button', { name: /Check Answer/i }));
+
+    expect(screen.getByText(/Correct!/i)).toBeInTheDocument();
+    expect(screen.getByText(/Correct spelling:/i)).toBeInTheDocument();
+  });
+
+  it('accepts interchangeable Russian letters ё and е without penalty', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    render(<Quiz data={{
+      commonWords: [
+        { english: 'hedgehog', russian: 'ёж', pronunciation: 'yozh' }
+      ]
+    }} />);
+
+    const input = await screen.findByRole('textbox');
+    fireEvent.change(input, { target: { value: 'еж' } });
     fireEvent.click(screen.getByRole('button', { name: /Check Answer/i }));
 
     expect(screen.getByText(/Correct!/i)).toBeInTheDocument();
