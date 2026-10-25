@@ -239,10 +239,33 @@ const App: React.FC = () => {
       <header>
         <div className="header-content">
           <h1 onClick={() => handleSectionChange('alphabet')} style={{ cursor: 'pointer' }} title="Return to alphabet lessons">
-            <svg className="russia-flag" viewBox="0 0 45 30" xmlns="http://www.w3.org/2000/svg" aria-label="Russian flag" role="img">
-              <rect width="45" height="10" y="0"  fill="#FFFFFF"/>
-              <rect width="45" height="10" y="10" fill="#0039A6"/>
-              <rect width="45" height="10" y="20" fill="#D52B1E"/>
+            <svg className="app-emblem russia-flag" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Basic Russian logo" role="img">
+              <defs>
+                <linearGradient id="rusEmblemBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#2563eb"/>
+                  <stop offset="50%" stopColor="#1e40af"/>
+                  <stop offset="100%" stopColor="#0f172a"/>
+                </linearGradient>
+                <linearGradient id="rusGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fde047"/>
+                  <stop offset="60%" stopColor="#f59e0b"/>
+                  <stop offset="100%" stopColor="#d97706"/>
+                </linearGradient>
+              </defs>
+              <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#rusEmblemBg)" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5"/>
+              {/* Russian Flag Accent in Top Corner */}
+              <g transform="translate(6, 6)">
+                <rect x="0" y="0" width="10" height="2" rx="1" fill="#ffffff" opacity="0.95"/>
+                <rect x="0" y="2.5" width="10" height="2" rx="1" fill="#3b82f6"/>
+                <rect x="0" y="5" width="10" height="2" rx="1" fill="#ef4444"/>
+              </g>
+              {/* Graduation Cap School Crest from OG image */}
+              <g transform="translate(0, 3)">
+                <path d="M24 13L8 20.5L24 28L40 20.5L24 13Z" fill="url(#rusGoldGrad)"/>
+                <path d="M14 24.5V32C14 35.5 18 38 24 38C30 38 34 35.5 34 32V24.5" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+                <path d="M40 21V30.5" stroke="url(#rusGoldGrad)" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="40" cy="31.5" r="1.5" fill="url(#rusGoldGrad)"/>
+              </g>
             </svg>
             Basic Russian
           </h1>
