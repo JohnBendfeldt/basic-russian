@@ -1319,11 +1319,6 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           </div>
         )}
 
-        {!needsRussianKeyboard && (
-          <div className="answer-tips">
-            <small>Tip: Punctuation is ignored when checking answers.</small>
-          </div>
-        )}
 
         {needsRussianKeyboard && showKeyboard && !showNext && (
           <div className="virtual-keyboard-container">
