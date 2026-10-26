@@ -74,8 +74,8 @@ We are currently engineering a serverless backend layer to support user accounts
 ### Setup & Running
 ```bash
 # 1. Clone the repository
-git clone https://github.com/JohnBendfeldt/russian-learning-app.git
-cd russian-learning-app
+git clone https://github.com/JohnBendfeldt/basic-russian.git
+cd basic-russian
 
 # 2. Install dependencies
 npm install
