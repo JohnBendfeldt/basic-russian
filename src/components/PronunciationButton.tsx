@@ -9,7 +9,7 @@ interface PronunciationButtonProps {
   className?: string;
   useLocalAudio?: boolean;
   isAlphabet?: boolean;
-  audioCategory?: 'alphabet' | 'words' | 'phrases' | 'numbers' | 'examples' | 'basicPhrases' | 'commonWords';
+  audioCategory?: 'alphabet' | 'words' | 'phrases' | 'numbers' | 'examples' | 'basicPhrases' | 'commonWords' | 'time';
 }
 
 const PronunciationButton: React.FC<PronunciationButtonProps> = ({ 
@@ -133,8 +133,9 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     if (category === 'basicPhrases') category = 'phrases';
     if (category === 'commonWords') category = 'words';
     
-    // Format filename - replace spaces with underscores
-    const fileName = normalizedText.replace(/\s+/g, '_');
+    // Format filename - strip punctuation and replace spaces with underscores
+    const cleanText = normalizedText.replace(/[?.,!]/g, '').trim();
+    const fileName = cleanText.replace(/\s+/g, '_');
     
     return `/audio/${category}/${fileName}.mp3`;
   };

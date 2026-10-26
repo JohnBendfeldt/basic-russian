@@ -14,7 +14,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
     { id: 'alphabet', label: 'Alphabet', icon: <FaFont /> },
     { id: 'phrases', label: 'Phrases', icon: <FaComment /> },
     { id: 'words', label: 'Words', icon: <FaListUl /> },
-    { id: 'numbers', label: 'Numbers', icon: <FaCalculator /> },
+    { id: 'numbers', label: 'Numbers & Time', icon: <FaCalculator /> },
     { id: 'quiz', label: 'Quiz', icon: <FaQuestionCircle /> }
   ];
 
@@ -37,7 +37,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
       {navItems.map(item => (
         <button
           key={item.id}
-          className={`bottom-nav-item ${activeSection === item.id ? 'active' : ''}`}
+          className={`bottom-nav-item ${(activeSection === item.id || (item.id === 'numbers' && activeSection === 'time')) ? 'active' : ''}`}
           onClick={() => handleNavClick(item.id)}
           aria-label={`Switch to ${item.label} section`}
           data-section={item.id}

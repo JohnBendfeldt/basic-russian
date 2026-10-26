@@ -3733,3 +3733,174 @@ html {
   }
 }
 
+/* Numbers and Time Section Switcher & Grammar Guide */
+.numbers-and-time-section {
+  width: 100%;
+}
+
+.section-tab-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+}
+
+.section-tab-bar {
+  display: inline-flex;
+  background: rgba(30, 58, 138, 0.08);
+  padding: 4px;
+  border-radius: 9999px;
+  gap: 6px;
+  border: 1px solid rgba(30, 58, 138, 0.12);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.section-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-family: var(--font-heading, inherit);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.section-tab-btn:hover {
+  color: #1e3a8a;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.section-tab-btn.active {
+  background: #ffffff;
+  color: #1e3a8a;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn-icon {
+  font-size: 1rem;
+}
+
+/* Time Grammar Guide Card */
+.time-grammar-guide {
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 0 auto 2rem auto;
+  max-width: 960px;
+  box-shadow: 0 4px 16px rgba(30, 58, 138, 0.05);
+}
+
+.guide-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  color: #1e3a8a;
+}
+
+.guide-icon {
+  font-size: 1.35rem;
+  color: #eab308;
+}
+
+.guide-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.guide-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.15rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.guide-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.guide-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.guide-card p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0 0 0.65rem 0;
+}
+
+.guide-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #334155;
+}
+
+.guide-card li {
+  line-height: 1.4;
+}
+
+.guide-card em {
+  color: #0039A6;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.guide-footer-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+@media (max-width: 640px) {
+  .section-tab-btn {
+    padding: 0.55rem 1rem;
+    font-size: 0.88rem;
+  }
+  
+  .time-grammar-guide {
+    padding: 1.15rem;
+  }
+}
+
+

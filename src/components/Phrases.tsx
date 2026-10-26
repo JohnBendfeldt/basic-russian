@@ -10,7 +10,7 @@ interface PhraseCardProps {
   isRevealed: boolean;
   onToggleReveal: () => void;
   animationKey: number; // Add a key to trigger animation only on the changed card
-  contentType?: 'phrases' | 'words' | 'numbers'; // Add content type prop
+  contentType?: 'phrases' | 'words' | 'numbers' | 'time'; // Add content type prop
 }
 
 const PhraseCard: React.FC<PhraseCardProps> = ({ 
@@ -31,7 +31,7 @@ const PhraseCard: React.FC<PhraseCardProps> = ({
         <h3 className="russian">{russian}</h3>
         <PronunciationButton 
           text={russian} 
-          label={`Pronounce ${contentType === 'words' ? 'word' : contentType === 'numbers' ? 'number' : 'phrase'} ${russian}`}
+          label={`Pronounce ${contentType === 'words' ? 'word' : contentType === 'numbers' ? 'number' : contentType === 'time' ? 'time expression' : 'phrase'} ${russian}`}
           className="phrase-pronunciation"
           audioCategory={contentType} // Use explicit content type for audio category
           useLocalAudio={true}
@@ -84,7 +84,7 @@ const PhraseCard: React.FC<PhraseCardProps> = ({
 interface PhrasesProps {
   data: PhraseItem[];
   title: string;
-  contentType?: 'phrases' | 'words' | 'numbers'; // Add content type prop
+  contentType?: 'phrases' | 'words' | 'numbers' | 'time'; // Add content type prop
 }
 
 const Phrases: React.FC<PhrasesProps> = ({ 

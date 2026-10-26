@@ -17,7 +17,7 @@ const Navigation: React.FC<NavigationProps> = ({
     { id: 'alphabet', label: 'Alphabet' },
     { id: 'phrases', label: 'Basic Phrases' },
     { id: 'words', label: 'Common Words' },
-    { id: 'numbers', label: 'Numbers' },
+    { id: 'numbers', label: 'Numbers & Time' },
     { id: 'quiz', label: 'Quiz' }
   ];
 
@@ -27,7 +27,7 @@ const Navigation: React.FC<NavigationProps> = ({
         {navItems.map(item => (
           <li
             key={item.id}
-            className={activeSection === item.id ? 'active' : ''}
+            className={(activeSection === item.id || (item.id === 'numbers' && activeSection === 'time')) ? 'active' : ''}
             onClick={() => setActiveSection(item.id)}
           >
             {item.label}

@@ -3,6 +3,7 @@ import './App.css';
 import Alphabet from './components/Alphabet';
 import Phrases from './components/Phrases';
 import Navigation from './components/Navigation';
+import NumbersAndTime from './components/NumbersAndTime';
 import Quiz from './components/Quiz';
 import BottomNavigation from './components/BottomNavigation';
 import UserMenu from './components/UserMenu';
@@ -22,8 +23,12 @@ const SECTION_META: Record<string, { title: string; description: string }> = {
     description: 'Learn essential Russian phrases for beginners with audio pronunciation. Greetings, introductions, common expressions, and everyday Russian phrases with English translations.',
   },
   numbers: {
-    title: 'Russian Numbers | Basic Russian',
-    description: 'Learn Russian numbers with pronunciation and audio. Count in Russian from 1 to 100 and beyond. Free interactive number lessons for beginners.',
+    title: 'Russian Numbers & Time | Basic Russian',
+    description: 'Learn Russian numbers and telling time with authentic native audio. Count in Russian from 1 to 1000 and tell time accurately.',
+  },
+  time: {
+    title: 'Russian Time & Telling Time | Basic Russian',
+    description: 'Learn how to tell time in Russian with authentic native audio pronunciation. Hours, minutes, and practical time expressions for beginners.',
   },
   words: {
     title: 'Common Russian Words | Basic Russian',
@@ -48,6 +53,7 @@ const PATH_TO_SECTION: Record<string, string> = {
   '/alphabet': 'alphabet',
   '/phrases': 'phrases',
   '/numbers': 'numbers',
+  '/time': 'time',
   '/words': 'words',
   '/quiz': 'quiz',
   '/privacy': 'privacy',
@@ -58,6 +64,7 @@ const SECTION_TO_PATH: Record<string, string> = {
   alphabet: '/alphabet',
   phrases: '/phrases',
   numbers: '/numbers',
+  time: '/time',
   words: '/words',
   quiz: '/quiz',
   privacy: '/privacy',
@@ -203,10 +210,12 @@ const App: React.FC = () => {
           contentType="phrases"
         />;
       case 'numbers':
-        return <Phrases 
-          data={russianData.numbers} 
-          title="Numbers" 
-          contentType="numbers"
+      case 'time':
+        return <NumbersAndTime 
+          numbersData={russianData.numbers} 
+          timeData={russianData.time}
+          activeTab={activeSection === 'time' ? 'time' : 'numbers'}
+          onTabChange={(tab) => handleSectionChange(tab)}
         />;
       case 'words':
         return <Phrases 

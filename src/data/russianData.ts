@@ -691,12 +691,194 @@ const commonWords: PhraseItem[] = [
   }
 ];
 
+// Time expressions and telling time
+const time: PhraseItem[] = [
+  // Asking the time & basics
+  {
+    russian: 'Который час?',
+    english: 'What time is it?',
+    pronunciation: 'kah-toh-riy chas'
+  },
+  {
+    russian: 'Сколько сейчас времени?',
+    english: 'What time is it now?',
+    pronunciation: 'skohl-kah see-chas vrye-mee-nee'
+  },
+  {
+    russian: 'Во сколько?',
+    english: 'At what time?',
+    pronunciation: 'vah skohl-kah'
+  },
+  {
+    russian: 'время',
+    english: 'time',
+    pronunciation: 'vrye-mya'
+  },
+  {
+    russian: 'сейчас',
+    english: 'now',
+    pronunciation: 'see-chas'
+  },
+  {
+    russian: 'час',
+    english: 'hour',
+    pronunciation: 'chas'
+  },
+  {
+    russian: 'минута',
+    english: 'minute',
+    pronunciation: 'mee-noo-ta'
+  },
+  {
+    russian: 'секунда',
+    english: 'second',
+    pronunciation: 'see-koon-da'
+  },
+
+  // Hours (Genitive agreement: час, часа, часов)
+  {
+    russian: 'Один час',
+    english: 'One o\'clock',
+    pronunciation: 'ah-deen chas'
+  },
+  {
+    russian: 'Два часа',
+    english: 'Two o\'clock',
+    pronunciation: 'dva cha-sah'
+  },
+  {
+    russian: 'Три часа',
+    english: 'Three o\'clock',
+    pronunciation: 'tree cha-sah'
+  },
+  {
+    russian: 'Четыре часа',
+    english: 'Four o\'clock',
+    pronunciation: 'chee-ty-rye cha-sah'
+  },
+  {
+    russian: 'Пять часов',
+    english: 'Five o\'clock',
+    pronunciation: 'pyat\' cha-sohf'
+  },
+  {
+    russian: 'Шесть часов',
+    english: 'Six o\'clock',
+    pronunciation: 'shest\' cha-sohf'
+  },
+  {
+    russian: 'Семь часов',
+    english: 'Seven o\'clock',
+    pronunciation: 'syem\' cha-sohf'
+  },
+  {
+    russian: 'Восемь часов',
+    english: 'Eight o\'clock',
+    pronunciation: 'voh-seem\' cha-sohf'
+  },
+  {
+    russian: 'Девять часов',
+    english: 'Nine o\'clock',
+    pronunciation: 'dyeh-vyat\' cha-sohf'
+  },
+  {
+    russian: 'Десять часов',
+    english: 'Ten o\'clock',
+    pronunciation: 'dyeh-syat\' cha-sohf'
+  },
+  {
+    russian: 'Одиннадцать часов',
+    english: 'Eleven o\'clock',
+    pronunciation: 'ah-deen-nad-tsat\' cha-sohf'
+  },
+  {
+    russian: 'Двенадцать часов',
+    english: 'Twelve o\'clock',
+    pronunciation: 'dvye-nad-tsat\' cha-sohf'
+  },
+
+  // Times of Day
+  {
+    russian: 'утра',
+    english: 'in the morning (a.m.)',
+    pronunciation: 'oot-rah'
+  },
+  {
+    russian: 'дня',
+    english: 'in the afternoon (p.m.)',
+    pronunciation: 'dnya'
+  },
+  {
+    russian: 'вечера',
+    english: 'in the evening (p.m.)',
+    pronunciation: 'vye-chee-rah'
+  },
+  {
+    russian: 'ночи',
+    english: 'at night',
+    pronunciation: 'noh-chee'
+  },
+  {
+    russian: 'полдень',
+    english: 'noon / midday',
+    pronunciation: 'pohl-dyen\''
+  },
+  {
+    russian: 'полночь',
+    english: 'midnight',
+    pronunciation: 'pohl-nahch'
+  },
+
+  // Practical Expressions
+  {
+    russian: 'полчаса',
+    english: 'half an hour',
+    pronunciation: 'pohl-cha-sah'
+  },
+  {
+    russian: 'четверть часа',
+    english: 'quarter of an hour',
+    pronunciation: 'cheet-vyert\' cha-sah'
+  },
+  {
+    russian: 'Половина первого',
+    english: 'Half past twelve (12:30)',
+    pronunciation: 'pah-lah-vee-nah pyer-vah-vah'
+  },
+  {
+    russian: 'Без десяти два',
+    english: 'Ten to two (1:50)',
+    pronunciation: 'byez dye-see-tee dva'
+  },
+  {
+    russian: 'Ровно три часа',
+    english: 'Exactly three o\'clock',
+    pronunciation: 'rohv-nah tree cha-sah'
+  },
+  {
+    russian: 'вовремя',
+    english: 'on time',
+    pronunciation: 'voh-vrye-mya'
+  },
+  {
+    russian: 'рано',
+    english: 'early',
+    pronunciation: 'rah-nah'
+  },
+  {
+    russian: 'поздно',
+    english: 'late',
+    pronunciation: 'pohz-nah'
+  }
+];
+
 // Export all data
 const russianData = {
   alphabet,
   basicPhrases,
   numbers,
-  commonWords
+  commonWords,
+  time
 };
 
 export default russianData;
