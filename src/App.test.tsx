@@ -64,4 +64,32 @@ describe('App', () => {
       expect(screen.getByRole('heading', { name: /russian alphabet/i, level: 2 })).toBeInTheDocument();
     });
   });
+
+  test('renders Numbers & Time and switches tabs between numbers and time', async () => {
+    window.history.pushState({}, '', '/numbers');
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /russian numbers/i, level: 2 })).toBeInTheDocument();
+    });
+
+    const timeTabBtn = screen.getByRole('tab', { name: /telling time/i });
+    fireEvent.click(timeTabBtn);
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/time');
+      expect(screen.getByRole('heading', { name: /russian time grammar rules/i, level: 3 })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /telling time & time phrases/i, level: 2 })).toBeInTheDocument();
+    });
+  });
+
+  test('renders Telling Time section directly when loaded at /time', async () => {
+    window.history.pushState({}, '', '/time');
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /russian time grammar rules/i, level: 3 })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /telling time & time phrases/i, level: 2 })).toBeInTheDocument();
+    });
+  });
 });

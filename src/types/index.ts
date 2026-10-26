@@ -34,4 +34,5 @@ export interface AppData {
   basicPhrases: PhraseItem[];
   numbers: PhraseItem[];
   commonWords: PhraseItem[];
+  time?: PhraseItem[];
 }
