@@ -134,6 +134,31 @@ describe('ProgressModal Component', () => {
       expect(screen.getByText('hello')).toBeInTheDocument();
     });
   });
+
+  it('correctly displays Russian in bold and avoids pronouncing English when question prompt was English', async () => {
+    // Attempt an English-to-Russian question where prompt is English ("Nineteen") and answer is Russian ("девятнадцать")
+    await ProgressService.recordWordAttempt({
+      category: 'numbers',
+      wordId: 'numbers-Nineteen-to-ru',
+      prompt: 'Nineteen',
+      answer: 'девятнадцать',
+      isCorrect: false
+    });
+
+    render(<ProgressModal isOpen={true} onClose={vi.fn()} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Words & Phrases to Review')).toBeInTheDocument();
+    });
+
+    // The bold title (.russian-text) MUST be the Russian word "девятнадцать", NOT the English word "Nineteen"
+    const russianTitle = document.querySelector('.review-word-info .russian-text');
+    expect(russianTitle?.textContent).toBe('девятнадцать');
+
+    // The subtitle (.english-translation) MUST be the English translation "Nineteen"
+    const englishSub = document.querySelector('.review-word-info .english-translation');
+    expect(englishSub?.textContent).toBe('Nineteen');
+  });
 });
 
 describe('Supabase Client Configuration & Auth Functions', () => {

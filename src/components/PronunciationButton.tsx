@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaVolumeUp } from 'react-icons/fa';
 import { speak, initVoices } from '../utils/speech';
+import { containsCyrillic } from '../utils/transliteration';
 
 interface PronunciationButtonProps {
   text: string;
@@ -133,8 +134,12 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     if (category === 'basicPhrases') category = 'phrases';
     if (category === 'commonWords') category = 'words';
     
-    // Format filename - strip punctuation and replace spaces with underscores
-    const cleanText = normalizedText.replace(/[?.,!]/g, '').trim();
+    // Format filename - strip slashes, parenthesized notes, punctuation and replace spaces with underscores
+    const cleanText = normalizedText
+      .split('/')[0]
+      .replace(/\s*\([^)]*\)\s*/g, '')
+      .replace(/[?.,!]/g, '')
+      .trim();
     const fileName = cleanText.replace(/\s+/g, '_');
     
     return `/audio/${category}/${fileName}.mp3`;
@@ -142,6 +147,13 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
 
   const handleSpeak = () => {
     if (isPlaying) return;
+    
+    // Safety guard: PronunciationButton is designed for Russian pronunciation.
+    // Never pronounce English text even if inadvertently passed.
+    if (!text || !containsCyrillic(text)) {
+      console.warn('PronunciationButton: Skipped playing non-Russian text:', text);
+      return;
+    }
     
     // Reset fallback attempt tracker for new playback
     fallbackAttemptedRef.current = false;

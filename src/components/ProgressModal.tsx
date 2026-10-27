@@ -1,14 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes, FaTrophy, FaGraduationCap, FaRedo, FaCheckCircle, FaChartBar } from 'react-icons/fa';
 import { ProgressService } from '../services/progressService';
-import { UserStats } from '../types/progress';
+import { UserStats, WordProgress } from '../types/progress';
 import PronunciationButton from './PronunciationButton';
+import { containsCyrillic } from '../utils/transliteration';
 
 interface ProgressModalProps {
   isOpen: boolean;
   onClose: () => void;
   userEmail?: string | null;
 }
+
+const getWordReviewDetails = (item: WordProgress) => {
+  const isPromptRussian = containsCyrillic(item.prompt);
+  const isAnswerRussian = containsCyrillic(item.answer);
+
+  let russian = item.prompt;
+  let english = item.answer;
+
+  if (!isPromptRussian && isAnswerRussian) {
+    russian = item.answer;
+    english = item.prompt;
+  }
+
+  // Clean Russian for audio (strip slashes/alternatives)
+  const audioRussian = russian.includes('/') ? russian.split('/')[0].trim() : russian;
+
+  return {
+    russian,
+    audioRussian,
+    english
+  };
+};
 
 export const ProgressModal: React.FC<ProgressModalProps> = ({ isOpen, onClose, userEmail }) => {
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -113,24 +136,27 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({ isOpen, onClose, u
                 </p>
 
                 <div className="review-words-list">
-                  {stats.wordsToReview.map((item) => (
-                    <div key={item.wordId} className="review-word-card">
-                      <div className="review-word-info">
-                        <span className="russian-text">{item.prompt}</span>
-                        <span className="english-translation">{item.answer}</span>
-                      </div>
+                  {stats.wordsToReview.map((item) => {
+                    const { russian, audioRussian, english } = getWordReviewDetails(item);
+                    return (
+                      <div key={item.wordId} className="review-word-card">
+                        <div className="review-word-info">
+                          <span className="russian-text">{russian}</span>
+                          <span className="english-translation">{english}</span>
+                        </div>
 
-                      <div className="review-word-actions">
-                        <span className="accuracy-badge">
-                          {item.timesCorrect}✓ / {item.timesIncorrect}✗
-                        </span>
-                        <PronunciationButton
-                          text={item.prompt}
-                          audioCategory={item.category as any}
-                        />
+                        <div className="review-word-actions">
+                          <span className="accuracy-badge">
+                            {item.timesCorrect}✓ / {item.timesIncorrect}✗
+                          </span>
+                          <PronunciationButton
+                            text={audioRussian}
+                            audioCategory={item.category as any}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
