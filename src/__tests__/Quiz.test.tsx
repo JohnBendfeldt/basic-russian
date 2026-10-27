@@ -236,6 +236,93 @@ describe('Quiz Component - Session Goals & Mastery Filtering', () => {
 
     expect(screen.getByText(/Correct!/i)).toBeInTheDocument();
   });
+
+  it('renders category filter pills for all topics and switches active category', async () => {
+    render(<Quiz data={{
+      ...sampleData,
+      time: [
+        { english: 'Monday', russian: 'Понедельник', pronunciation: 'pah-nee-dyel-neek' }
+      ]
+    }} />);
+
+    // Check that all category filter tabs are rendered
+    expect(screen.getByRole('tab', { name: /All Topics/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Alphabet/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Phrases & Greetings/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Common Words/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Numbers/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Time & Days/i })).toBeInTheDocument();
+
+    // Default active is All Topics
+    expect(screen.getByRole('tab', { name: /All Topics/i })).toHaveClass('active');
+
+    // Click Time & Days category
+    const timeTab = screen.getByRole('tab', { name: /Time & Days/i });
+    fireEvent.click(timeTab);
+
+    expect(timeTab).toHaveClass('active');
+    expect(localStorage.getItem('russian_quiz_category')).toBe('time');
+
+    // Prompt should strictly come from the time dataset
+    const prompt = document.querySelector('.quiz-prompt');
+    const isMondayRu = prompt?.textContent?.includes('Понедельник');
+    const isMondayEn = prompt?.textContent?.includes('Monday');
+    expect(isMondayRu || isMondayEn).toBe(true);
+  });
+
+  it('records quiz session with the selected category when completed', async () => {
+    const recordQuizSpy = vi.spyOn(ProgressService, 'recordQuizSession').mockResolvedValue({
+      id: 'session_time_1',
+      userId: 'guest',
+      category: 'time',
+      score: 5,
+      totalQuestions: 5,
+      percentage: 100,
+      completedAt: new Date().toISOString()
+    });
+
+    render(<Quiz data={{
+      time: [
+        { english: 'Today', russian: 'Сегодня', pronunciation: 'see-voh-dnya' }
+      ]
+    }} />);
+
+    // Switch to Time & Days
+    const timeTab = screen.getByRole('tab', { name: /Time & Days/i });
+    fireEvent.click(timeTab);
+
+    // Set goal to 5
+    const fivePill = screen.getByRole('button', { name: '5 Qs' });
+    fireEvent.click(fivePill);
+
+    // Answer 5 questions
+    for (let i = 1; i <= 5; i++) {
+      const input = screen.getByRole('textbox');
+      // Prompt will be either Russian or English; both are accepted if we provide the right counterpart
+      const promptText = document.querySelector('.quiz-prompt-text')?.textContent || '';
+      const ans = promptText.includes('Сегодня') ? 'today' : 'сегодня';
+      fireEvent.change(input, { target: { value: ans } });
+      fireEvent.click(screen.getByRole('button', { name: 'Check Answer' }));
+
+      if (i < 5) {
+        const nextBtn = screen.getByRole('button', { name: new RegExp(`Next Question \\(${i + 1}/5\\)`, 'i') });
+        fireEvent.click(nextBtn);
+      } else {
+        const finishBtn = screen.getByRole('button', { name: /Complete Quiz & View Results/i });
+        fireEvent.click(finishBtn);
+      }
+    }
+
+    await waitFor(() => {
+      expect(screen.getByText('Quiz Session Complete!')).toBeInTheDocument();
+    });
+
+    expect(recordQuizSpy).toHaveBeenCalledWith({
+      category: 'time',
+      score: 5,
+      totalQuestions: 5
+    });
+  });
 });
 
 

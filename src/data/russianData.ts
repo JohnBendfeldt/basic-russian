@@ -340,6 +340,56 @@ const basicPhrases: PhraseItem[] = [
     russian: 'Я хочу пить',
     english: 'I want to drink',
     pronunciation: 'ya khah-choo peet'
+  },
+  {
+    russian: 'Доброе утро',
+    english: 'Good morning',
+    pronunciation: 'doh-bra-ye oo-tra'
+  },
+  {
+    russian: 'Добрый день',
+    english: 'Good afternoon',
+    pronunciation: 'doh-briy dyen\''
+  },
+  {
+    russian: 'Добрый вечер',
+    english: 'Good evening',
+    pronunciation: 'doh-briy vye-cheer'
+  },
+  {
+    russian: 'Спокойной ночи',
+    english: 'Good night',
+    pronunciation: 'spah-koy-nay noh-chee'
+  },
+  {
+    russian: 'Пока',
+    english: 'Bye (informal)',
+    pronunciation: 'pah-kah'
+  },
+  {
+    russian: 'Очень приятно',
+    english: 'Nice to meet you',
+    pronunciation: 'oh-cheen\' pree-yat-na'
+  },
+  {
+    russian: 'Не за что',
+    english: 'You\'re welcome / Not at all',
+    pronunciation: 'nye za shta'
+  },
+  {
+    russian: 'Вы говорите по-английски?',
+    english: 'Do you speak English?',
+    pronunciation: 'vy gah-vah-ree-tye pah ahn-gleey-skee'
+  },
+  {
+    russian: 'Я немного говорю по-русски',
+    english: 'I speak a little Russian',
+    pronunciation: 'ya nye-mnoh-gah gah-vah-ryoo pah roos-kee'
+  },
+  {
+    russian: 'Как это по-русски?',
+    english: 'How do you say this in Russian?',
+    pronunciation: 'kak eh-ta pah roos-kee'
   }
 ];
 
@@ -688,6 +738,109 @@ const commonWords: PhraseItem[] = [
     russian: 'виза',
     english: 'visa',
     pronunciation: 'vee-za'
+  },
+  // Question Words
+  {
+    russian: 'кто',
+    english: 'who',
+    pronunciation: 'ktoh'
+  },
+  {
+    russian: 'что',
+    english: 'what',
+    pronunciation: 'shtoh'
+  },
+  {
+    russian: 'где',
+    english: 'where',
+    pronunciation: 'gdye'
+  },
+  {
+    russian: 'когда',
+    english: 'when',
+    pronunciation: 'kahg-dah'
+  },
+  {
+    russian: 'почему',
+    english: 'why',
+    pronunciation: 'pah-chee-moo'
+  },
+  {
+    russian: 'как',
+    english: 'how',
+    pronunciation: 'kahk'
+  },
+  {
+    russian: 'сколько',
+    english: 'how much / how many',
+    pronunciation: 'skol\'-kah'
+  },
+  // Family
+  {
+    russian: 'семья',
+    english: 'family',
+    pronunciation: 'seem-ya'
+  },
+  {
+    russian: 'мама',
+    english: 'mother / mom',
+    pronunciation: 'mah-ma'
+  },
+  {
+    russian: 'папа',
+    english: 'father / dad',
+    pronunciation: 'pah-pa'
+  },
+  {
+    russian: 'сестра',
+    english: 'sister',
+    pronunciation: 'see-strah'
+  },
+  {
+    russian: 'брат',
+    english: 'brother',
+    pronunciation: 'braht'
+  },
+  {
+    russian: 'муж',
+    english: 'husband',
+    pronunciation: 'moozh'
+  },
+  {
+    russian: 'жена',
+    english: 'wife',
+    pronunciation: 'zhe-nah'
+  },
+  // Transportation
+  {
+    russian: 'метро',
+    english: 'subway / metro',
+    pronunciation: 'mee-troh'
+  },
+  {
+    russian: 'поезд',
+    english: 'train',
+    pronunciation: 'poh-yezd'
+  },
+  {
+    russian: 'такси',
+    english: 'taxi',
+    pronunciation: 'tahk-see'
+  },
+  {
+    russian: 'автобус',
+    english: 'bus',
+    pronunciation: 'ahf-toh-boos'
+  },
+  {
+    russian: 'машина',
+    english: 'car',
+    pronunciation: 'mah-shee-na'
+  },
+  {
+    russian: 'самолёт',
+    english: 'airplane',
+    pronunciation: 'sah-mah-lyot'
   }
 ];
 
@@ -869,6 +1022,67 @@ const time: PhraseItem[] = [
     russian: 'поздно',
     english: 'late',
     pronunciation: 'pohz-nah'
+  },
+  // Days of the Week & Calendar
+  {
+    russian: 'понедельник',
+    english: 'Monday',
+    pronunciation: 'pah-nee-dyel\'-neek'
+  },
+  {
+    russian: 'вторник',
+    english: 'Tuesday',
+    pronunciation: 'ftohr-neek'
+  },
+  {
+    russian: 'среда',
+    english: 'Wednesday',
+    pronunciation: 'srye-dah'
+  },
+  {
+    russian: 'четверг',
+    english: 'Thursday',
+    pronunciation: 'cheet-vyerk'
+  },
+  {
+    russian: 'пятница',
+    english: 'Friday',
+    pronunciation: 'pyat-nee-tsa'
+  },
+  {
+    russian: 'суббота',
+    english: 'Saturday',
+    pronunciation: 'soo-boh-ta'
+  },
+  {
+    russian: 'воскресенье',
+    english: 'Sunday',
+    pronunciation: 'vah-skrye-syen\'-ye'
+  },
+  {
+    russian: 'сегодня',
+    english: 'today',
+    pronunciation: 'see-voh-dnya'
+  },
+  {
+    russian: 'вчера',
+    english: 'yesterday',
+    pronunciation: 'fchee-rah'
+  },
+  {
+    russian: 'завтра',
+    english: 'tomorrow',
+    pronunciation: 'zahf-tra'
+  },
+  {
+    russian: 'день',
+    english: 'day',
+    pronunciation: 'dyen\''
+  },
+  {
+    russian: 'неделя',
+    english: 'week',
+    pronunciation: 'nee-dye-lya'
   }
 ];
 
