@@ -50,7 +50,7 @@
   status = 200
 
 # ==============================================================================
-# Global Security Headers (OWASP Recommended)
+# Global Security Headers & Default Document Cache Prevention
 # ==============================================================================
 [[headers]]
   for = "/*"
@@ -62,6 +62,7 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://login.microsoftonline.com https://accounts.google.com https://github.com; frame-src 'self' https://accounts.google.com https://login.microsoftonline.com https://github.com;"
+    Cache-Control = "no-cache, no-store, must-revalidate"
 
 # Sitemap must be served as XML
 [[headers]]
@@ -85,20 +86,41 @@
     Access-Control-Allow-Origin = "*"
     Cache-Control = "no-cache"
 
-# Service worker and HTML must never be HTTP-cached
-# Otherwise Android Chrome won't detect new deployments
+# Service worker, registration script, manifest, and HTML entry points must NEVER be cached
+# Otherwise iOS Chrome/Safari and Android Chrome will lock onto stale deployments
 [[headers]]
-  for = "/sw.js"
+  for = "/"
   [headers.values]
-    Cache-Control = "no-store, no-cache, must-revalidate"
+    Cache-Control = "no-cache, no-store, must-revalidate"
 
 [[headers]]
   for = "/index.html"
   [headers.values]
-    Cache-Control = "no-store, no-cache, must-revalidate"
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/registerSW.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
 
 # Hashed JS/CSS assets can be cached forever (Vite adds content hashes to filenames)
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Audio assets (can be cached with revalidation)
+[[headers]]
+  for = "/audio/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
