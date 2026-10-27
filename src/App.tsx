@@ -232,7 +232,8 @@ const App: React.FC = () => {
           })),
           basicPhrases: russianData.basicPhrases,
           numbers: russianData.numbers,
-          commonWords: russianData.commonWords
+          commonWords: russianData.commonWords,
+          time: russianData.time
         }} />;
       case 'privacy':
         return <PrivacyPolicy onNavigate={handleSectionChange} />;

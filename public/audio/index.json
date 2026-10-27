@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-26T23:57:19.950665Z",
+  "generated": "2026-10-27T00:16:32.444817Z",
   "voice": "ru-RU-SvetlanaNeural",
-  "count": 188,
+  "count": 230,
   "files": {
     "alphabet": [
       {
@@ -523,6 +523,66 @@
         "path": "/audio/phrases/я_хочу_пить.mp3",
         "size": 13104,
         "text": "Я хочу пить"
+      },
+      {
+        "filename": "доброе_утро.mp3",
+        "path": "/audio/phrases/доброе_утро.mp3",
+        "size": 13392,
+        "text": "Доброе утро"
+      },
+      {
+        "filename": "добрый_день.mp3",
+        "path": "/audio/phrases/добрый_день.mp3",
+        "size": 11664,
+        "text": "Добрый день"
+      },
+      {
+        "filename": "добрый_вечер.mp3",
+        "path": "/audio/phrases/добрый_вечер.mp3",
+        "size": 12672,
+        "text": "Добрый вечер"
+      },
+      {
+        "filename": "спокойной_ночи.mp3",
+        "path": "/audio/phrases/спокойной_ночи.mp3",
+        "size": 14256,
+        "text": "Спокойной ночи"
+      },
+      {
+        "filename": "пока.mp3",
+        "path": "/audio/phrases/пока.mp3",
+        "size": 11232,
+        "text": "Пока"
+      },
+      {
+        "filename": "очень_приятно.mp3",
+        "path": "/audio/phrases/очень_приятно.mp3",
+        "size": 13248,
+        "text": "Очень приятно"
+      },
+      {
+        "filename": "не_за_что.mp3",
+        "path": "/audio/phrases/не_за_что.mp3",
+        "size": 11520,
+        "text": "Не за что"
+      },
+      {
+        "filename": "вы_говорите_по-английски.mp3",
+        "path": "/audio/phrases/вы_говорите_по-английски.mp3",
+        "size": 15552,
+        "text": "Вы говорите по-английски?"
+      },
+      {
+        "filename": "я_немного_говорю_по-русски.mp3",
+        "path": "/audio/phrases/я_немного_говорю_по-русски.mp3",
+        "size": 17136,
+        "text": "Я немного говорю по-русски"
+      },
+      {
+        "filename": "как_это_по-русски.mp3",
+        "path": "/audio/phrases/как_это_по-русски.mp3",
+        "size": 13392,
+        "text": "Как это по-русски?"
       }
     ],
     "numbers": [
@@ -935,6 +995,126 @@
         "path": "/audio/words/виза.mp3",
         "size": 11232,
         "text": "виза"
+      },
+      {
+        "filename": "кто.mp3",
+        "path": "/audio/words/кто.mp3",
+        "size": 11232,
+        "text": "кто"
+      },
+      {
+        "filename": "что.mp3",
+        "path": "/audio/words/что.mp3",
+        "size": 11232,
+        "text": "что"
+      },
+      {
+        "filename": "где.mp3",
+        "path": "/audio/words/где.mp3",
+        "size": 11232,
+        "text": "где"
+      },
+      {
+        "filename": "когда.mp3",
+        "path": "/audio/words/когда.mp3",
+        "size": 11232,
+        "text": "когда"
+      },
+      {
+        "filename": "почему.mp3",
+        "path": "/audio/words/почему.mp3",
+        "size": 11232,
+        "text": "почему"
+      },
+      {
+        "filename": "как.mp3",
+        "path": "/audio/words/как.mp3",
+        "size": 11232,
+        "text": "как"
+      },
+      {
+        "filename": "сколько.mp3",
+        "path": "/audio/words/сколько.mp3",
+        "size": 11232,
+        "text": "сколько"
+      },
+      {
+        "filename": "семья.mp3",
+        "path": "/audio/words/семья.mp3",
+        "size": 11232,
+        "text": "семья"
+      },
+      {
+        "filename": "мама.mp3",
+        "path": "/audio/words/мама.mp3",
+        "size": 11232,
+        "text": "мама"
+      },
+      {
+        "filename": "папа.mp3",
+        "path": "/audio/words/папа.mp3",
+        "size": 11232,
+        "text": "папа"
+      },
+      {
+        "filename": "сестра.mp3",
+        "path": "/audio/words/сестра.mp3",
+        "size": 11232,
+        "text": "сестра"
+      },
+      {
+        "filename": "брат.mp3",
+        "path": "/audio/words/брат.mp3",
+        "size": 11232,
+        "text": "брат"
+      },
+      {
+        "filename": "муж.mp3",
+        "path": "/audio/words/муж.mp3",
+        "size": 11232,
+        "text": "муж"
+      },
+      {
+        "filename": "жена.mp3",
+        "path": "/audio/words/жена.mp3",
+        "size": 11232,
+        "text": "жена"
+      },
+      {
+        "filename": "метро.mp3",
+        "path": "/audio/words/метро.mp3",
+        "size": 11232,
+        "text": "метро"
+      },
+      {
+        "filename": "поезд.mp3",
+        "path": "/audio/words/поезд.mp3",
+        "size": 11232,
+        "text": "поезд"
+      },
+      {
+        "filename": "такси.mp3",
+        "path": "/audio/words/такси.mp3",
+        "size": 11232,
+        "text": "такси"
+      },
+      {
+        "filename": "автобус.mp3",
+        "path": "/audio/words/автобус.mp3",
+        "size": 11232,
+        "text": "автобус"
+      },
+      {
+        "filename": "машина.mp3",
+        "path": "/audio/words/машина.mp3",
+        "size": 11232,
+        "text": "машина"
+      },
+      {
+        "filename": "самолёт.mp3",
+        "path": "/audio/words/самолёт.mp3",
+        "size": 11376,
+        "text": "самолёт"
       }
     ],
     "time": [
@@ -1141,6 +1321,78 @@
         "path": "/audio/time/поздно.mp3",
         "size": 11232,
         "text": "поздно"
+      },
+      {
+        "filename": "понедельник.mp3",
+        "path": "/audio/time/понедельник.mp3",
+        "size": 11808,
+        "text": "понедельник"
+      },
+      {
+        "filename": "вторник.mp3",
+        "path": "/audio/time/вторник.mp3",
+        "size": 11376,
+        "text": "вторник"
+      },
+      {
+        "filename": "среда.mp3",
+        "path": "/audio/time/среда.mp3",
+        "size": 11232,
+        "text": "среда"
+      },
+      {
+        "filename": "четверг.mp3",
+        "path": "/audio/time/четверг.mp3",
+        "size": 11232,
+        "text": "четверг"
+      },
+      {
+        "filename": "пятница.mp3",
+        "path": "/audio/time/пятница.mp3",
+        "size": 11232,
+        "text": "пятница"
+      },
+      {
+        "filename": "суббота.mp3",
+        "path": "/audio/time/суббота.mp3",
+        "size": 11232,
+        "text": "суббота"
+      },
+      {
+        "filename": "воскресенье.mp3",
+        "path": "/audio/time/воскресенье.mp3",
+        "size": 12240,
+        "text": "воскресенье"
+      },
+      {
+        "filename": "сегодня.mp3",
+        "path": "/audio/time/сегодня.mp3",
+        "size": 11664,
+        "text": "сегодня"
+      },
+      {
+        "filename": "вчера.mp3",
+        "path": "/audio/time/вчера.mp3",
+        "size": 11232,
+        "text": "вчера"
+      },
+      {
+        "filename": "завтра.mp3",
+        "path": "/audio/time/завтра.mp3",
+        "size": 11232,
+        "text": "завтра"
+      },
+      {
+        "filename": "день.mp3",
+        "path": "/audio/time/день.mp3",
+        "size": 11232,
+        "text": "день"
+      },
+      {
+        "filename": "неделя.mp3",
+        "path": "/audio/time/неделя.mp3",
+        "size": 11232,
+        "text": "неделя"
       }
     ]
   }

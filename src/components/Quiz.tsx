@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { FaCheck, FaTimes, FaKeyboard, FaTrophy, FaRedo, FaCheckCircle, FaTimesCircle, FaStar, FaGraduationCap } from 'react-icons/fa';
 import RussianKeyboard from './RussianKeyboard';
 import PronunciationButton from './PronunciationButton';
@@ -19,12 +19,31 @@ interface PhraseItem {
   pronunciation?: string;
 }
 
+export type QuizCategoryFilter = 'all' | 'alphabet' | 'basicPhrases' | 'commonWords' | 'numbers' | 'time';
+
+export interface QuizCategoryInfo {
+  id: QuizCategoryFilter;
+  label: string;
+  icon: string;
+  description: string;
+}
+
+export const QUIZ_CATEGORIES: QuizCategoryInfo[] = [
+  { id: 'all', label: 'All Topics', icon: '🎯', description: 'Curated mix of the entire Russian curriculum' },
+  { id: 'alphabet', label: 'Alphabet', icon: '🔤', description: '33 Cyrillic letters and pronunciations' },
+  { id: 'basicPhrases', label: 'Phrases & Greetings', icon: '💬', description: 'Greetings, politeness, and essential dialogue' },
+  { id: 'commonWords', label: 'Common Words', icon: '📖', description: 'Question words, family, transit, and essentials' },
+  { id: 'numbers', label: 'Numbers', icon: '🔢', description: 'Counting 0 through 1,000' },
+  { id: 'time', label: 'Time & Days', icon: '⏰', description: 'Days of the week, relative days, and clock phrases' },
+];
+
 interface QuizProps {
   data: {
     alphabet?: AlphabetItem[];
     basicPhrases?: PhraseItem[];
     numbers?: PhraseItem[];
     commonWords?: PhraseItem[];
+    time?: PhraseItem[];
     [key: string]: any;
   };
 }
@@ -57,7 +76,7 @@ const isHardSignAnswer = (answer: string): boolean =>
 
 const CYRILLIC_QUICK_CHARS = ['я', 'ю', 'ё', 'ж', 'ш', 'щ', 'ч', 'ь', 'ъ', 'ы', 'э'];
 
-const getAudioCategory = (questionType: string): 'alphabet' | 'phrases' | 'numbers' | 'words' | 'examples' => {
+const getAudioCategory = (questionType: string): 'alphabet' | 'phrases' | 'numbers' | 'words' | 'time' | 'examples' => {
   switch (questionType) {
     case 'alphabet':
       return 'alphabet';
@@ -67,6 +86,8 @@ const getAudioCategory = (questionType: string): 'alphabet' | 'phrases' | 'numbe
       return 'numbers';
     case 'commonWords':
       return 'words';
+    case 'time':
+      return 'time';
     default:
       return questionType as any;
   }
@@ -81,6 +102,15 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       if ([5, 10, 20].includes(num)) return num;
     }
     return 10;
+  });
+
+  // Active Category Filter: 'all', 'alphabet', 'basicPhrases', 'commonWords', 'numbers', 'time'
+  const [activeCategory, setActiveCategory] = useState<QuizCategoryFilter>(() => {
+    const saved = localStorage.getItem('russian_quiz_category');
+    if (saved && ['all', 'alphabet', 'basicPhrases', 'commonWords', 'numbers', 'time'].includes(saved)) {
+      return saved as QuizCategoryFilter;
+    }
+    return 'all';
   });
 
   // Mastered words tracking (masteryLevel >= 5)
@@ -327,7 +357,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     }));
   };
 
-  // Build the complete list of all 209 curriculum questions
+  // Build the complete list of all curriculum questions across categories
   const getAllQuestions = useCallback((): QuestionDef[] => {
     if (!data) return [];
     const questions: QuestionDef[] = [];
@@ -343,7 +373,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       });
     }
 
-    const categories = ['basicPhrases', 'numbers', 'commonWords'];
+    const categories = ['basicPhrases', 'numbers', 'commonWords', 'time'];
     categories.forEach(cat => {
       if (data[cat] && Array.isArray(data[cat])) {
         data[cat].forEach((item: PhraseItem) => {
@@ -366,12 +396,54 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     return questions;
   }, [data]);
 
-  const totalCurriculumQuestions = (data?.alphabet?.length || 0) +
-    ((data?.basicPhrases?.length || 0) * 2) +
-    ((data?.numbers?.length || 0) * 2) +
-    ((data?.commonWords?.length || 0) * 2);
+  // All curriculum questions memoized
+  const allCurriculumQuestions = useMemo(() => getAllQuestions(), [getAllQuestions]);
+  const totalCurriculumQuestions = allCurriculumQuestions.length;
 
-  const getRandomQuestion = useCallback((overrideMastered?: Set<string>) => {
+  // Filter questions for the currently selected category
+  const currentCategoryQuestions = useMemo(() => {
+    if (activeCategory === 'all') return allCurriculumQuestions;
+    return allCurriculumQuestions.filter(q => q.category === activeCategory);
+  }, [allCurriculumQuestions, activeCategory]);
+
+  const activeTotalQuestions = currentCategoryQuestions.length;
+
+  // Mastered count specifically within the active filter
+  const activeMasteredCount = useMemo(() => {
+    let count = 0;
+    currentCategoryQuestions.forEach(q => {
+      if (masteredWordIds.has(q.id)) count++;
+    });
+    return count;
+  }, [currentCategoryQuestions, masteredWordIds]);
+
+  const activeRemainingToMaster = Math.max(0, activeTotalQuestions - activeMasteredCount);
+
+  // Per-category counts (total and mastered) for category filter badges
+  const categoryCounts = useMemo(() => {
+    const counts: Record<QuizCategoryFilter, { total: number; mastered: number }> = {
+      all: { total: allCurriculumQuestions.length, mastered: masteredWordIds.size },
+      alphabet: { total: 0, mastered: 0 },
+      basicPhrases: { total: 0, mastered: 0 },
+      commonWords: { total: 0, mastered: 0 },
+      numbers: { total: 0, mastered: 0 },
+      time: { total: 0, mastered: 0 }
+    };
+
+    allCurriculumQuestions.forEach(q => {
+      const cat = q.category as QuizCategoryFilter;
+      if (counts[cat]) {
+        counts[cat].total += 1;
+        if (masteredWordIds.has(q.id)) {
+          counts[cat].mastered += 1;
+        }
+      }
+    });
+
+    return counts;
+  }, [allCurriculumQuestions, masteredWordIds]);
+
+  const getRandomQuestion = useCallback((overrideMastered?: Set<string>, categoryOverride?: QuizCategoryFilter) => {
     setUserAnswer('');
     setIsCorrect(null);
     setShowNext(false);
@@ -382,12 +454,17 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
     try {
       const allQuestions = getAllQuestions();
-      if (allQuestions.length === 0) {
+      const targetCat = categoryOverride !== undefined ? categoryOverride : activeCategory;
+      const targetPool = targetCat === 'all'
+        ? allQuestions
+        : allQuestions.filter(q => q.category === targetCat);
+
+      if (targetPool.length === 0) {
         setCurrentQuestion({
           type: 'dummy',
-          prompt: 'No questions available',
+          prompt: 'No questions available in this category',
           answer: '',
-          hint: 'Please load some content first',
+          hint: 'Please choose another topic or reload',
           russian: ''
         });
         return;
@@ -396,22 +473,22 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       const activeMastered = overrideMastered || masteredWordIdsRef.current || masteredWordIds;
 
       // Priority 1: Unmastered (masteryLevel < 5) AND not yet asked in current rotation
-      let candidatePool = allQuestions.filter(q => 
+      let candidatePool = targetPool.filter(q => 
         !activeMastered.has(q.id) && !askedQuestionsRef.current.has(q.id)
       );
 
       // Priority 2: If all unmastered were asked in this rotation, reset rotation and pick from unmastered
       if (candidatePool.length === 0) {
         askedQuestionsRef.current.clear();
-        candidatePool = allQuestions.filter(q => !activeMastered.has(q.id));
+        candidatePool = targetPool.filter(q => !activeMastered.has(q.id));
       }
 
-      // Priority 3: If ALL 209 questions are mastered, allow practicing mastered questions
+      // Priority 3: If ALL questions in this category are mastered, allow practicing mastered questions
       if (candidatePool.length === 0) {
-        candidatePool = allQuestions.filter(q => !askedQuestionsRef.current.has(q.id));
+        candidatePool = targetPool.filter(q => !askedQuestionsRef.current.has(q.id));
         if (candidatePool.length === 0) {
           askedQuestionsRef.current.clear();
-          candidatePool = allQuestions;
+          candidatePool = targetPool;
         }
       }
 
@@ -493,12 +570,12 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         id: 'emergency-hello'
       });
     }
-  }, [data, getAllQuestions, masteredWordIds]);
+  }, [data, getAllQuestions, activeCategory, masteredWordIds]);
 
   const handleNextQuestion = useCallback(() => {
     setSessionIndex(prev => prev + 1);
-    getRandomQuestion();
-  }, [getRandomQuestion]);
+    getRandomQuestion(undefined, activeCategory);
+  }, [getRandomQuestion, activeCategory]);
 
   const handleCompleteSession = useCallback(async () => {
     setIsSessionComplete(true);
@@ -506,18 +583,19 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
       await ProgressService.recordQuizSession({
-        category: 'mixed',
+        category: activeCategory === 'all' ? 'mixed' : activeCategory,
         score: sessionScore,
         totalQuestions: sessionGoal,
       });
     } catch (err) {
       console.warn('Could not record completed quiz session:', err);
     }
-  }, [sessionScore, sessionGoal]);
+  }, [sessionScore, sessionGoal, activeCategory]);
 
-  const startNewQuizSession = useCallback((newGoal?: number) => {
+  const startNewQuizSession = useCallback((newGoal?: number, newCategory?: QuizCategoryFilter) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const goal = newGoal !== undefined ? newGoal : sessionGoal;
+    const cat = newCategory !== undefined ? newCategory : activeCategory;
     if (newGoal !== undefined && newGoal !== sessionGoal) {
       setSessionGoal(goal);
       localStorage.setItem('russian_quiz_goal', goal.toString());
@@ -535,11 +613,19 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     sessionStatsRef.current = {
       score: 0,
       total: 0,
-      category: 'mixed',
+      category: cat === 'all' ? 'mixed' : cat,
       isSaved: false
     };
-    getRandomQuestion();
-  }, [sessionGoal, getRandomQuestion]);
+    getRandomQuestion(undefined, cat);
+  }, [sessionGoal, activeCategory, getRandomQuestion]);
+
+  const handleCategoryChange = (newCategory: QuizCategoryFilter) => {
+    if (newCategory === activeCategory) return;
+    setActiveCategory(newCategory);
+    localStorage.setItem('russian_quiz_category', newCategory);
+    askedQuestionsRef.current.clear();
+    startNewQuizSession(sessionGoal, newCategory);
+  };
 
   const handleGoalChange = (newGoal: number) => {
     if (newGoal === sessionGoal) return;
@@ -594,12 +680,12 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      getRandomQuestion();
+      getRandomQuestion(undefined, activeCategory);
 
       correctSoundRef.current = new Audio('/audio/sounds/correct.mp3');
       incorrectSoundRef.current = new Audio('/audio/sounds/incorrect.mp3');
     }
-  }, [getRandomQuestion]);
+  }, [getRandomQuestion, activeCategory]);
 
   // Cleanup effect: save partial session if unmounting mid-quiz (at least 3 questions answered)
   useEffect(() => {
@@ -1078,11 +1164,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
               </div>
               <div className="recap-stat-card highlight">
                 <span className="stat-label">🏆 Mastered</span>
-                <span className="stat-value">{masteredCount} / {totalCurriculumQuestions}</span>
+                <span className="stat-value">{activeMasteredCount} / {activeTotalQuestions}</span>
               </div>
               <div className="recap-stat-card pool-left">
                 <span className="stat-label">📚 Remaining</span>
-                <span className="stat-value">{remainingToMaster}</span>
+                <span className="stat-value">{activeRemainingToMaster}</span>
               </div>
             </div>
 
@@ -1092,6 +1178,30 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           </div>
 
           <div className="recap-next-session">
+            <div className="recap-topic-selector">
+              <span className="goal-picker-label">Choose topic:</span>
+              <div className="recap-topic-pills" role="tablist" aria-label="Choose quiz topic">
+                {QUIZ_CATEGORIES.map(cat => {
+                  const isActive = activeCategory === cat.id;
+                  const countInfo = categoryCounts[cat.id];
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      className={`recap-topic-pill ${isActive ? 'active' : ''}`}
+                      onClick={() => handleCategoryChange(cat.id)}
+                      title={`Switch to ${cat.label} (${countInfo?.total || 0} questions)`}
+                    >
+                      <span className="cat-icon">{cat.icon}</span>
+                      <span className="cat-label">{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="recap-goal-picker">
               <span className="goal-picker-label">Choose next quiz length:</span>
               <div className="goal-picker-buttons" role="group" aria-label="Next quiz length">
@@ -1176,14 +1286,40 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   }
 
   // --- RENDER ACTIVE QUIZ SESSION ---
-  const masteredCount = masteredWordIds.size;
-  const remainingToMaster = Math.max(0, totalCurriculumQuestions - masteredCount);
   const progressPercent = sessionGoal > 0 ? Math.min(100, Math.round((sessionAnswered / sessionGoal) * 100)) : 0;
   const questionsLeft = Math.max(0, sessionGoal - sessionAnswered);
 
   return (
     <div className="section quiz-section">
       <h2 className="quiz-page-title">Test Your Knowledge</h2>
+
+      {/* Modern Horizontal Category Filter Bar */}
+      <div className="quiz-category-filter-bar" role="tablist" aria-label="Filter quiz by category">
+        <div className="category-filter-scroll">
+          {QUIZ_CATEGORIES.map(cat => {
+            const isActive = activeCategory === cat.id;
+            const countInfo = categoryCounts[cat.id];
+            const isFullyMastered = countInfo && countInfo.total > 0 && countInfo.mastered >= countInfo.total;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                className={`category-filter-pill ${isActive ? 'active' : ''} ${isFullyMastered ? 'mastered' : ''}`}
+                onClick={() => handleCategoryChange(cat.id)}
+                title={`Filter quiz to ${cat.label} (${countInfo?.total || 0} questions)`}
+              >
+                <span className="cat-icon" aria-hidden="true">{cat.icon}</span>
+                <span className="cat-label">{cat.label}</span>
+                <span className="cat-count-badge">
+                  {countInfo?.mastered ? `${countInfo.mastered}/${countInfo.total}` : (countInfo?.total || 0)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Modern Compact Quiz Header Panel / Game HUD */}
       <div className="quiz-header-panel">
@@ -1222,8 +1358,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
         <div className="curriculum-pool-badge" title="Mastered words are removed from future questions">
           <span className="pool-icon">🏆</span>
-          <span>Mastered: <strong>{masteredCount}</strong> / {totalCurriculumQuestions}</span>
-          <span className="pool-remaining-tag">({remainingToMaster} remaining)</span>
+          <span>Mastered: <strong>{activeMasteredCount}</strong> / {activeTotalQuestions}</span>
+          <span className="pool-remaining-tag">({activeRemainingToMaster} remaining)</span>
         </div>
       </div>
 
