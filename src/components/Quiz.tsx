@@ -708,7 +708,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     if (!userAnswer.trim()) return;
 
     let processedAnswer = userAnswer;
-    if (needsRussianKeyboard && !containsCyrillic(processedAnswer)) {
+    if (needsRussianKeyboard && /[a-zA-Z'`"]/.test(processedAnswer)) {
       processedAnswer = transliterate(processedAnswer);
       setUserAnswer(processedAnswer);
     }
@@ -947,8 +947,9 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       if (combinationStarters.includes(prevChar) && 
           combinationFollowers[prevChar as keyof typeof combinationFollowers]?.includes(currChar)) {
         const transliteratedValue = transliterate(newValue);
+        const newCursorPos = transliterate(newValue.slice(0, selectionStart)).length;
         setUserAnswer(transliteratedValue);
-        setCursorPosition(selectionStart);
+        setCursorPosition(newCursorPos);
         setLastInput(newValue);
         return;
       }
@@ -962,8 +963,9 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         inputType === 'insertLineBreak' ||
         newValue.includes('\n')) {
       const transliteratedValue = transliterate(newValue);
+      const newCursorPos = transliterate(newValue.slice(0, selectionStart)).length;
       setUserAnswer(transliteratedValue);
-      setCursorPosition(selectionStart);
+      setCursorPosition(newCursorPos);
     } else {
       setCursorPosition(selectionStart);
     }
@@ -972,7 +974,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   };
 
   const handleCheckAnswer = () => {
-    if (needsRussianKeyboard && userAnswer && !containsCyrillic(userAnswer)) {
+    if (needsRussianKeyboard && userAnswer && /[a-zA-Z'`"]/.test(userAnswer)) {
       const transliteratedValue = transliterate(userAnswer);
       setUserAnswer(transliteratedValue);
     }
@@ -1040,10 +1042,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     !currentQuestion.type.includes('alphabet') && 
     currentQuestion.hint.includes('How do you say this in Russian');
 
-  const combinationStarters = ['y', 'Y', 'z', 'Z', 's', 'S', 'c', 'C', 't', 'T', 'k', 'K'];
+  const combinationStarters = ['y', 'Y', 'i', 'I', 'e', 'E', 'z', 'Z', 's', 'S', 'c', 'C', 't', 'T', 'k', 'K'];
   const combinationFollowers = {
     'y': ['a', 'A', 'u', 'U', 'o', 'O', 'e', 'E'],
     'Y': ['a', 'A', 'u', 'U', 'o', 'O', 'e', 'E'],
+    'i': ['h', 'H'],
+    'I': ['h', 'H'],
+    'e': ['h', 'H'],
+    'E': ['h', 'H'],
     'z': ['h', 'H'],
     'Z': ['h', 'H'],
     's': ['h', 'H'],
@@ -1443,9 +1449,13 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
                   <div><code>ya</code> → <strong>я</strong></div>
                   <div><code>yu</code> → <strong>ю</strong></div>
                   <div><code>yo</code> → <strong>ё</strong></div>
+                  <div><code>ih</code> → <strong>ы</strong></div>
+                  <div><code>eh</code> → <strong>э</strong></div>
                   <div><code>zh</code> → <strong>ж</strong></div>
                   <div><code>sh</code> → <strong>ш</strong></div>
                   <div><code>ch</code> → <strong>ч</strong></div>
+                  <div><code>shch</code> → <strong>щ</strong></div>
+                  <div><code>ts</code> → <strong>ц</strong></div>
                   <div><code>'</code> → <strong>ь</strong></div>
                   <div><code>"</code> → <strong>ъ</strong></div>
                 </div>

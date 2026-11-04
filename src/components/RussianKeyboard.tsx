@@ -61,8 +61,8 @@ const RussianKeyboard: React.FC<RussianKeyboardProps> = ({ onLetterClick }) => {
     { label: 'Ж', value: 'ж', en: 'ZH' },  // zh
     { label: 'Ш', value: 'ш', en: 'SH' },  // sh
     { label: 'Ч', value: 'ч', en: 'CH' },  // ch
-    { label: 'Ы', value: 'ы', en: 'Y' },   // hard i
-    { label: 'Э', value: 'э', en: 'E' },   // hard e
+    { label: 'Ы', value: 'ы', en: 'IH' },  // hard i
+    { label: 'Э', value: 'э', en: 'EH' },  // hard e
     { label: 'Ь', value: 'ь', en: "'" },   // soft sign - make this more prominent
     { label: 'Ъ', value: 'ъ', en: '"' }    // hard sign
   ];
