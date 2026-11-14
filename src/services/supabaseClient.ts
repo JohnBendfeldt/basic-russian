@@ -3,8 +3,27 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+export const isSafeHttpsUrl = (value?: string | null): boolean => {
+  if (!value || typeof value !== 'string') return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export const isSupabaseConfigured = (): boolean => {
-  return Boolean(supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith('https://'));
+  if (!supabaseUrl || !supabaseAnonKey || !isSafeHttpsUrl(supabaseUrl)) {
+    return false;
+  }
+  if (
+    supabaseUrl.includes('your-project-id.supabase.co') ||
+    supabaseAnonKey === 'your-anon-public-key'
+  ) {
+    return false;
+  }
+  return true;
 };
 
 export const supabase: SupabaseClient | null = isSupabaseConfigured()

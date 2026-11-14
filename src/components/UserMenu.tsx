@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaUser, FaSignOutAlt, FaChartLine, FaSignInAlt, FaGoogle, FaMicrosoft, FaGithub, FaShieldAlt, FaFileContract } from 'react-icons/fa';
-import { supabase, signOutUser } from '../services/supabaseClient';
+import { supabase, signOutUser, isSafeHttpsUrl } from '../services/supabaseClient';
 import { ProgressService } from '../services/progressService';
 import AuthModal from './AuthModal';
 import ProgressModal from './ProgressModal';
@@ -29,10 +29,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, initialUser = nu
     });
 
     // Subscribe to auth state changes (login, logout, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const user = session?.user ?? null;
       setCurrentUser(user);
-      if (user) {
+      if (user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         ProgressService.syncGuestDataToCloud();
       }
     });
@@ -62,6 +62,9 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, initialUser = nu
 
   const provider = currentUser?.app_metadata?.provider;
   const displayName = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'User';
+  const avatarUrl = isSafeHttpsUrl(currentUser?.user_metadata?.avatar_url)
+    ? currentUser.user_metadata.avatar_url
+    : null;
 
   return (
     <div className="user-menu-wrapper" ref={dropdownRef}>
@@ -76,11 +79,13 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, initialUser = nu
             aria-haspopup="true"
             aria-label={`User menu for ${displayName}`}
           >
-            {currentUser.user_metadata?.avatar_url ? (
+            {avatarUrl ? (
               <img
-                src={currentUser.user_metadata.avatar_url}
+                src={avatarUrl}
                 alt={displayName}
                 className="user-avatar-img"
+                referrerPolicy="no-referrer"
+                loading="lazy"
               />
             ) : (
               <div className="user-avatar-placeholder">

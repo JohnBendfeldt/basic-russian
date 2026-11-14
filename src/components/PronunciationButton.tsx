@@ -138,7 +138,8 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     const cleanText = normalizedText
       .split('/')[0]
       .replace(/\s*\([^)]*\)\s*/g, '')
-      .replace(/[?.,!]/g, '')
+      .replace(/[?.,!\\]/g, '')
+      .replace(/\.\.+/g, '')
       .trim();
     const fileName = cleanText.replace(/\s+/g, '_');
     
@@ -245,6 +246,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
 
   return (
     <button
+      type="button"
       className={`pronunciation-button ${isPlaying ? 'playing' : ''} ${className || ''}`}
       onClick={handleSpeak}
       disabled={isPlaying || !initialized}

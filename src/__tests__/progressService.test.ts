@@ -150,4 +150,17 @@ describe('ProgressService (Guest Mode)', () => {
     const statsAfter2ndKnown = await ProgressService.getUserStats();
     expect(statsAfter2ndKnown.wordsToReview.length).toBe(0);
   });
+
+  it('safely handles malformed JSON and ignores prototype-polluting keys in localStorage', async () => {
+    localStorage.setItem('russian_quiz_sessions', '"not-an-array"');
+    localStorage.setItem(
+      'russian_word_progress',
+      '{"__proto__":{"polluted":true},"constructor":{"polluted":true},"valid-id":{"userId":"guest_user","category":"words","wordId":"valid-id","prompt":"Привет","answer":"hello","timesCorrect":1,"timesIncorrect":0,"lastTestedAt":"2026-01-01T00:00:00Z","masteryLevel":1}}'
+    );
+
+    const stats = await ProgressService.getUserStats();
+    expect(stats.totalQuizzesTaken).toBe(0);
+    expect(stats.wordsLearningCount).toBe(1);
+    expect(({} as any).polluted).toBeUndefined();
+  });
 });

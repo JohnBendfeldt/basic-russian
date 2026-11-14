@@ -21,7 +21,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onNavigate }) => {
         </div>
 
         <h1 className="legal-title">Privacy Policy</h1>
-        <p className="legal-last-updated">Last Updated: October 16, 2026</p>
+        <p className="legal-last-updated">Last Updated: November 13, 2026</p>
 
         <div className="legal-highlight-box">
           <strong>Plain English Summary:</strong> We believe in privacy by default. Basic Russian is an educational tool. We only collect the minimal information needed to save your quiz progress and learning stats. We never sell your data, we do not run third-party advertising trackers, and you can delete your data at any time.
@@ -31,11 +31,11 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onNavigate }) => {
         <p>We collect information in two ways:</p>
         <ul>
           <li><strong>Guest Users (Unauthenticated):</strong> If you use the app without logging in, your quiz scores and word practice history are stored exclusively in your local browser’s <code>localStorage</code>. No personal identification is collected or transmitted to our servers.</li>
-          <li><strong>Registered Users (Authenticated via Google or Microsoft):</strong> If you choose to sign in to sync progress across devices, we receive basic authentication details from your chosen OAuth provider:
+          <li><strong>Registered Users (Authenticated via Google, Microsoft Entra ID, or GitHub):</strong> If you choose to sign in to sync progress across devices, we receive basic authentication details from your chosen OAuth provider:
             <ul>
               <li>Email address</li>
               <li>Display name</li>
-              <li>Profile avatar URL (if provided by Google/Microsoft)</li>
+              <li>Profile avatar URL (if provided by Google, Microsoft, or GitHub)</li>
             </ul>
           </li>
           <li><strong>Learning Data:</strong> Quiz session scores, accuracy rates, and spaced-repetition performance for practice vocabulary.</li>
@@ -55,9 +55,9 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onNavigate }) => {
           Your data is stored in a secure cloud PostgreSQL database managed via Supabase, hosted on enterprise cloud infrastructure. Security measures include:
         </p>
         <ul>
-          <li><strong>Encryption in Transit:</strong> All communication between your browser and our services is encrypted using HTTPS / TLS.</li>
-          <li><strong>Row Level Security (RLS):</strong> Our database enforces strict row-level security policies at the database engine level, ensuring that users can only view, modify, or delete their own learning records.</li>
-          <li><strong>No Password Storage:</strong> We authenticate exclusively through industry-standard OAuth 2.0 (Google and Microsoft Entra ID). We never handle, store, or have access to your account passwords.</li>
+          <li><strong>Encryption in Transit:</strong> All communication between your browser and our services is encrypted using HTTPS / TLS with Strict-Transport-Security (HSTS) and a strict Content Security Policy (CSP).</li>
+          <li><strong>Row Level Security (RLS):</strong> Our database enforces strict row-level security policies and integrity constraints at the PostgreSQL engine level, ensuring that users can only view, modify, or delete their own learning records.</li>
+          <li><strong>No Password Storage:</strong> We authenticate exclusively through industry-standard OAuth 2.0 / OpenID Connect (Google, Microsoft Entra ID, and GitHub). We never handle, store, or have access to your account passwords.</li>
         </ul>
 
         <h2>4. Your Rights &amp; Data Deletion (GDPR &amp; CCPA)</h2>
@@ -71,9 +71,9 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onNavigate }) => {
         <h2>5. Third-Party Services</h2>
         <p>To deliver this application, we work with trusted infrastructure providers:</p>
         <ul>
-          <li><strong>Google Identity &amp; Microsoft Entra ID:</strong> Used for secure single sign-on authentication.</li>
-          <li><strong>Supabase:</strong> Provides managed PostgreSQL database hosting and session management.</li>
-          <li><strong>Netlify:</strong> Provides global static web hosting and serverless functions.</li>
+          <li><strong>Google Identity, Microsoft Entra ID &amp; GitHub OAuth:</strong> Used for secure single sign-on authentication.</li>
+          <li><strong>Supabase:</strong> Provides managed PostgreSQL database hosting and OAuth session management.</li>
+          <li><strong>Netlify:</strong> Provides global CDN web hosting, TLS termination, and HTTP security headers.</li>
         </ul>
 
         <h2>6. Children’s Privacy</h2>

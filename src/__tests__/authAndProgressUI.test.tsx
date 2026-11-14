@@ -5,7 +5,7 @@ import { AuthModal } from '../components/AuthModal';
 import { UserMenu } from '../components/UserMenu';
 import { ProgressModal } from '../components/ProgressModal';
 import { ProgressService } from '../services/progressService';
-import { isSupabaseConfigured, signInWithGoogle, signInWithEntra, signInWithGithub, supabase } from '../services/supabaseClient';
+import { isSupabaseConfigured, isSafeHttpsUrl, signInWithGoogle, signInWithEntra, signInWithGithub, supabase } from '../services/supabaseClient';
 
 describe('AuthModal Component', () => {
   it('does not render when isOpen is false', () => {
@@ -93,6 +93,26 @@ describe('UserMenu Component', () => {
     fireEvent.click(screen.getByText('Privacy Policy'));
     expect(onNavigate).toHaveBeenCalledWith('privacy');
   });
+
+  it('rejects non-HTTPS avatar URLs and applies no-referrer to valid HTTPS avatars', () => {
+    const unsafeUser = {
+      email: 'test@example.com',
+      user_metadata: { full_name: 'Unsafe User', avatar_url: 'javascript:alert(1)' },
+      app_metadata: { provider: 'github' }
+    };
+    const { unmount } = render(<UserMenu initialUser={unsafeUser} />);
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    unmount();
+
+    const safeUser = {
+      email: 'test@example.com',
+      user_metadata: { full_name: 'Safe User', avatar_url: 'https://avatars.githubusercontent.com/u/1?v=4' },
+      app_metadata: { provider: 'github' }
+    };
+    render(<UserMenu initialUser={safeUser} />);
+    const avatar = screen.getByRole('img', { name: 'Safe User' });
+    expect(avatar).toHaveAttribute('referrerpolicy', 'no-referrer');
+  });
 });
 
 describe('ProgressModal Component', () => {
@@ -162,6 +182,14 @@ describe('ProgressModal Component', () => {
 });
 
 describe('Supabase Client Configuration & Auth Functions', () => {
+  it('validates HTTPS URLs strictly via isSafeHttpsUrl', () => {
+    expect(isSafeHttpsUrl('https://example.supabase.co')).toBe(true);
+    expect(isSafeHttpsUrl('http://example.supabase.co')).toBe(false);
+    expect(isSafeHttpsUrl('javascript:alert(1)')).toBe(false);
+    expect(isSafeHttpsUrl('data:text/html,<script>alert(1)</script>')).toBe(false);
+    expect(isSafeHttpsUrl(null)).toBe(false);
+  });
+
   it('correctly determines whether Supabase is configured', () => {
     const configured = isSupabaseConfigured();
     expect(typeof configured).toBe('boolean');
