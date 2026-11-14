@@ -67,7 +67,7 @@ export const signInWithGoogle = async (): Promise<{ error: Error | null }> => {
 
       const params = new URLSearchParams({
         client_id: googleClientId,
-        redirect_uri: redirectTo,
+        redirect_uri: `${redirectTo.replace(/\/+$/, '')}/`,
         response_type: 'id_token',
         scope: 'openid email profile',
         nonce: hashedNonce,

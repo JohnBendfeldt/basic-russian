@@ -123,7 +123,7 @@ describe('supabaseClient - configured cloud mode', () => {
     const authUrl = new URL(assignMock.mock.calls[0][0]);
     expect(`${authUrl.origin}${authUrl.pathname}`).toBe('https://accounts.google.com/o/oauth2/v2/auth');
     expect(authUrl.searchParams.get('client_id')).toBe(GOOGLE_CLIENT_ID);
-    expect(authUrl.searchParams.get('redirect_uri')).toBe('https://basicrussian.org');
+    expect(authUrl.searchParams.get('redirect_uri')).toBe('https://basicrussian.org/');
     expect(authUrl.searchParams.get('response_type')).toBe('id_token');
     expect(authUrl.searchParams.get('nonce')).toMatch(/^[a-f0-9]{64}$/);
     const storedNonce = sessionStorage.getItem(mod.GOOGLE_NONCE_STORAGE_KEY);
