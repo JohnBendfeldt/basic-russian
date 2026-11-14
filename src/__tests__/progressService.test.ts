@@ -163,4 +163,41 @@ describe('ProgressService (Guest Mode)', () => {
     expect(stats.wordsLearningCount).toBe(1);
     expect(({} as any).polluted).toBeUndefined();
   });
+
+  it('clamps mastery at 3 (MASTERY_THRESHOLD) and supports overrideWordAttempt', async () => {
+    const wordId = 'basicPhrases-Привет';
+    for (let i = 1; i <= 4; i++) {
+      const res = await ProgressService.recordWordAttempt({
+        category: 'basicPhrases',
+        wordId,
+        prompt: 'Привет',
+        answer: 'hello',
+        isCorrect: true,
+      });
+      expect(res.masteryLevel).toBe(Math.min(3, i));
+    }
+    const masteredIds = await ProgressService.getMasteredWordIds();
+    expect(masteredIds.has(wordId)).toBe(true);
+
+    const reviewId = 'basicPhrases-Спасибо';
+    const missed = await ProgressService.recordWordAttempt({
+      category: 'basicPhrases',
+      wordId: reviewId,
+      prompt: 'Спасибо',
+      answer: 'thank you',
+      isCorrect: false,
+    });
+    expect(missed.timesIncorrect).toBe(1);
+    expect(missed.masteryLevel).toBe(0);
+
+    const overridden = await ProgressService.overrideWordAttempt({
+      category: 'basicPhrases',
+      wordId: reviewId,
+      prompt: 'Спасибо',
+      answer: 'thank you',
+    });
+    expect(overridden.timesCorrect).toBe(1);
+    expect(overridden.timesIncorrect).toBe(0);
+    expect(overridden.masteryLevel).toBe(1);
+  });
 });

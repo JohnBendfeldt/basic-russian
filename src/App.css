@@ -1046,6 +1046,48 @@ footer {
 
 .feedback-action-area {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.feedback-overridden-note {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #15803d;
+  background-color: rgba(22, 163, 74, 0.12);
+  border-radius: 8px;
+  padding: 4px 10px;
+  display: inline-block;
+  font-weight: 600;
+}
+
+.feedback-override-button {
+  width: 100%;
+  padding: 0.6rem 1.1rem;
+  border: 1.5px solid #f59e0b;
+  border-radius: 12px;
+  background: #fffbeb;
+  color: #b45309;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.feedback-override-button:hover {
+  background: #fef3c7;
+  border-color: #d97706;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.2);
+}
+
+.feedback-override-button:active {
+  transform: scale(0.98);
 }
 
 .feedback-continue-button {

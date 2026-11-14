@@ -17,17 +17,17 @@ describe('Quiz Deep Interactions - Category Filters, Soft/Hard Signs, Cyrillic H
     vi.restoreAllMocks();
   });
 
-  it('grades Russian soft sign (Ь) and celebrates Word Mastered (5/5)', async () => {
+  it('grades Russian soft sign (Ь) and celebrates Word Mastered (3/3)', async () => {
     vi.spyOn(ProgressService, 'recordWordAttempt').mockResolvedValue({
       userId: 'guest_user',
       category: 'alphabet',
       wordId: 'alphabet-Ь',
       prompt: 'Ь',
       answer: 'soft sign',
-      timesCorrect: 5,
+      timesCorrect: 3,
       timesIncorrect: 0,
       lastTestedAt: new Date().toISOString(),
-      masteryLevel: 5,
+      masteryLevel: 3,
     });
 
     render(
@@ -47,7 +47,29 @@ describe('Quiz Deep Interactions - Category Filters, Soft/Hard Signs, Cyrillic H
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
     expect(await screen.findByText('Correct!')).toBeInTheDocument();
-    expect(await screen.findByText(/Word Mastered \(5\/5\)!/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Word Mastered \(3\/3\)!/i)).toBeInTheDocument();
+  });
+
+  it('allows overriding an incorrect answer via "I was right" and persists credit', async () => {
+    render(
+      <Quiz
+        data={{
+          alphabet: [{ character: 'А', pronunciation: 'ah', example: 'арбуз' }],
+        }}
+      />
+    );
+
+    const input = await screen.findByRole('textbox');
+    fireEvent.change(input, { target: { value: 'totally wrong' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    expect(await screen.findByText('Not quite')).toBeInTheDocument();
+    const overrideBtn = screen.getByRole('button', { name: /I was right/i });
+    fireEvent.click(overrideBtn);
+
+    expect(await screen.findByText(/Correct! \(Overridden\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Answer accepted as correct/i)).toBeInTheDocument();
+    expect(document.querySelector('.session-score-badge')?.textContent).toContain('1 / 1');
   });
 
   it('toggles Phonetic Typing Cheatsheet, full Russian Keyboard, quick Cyrillic helper keys, and completes missed-word recap', async () => {

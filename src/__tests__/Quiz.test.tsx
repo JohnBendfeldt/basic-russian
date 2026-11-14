@@ -64,7 +64,7 @@ describe('Quiz Component - Session Goals & Mastery Filtering', () => {
     expect(localStorage.getItem('russian_quiz_goal')).toBe('20');
   });
 
-  it('excludes mastered words (masteryLevel >= 5) from active questions', async () => {
+  it('excludes mastered words (masteryLevel >= 3) from active questions', async () => {
     // Mock getMasteredWordIds to return 'alphabet-А' as already mastered
     vi.spyOn(ProgressService, 'getMasteredWordIds').mockResolvedValue(new Set(['alphabet-А']));
 

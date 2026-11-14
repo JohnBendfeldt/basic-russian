@@ -1,4 +1,4 @@
-import { QuizSession, WordProgress, UserStats } from '../types/progress';
+import { QuizSession, WordProgress, UserStats, MASTERY_THRESHOLD } from '../types/progress';
 import { supabase } from './supabaseClient';
 
 export const APP_LANGUAGE_ID = 'ru';
@@ -7,6 +7,33 @@ const LOCAL_STORAGE_SESSIONS_KEY = 'russian_quiz_sessions';
 const LOCAL_STORAGE_WORDS_KEY = 'russian_word_progress';
 
 const getGuestUserId = (): string => 'guest_user';
+
+const stripDirectionalSuffix = (wordId: string): string =>
+  wordId.replace(/-(?:ru-to-en|en-to-ru|fr-to-en|en-to-fr|to-en|to-ru|to-fr)$/, '');
+
+const querySingleOrMaybeSingle = async (query: any) =>
+  typeof query?.maybeSingle === 'function' ? query.maybeSingle() : query.single();
+
+const deduplicateWordsByCanonicalId = (words: WordProgress[]): WordProgress[] => {
+  const merged = new Map<string, WordProgress>();
+  for (const word of words) {
+    const canonicalId = stripDirectionalSuffix(word.wordId);
+    const existing = merged.get(canonicalId);
+    if (!existing) {
+      merged.set(canonicalId, { ...word, wordId: canonicalId });
+    } else {
+      merged.set(canonicalId, {
+        ...existing,
+        wordId: canonicalId,
+        timesCorrect: existing.timesCorrect + word.timesCorrect,
+        timesIncorrect: existing.timesIncorrect + word.timesIncorrect,
+        masteryLevel: Math.max(existing.masteryLevel, word.masteryLevel),
+        lastTestedAt: existing.lastTestedAt >= word.lastTestedAt ? existing.lastTestedAt : word.lastTestedAt,
+      });
+    }
+  }
+  return Array.from(merged.values());
+};
 
 // ==========================================
 // LOCAL STORAGE HELPERS
@@ -68,6 +95,40 @@ const saveLocalWordProgress = (words: Record<string, WordProgress>) => {
 // ==========================================
 
 export class ProgressService {
+  private static previousMasteryMap = new Map<string, number>();
+
+  private static resolveWordProgressSnapshot(params: {
+    cacheKey: string;
+    isOverride: boolean;
+    isCorrect: boolean;
+    existingCorrect: number;
+    existingIncorrect: number;
+    existingMastery: number;
+  }): { timesCorrect: number; timesIncorrect: number; masteryLevel: number } {
+    const { cacheKey, isOverride, isCorrect, existingCorrect, existingIncorrect, existingMastery } = params;
+    if (isOverride) {
+      const prevMastery = this.previousMasteryMap.get(cacheKey);
+      this.previousMasteryMap.delete(cacheKey);
+      const baseMastery = prevMastery !== undefined ? prevMastery : existingMastery;
+      return {
+        timesCorrect: existingCorrect + 1,
+        timesIncorrect: Math.max(0, existingIncorrect - 1),
+        masteryLevel: Math.max(0, Math.min(MASTERY_THRESHOLD, baseMastery + 1)),
+      };
+    }
+
+    if (isCorrect) {
+      this.previousMasteryMap.delete(cacheKey);
+    } else {
+      this.previousMasteryMap.set(cacheKey, existingMastery);
+    }
+    return {
+      timesCorrect: existingCorrect + (isCorrect ? 1 : 0),
+      timesIncorrect: existingIncorrect + (isCorrect ? 0 : 1),
+      masteryLevel: Math.max(0, Math.min(MASTERY_THRESHOLD, existingMastery + (isCorrect ? 1 : -1))),
+    };
+  }
+
   /**
    * Record an attempt on an individual word during a quiz
    */
@@ -78,8 +139,33 @@ export class ProgressService {
     answer: string;
     isCorrect: boolean;
   }): Promise<WordProgress> {
-    const { category, wordId, prompt, answer, isCorrect } = params;
+    return this.saveWordProgressAttempt({ ...params, isOverride: false });
+  }
+
+  /**
+   * Override a previous incorrect attempt on a word ("I was right"), reversing the incorrect
+   * count and applying a positive mastery delta relative to before the incorrect attempt.
+   */
+  static async overrideWordAttempt(params: {
+    category: string;
+    wordId: string;
+    prompt: string;
+    answer: string;
+  }): Promise<WordProgress> {
+    return this.saveWordProgressAttempt({ ...params, isCorrect: true, isOverride: true });
+  }
+
+  private static async saveWordProgressAttempt(params: {
+    category: string;
+    wordId: string;
+    prompt: string;
+    answer: string;
+    isCorrect: boolean;
+    isOverride: boolean;
+  }): Promise<WordProgress> {
+    const { category, wordId, prompt, answer, isCorrect, isOverride } = params;
     const now = new Date().toISOString();
+    const cacheKey = `${APP_LANGUAGE_ID}:${wordId}`;
 
     // 1. Try Supabase if authenticated
     if (supabase) {
@@ -87,19 +173,23 @@ export class ProgressService {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           // Fetch existing word progress
-          const { data: existing } = await supabase
-            .from('word_progress')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('language_id', APP_LANGUAGE_ID)
-            .eq('word_id', wordId)
-            .single();
+          const { data: existing } = await querySingleOrMaybeSingle(
+            supabase
+              .from('word_progress')
+              .select('*')
+              .eq('user_id', user.id)
+              .eq('language_id', APP_LANGUAGE_ID)
+              .eq('word_id', wordId)
+          );
 
-          const timesCorrect = (existing?.times_correct || 0) + (isCorrect ? 1 : 0);
-          const timesIncorrect = (existing?.times_incorrect || 0) + (isCorrect ? 0 : 1);
-          // Mastery formula: each correct adds 1, incorrect resets by 1 (clamped 0 to 5)
-          const currentMastery = existing?.mastery_level || 0;
-          const masteryLevel = Math.max(0, Math.min(5, currentMastery + (isCorrect ? 1 : -1)));
+          const { timesCorrect, timesIncorrect, masteryLevel } = this.resolveWordProgressSnapshot({
+            cacheKey,
+            isOverride,
+            isCorrect,
+            existingCorrect: existing?.times_correct || 0,
+            existingIncorrect: existing?.times_incorrect || 0,
+            existingMastery: existing?.mastery_level || 0
+          });
 
           const { data, error } = await supabase
             .from('word_progress')
@@ -152,9 +242,14 @@ export class ProgressService {
       masteryLevel: 0
     };
 
-    const timesCorrect = existing.timesCorrect + (isCorrect ? 1 : 0);
-    const timesIncorrect = existing.timesIncorrect + (isCorrect ? 0 : 1);
-    const masteryLevel = Math.max(0, Math.min(5, existing.masteryLevel + (isCorrect ? 1 : -1)));
+    const { timesCorrect, timesIncorrect, masteryLevel } = this.resolveWordProgressSnapshot({
+      cacheKey,
+      isOverride,
+      isCorrect,
+      existingCorrect: existing.timesCorrect,
+      existingIncorrect: existing.timesIncorrect,
+      existingMastery: existing.masteryLevel
+    });
 
     const updated: WordProgress = {
       ...existing,
@@ -172,14 +267,14 @@ export class ProgressService {
   }
 
   /**
-   * Return all word IDs that have reached full mastery (masteryLevel >= 5)
+   * Return all word IDs that have reached full mastery (masteryLevel >= MASTERY_THRESHOLD)
    */
   static async getMasteredWordIds(): Promise<Set<string>> {
     const mastered = new Set<string>();
 
     const localWords = getLocalWordProgress();
     for (const [id, word] of Object.entries(localWords)) {
-      if (word.masteryLevel >= 5) {
+      if (word.masteryLevel >= MASTERY_THRESHOLD) {
         mastered.add(id);
       }
     }
@@ -192,7 +287,7 @@ export class ProgressService {
             .from('word_progress')
             .select('word_id, language_id')
             .eq('user_id', user.id)
-            .gte('mastery_level', 5);
+            .gte('mastery_level', MASTERY_THRESHOLD);
           if (data) {
             data
               .filter((row: any) => !row.language_id || row.language_id === APP_LANGUAGE_ID)
@@ -418,11 +513,12 @@ export class ProgressService {
       ? Math.round(sessions.reduce((acc, s) => acc + s.percentage, 0) / totalQuizzesTaken)
       : 0;
 
-    const wordsMasteredCount = words.filter(w => w.masteryLevel >= 5).length;
-    const wordsLearningCount = words.filter(w => w.masteryLevel < 5).length;
+    const canonicalWords = deduplicateWordsByCanonicalId(words);
+    const wordsMasteredCount = canonicalWords.filter(w => w.masteryLevel >= MASTERY_THRESHOLD).length;
+    const wordsLearningCount = canonicalWords.filter(w => w.masteryLevel < MASTERY_THRESHOLD).length;
 
     // Words to review: answered incorrectly and not yet cleared (clears after 2 knowns / masteryLevel >= 2)
-    const wordsToReview = words
+    const wordsToReview = canonicalWords
       .filter(w => w.timesIncorrect > 0 && w.masteryLevel < 2)
       .sort((a, b) => b.timesIncorrect - a.timesIncorrect)
       .slice(0, 10);

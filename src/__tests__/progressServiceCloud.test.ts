@@ -16,6 +16,7 @@ const makeChain = (result: Result) => {
   c.upsert = vi.fn(() => c);
   c.insert = vi.fn(() => c);
   c.single = vi.fn(() => Promise.resolve(result));
+  c.maybeSingle = vi.fn(() => Promise.resolve(result));
   c.then = (res: (v: Result) => unknown, rej: (e: unknown) => unknown) =>
     Promise.resolve(result).then(res, rej);
   return c;
@@ -96,12 +97,12 @@ describe('ProgressService - Storage Hardening & Signed-In Cloud Sync', () => {
         times_correct: 5,
         times_incorrect: 1,
         last_tested_at: '2026-11-13T00:00:00Z',
-        mastery_level: 5,
+        mastery_level: 3,
       };
 
       const { chains } = mockSignedIn({
         word_progress: [
-          { data: { ...savedRow, times_correct: 4, mastery_level: 5 } },
+          { data: { ...savedRow, times_correct: 4, mastery_level: 3 } },
           { data: savedRow, error: null },
         ],
       });
@@ -116,7 +117,7 @@ describe('ProgressService - Storage Hardening & Signed-In Cloud Sync', () => {
 
       expect(chains.word_progress).toHaveLength(2);
       expect(res.userId).toBe('user-ru-1');
-      expect(res.masteryLevel).toBe(5);
+      expect(res.masteryLevel).toBe(3);
       expect(res.timesCorrect).toBe(5);
 
       vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -139,7 +140,7 @@ describe('ProgressService - Storage Hardening & Signed-In Cloud Sync', () => {
       localStorage.setItem(
         'russian_word_progress',
         JSON.stringify({
-          'local-mastered': { wordId: 'local-mastered', masteryLevel: 5 },
+          'local-mastered': { wordId: 'local-mastered', masteryLevel: 3 },
           'local-learning': { wordId: 'local-learning', masteryLevel: 2 },
         })
       );
@@ -190,7 +191,7 @@ describe('ProgressService - Storage Hardening & Signed-In Cloud Sync', () => {
         },
         word_progress: {
           data: [
-            { id: 'w1', user_id: 'user-ru-1', category: 'words', word_id: 'вода', prompt: 'вода', answer: 'water', times_correct: 5, times_incorrect: 0, last_tested_at: 't', mastery_level: 5 },
+            { id: 'w1', user_id: 'user-ru-1', category: 'words', word_id: 'вода', prompt: 'вода', answer: 'water', times_correct: 5, times_incorrect: 0, last_tested_at: 't', mastery_level: 3 },
             { id: 'w2', user_id: 'user-ru-1', category: 'words', word_id: 'хлеб', prompt: 'хлеб', answer: 'bread', times_correct: 0, times_incorrect: 3, last_tested_at: 't', mastery_level: 0 },
           ],
         },
