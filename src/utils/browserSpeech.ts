@@ -290,16 +290,16 @@ export const getRussianVoiceInstallInstructions = (): string => {
     return 'To add Russian voices in Windows, go to Settings → Time & Language → Language & Region → Add a language → Russian → Install the language pack.';
   }
   
+  if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+    return 'For iOS, go to Settings → Accessibility → Spoken Content → Voices → Russian → Download the voice.';
+  }
+  
   if (userAgent.includes('mac os') || userAgent.includes('macintosh')) {
     return 'To add Russian voices on macOS, go to System Preferences → Accessibility → Spoken Content → System Voice → Customize → Russian → Download the voice.';
   }
   
   if (userAgent.includes('android')) {
     return 'For Android, go to Settings → Language & Input → Text-to-speech output → Preferred engine settings → Install voice data → Russian.';
-  }
-  
-  if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
-    return 'For iOS, go to Settings → Accessibility → Spoken Content → Voices → Russian → Download the voice.';
   }
   
   return 'To add Russian voices, check your device settings for language and speech options, then download a Russian voice pack.';
