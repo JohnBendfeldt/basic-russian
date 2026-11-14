@@ -280,6 +280,17 @@ const App: React.FC = () => {
             Basic Russian
           </h1>
           <div className="header-actions">
+            <a
+              href="https://basiclanguage.school"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="header-action-btn language-hub-pill"
+              title="Explore 15+ world languages on Basic Language School"
+              aria-label="Explore 15+ world languages on Basic Language School"
+            >
+              <span aria-hidden="true">🌐</span>
+              <span className="hub-pill-text">15+ Languages</span>
+            </a>
             {installPrompt && (
               <button onClick={handleInstallClick} className="install-button">
                 Install App
@@ -307,7 +318,16 @@ const App: React.FC = () => {
       
       <footer>
         <p>
-          © {new Date().getFullYear()} Basic Russian Learning ·{' '}
+          © {new Date().getFullYear()} Basic Russian Learning · Part of{' '}
+          <a
+            href="https://basiclanguage.school"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            Basic Language School
+          </a>{' '}
+          ·{' '}
           <a
             href="/privacy"
             className="footer-link"

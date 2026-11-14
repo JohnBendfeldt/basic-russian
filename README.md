@@ -7,7 +7,7 @@ An interactive, responsive Russian language learning application featuring Micro
 [![TypeScript](https://img.shields.io/badge/TypeScript%205-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22%20LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Vite](https://img.shields.io/badge/Vite%206-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Vitest](https://img.shields.io/badge/Vitest-86_Passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-87_Passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20RLS-3ECF8E?style=for-the-badge&logo=supabase&logoColor=black)](https://supabase.com/)
 [![PWA](https://img.shields.io/badge/PWA-Ready-f59e0b?style=for-the-badge&logo=pwa&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![Netlify](https://img.shields.io/badge/Hosted%20on-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://basicrussian.org)
@@ -22,6 +22,7 @@ An interactive, responsive Russian language learning application featuring Micro
 Designed with modern web performance and security in mind, it provides instant neural audio feedback, live Latin-to-Cyrillic phonetic typing, an adaptive quiz engine with spaced-repetition mastery, optional OAuth cloud sync, and offline PWA learning capabilities.
 
 * 🚀 **Live Application**: [https://basicrussian.org](https://basicrussian.org)
+* 🌐 **Multi-Language Hub**: Part of [Basic Language School](https://basiclanguage.school) (15+ world languages across 210 bidirectional pairs).
 
 ---
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaUser, FaSignOutAlt, FaChartLine, FaSignInAlt, FaGoogle, FaMicrosoft, FaGithub, FaShieldAlt, FaFileContract } from 'react-icons/fa';
+import { FaUser, FaSignOutAlt, FaChartLine, FaSignInAlt, FaGoogle, FaMicrosoft, FaGithub, FaShieldAlt, FaFileContract, FaGlobe } from 'react-icons/fa';
 import { supabase, signOutUser, isSafeHttpsUrl } from '../services/supabaseClient';
 import { ProgressService } from '../services/progressService';
 import AuthModal from './AuthModal';
@@ -135,6 +135,17 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, initialUser = nu
                 <FaChartLine />
                 <span>My Progress & Stats</span>
               </button>
+
+              <a
+                href="https://basiclanguage.school"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dropdown-item"
+                onClick={() => setMenuOpen(false)}
+              >
+                <FaGlobe />
+                <span>15+ Languages Hub</span>
+              </a>
 
               {onNavigate && (
                 <>

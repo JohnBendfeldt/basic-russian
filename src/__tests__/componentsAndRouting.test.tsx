@@ -211,4 +211,18 @@ describe('App Routing, Numbers & Time, RussianKeyboard, AuthModal & UserMenu', (
     );
     expect(screen.getByAltText('Olga')).toHaveAttribute('referrerpolicy', 'no-referrer');
   });
+
+  it('renders secure links to Basic Language School in the header, footer, and user menu', async () => {
+    render(<App />);
+
+    const headerLink = await screen.findByRole('link', {
+      name: /Explore 15\+ world languages on Basic Language School/i,
+    });
+    expect(headerLink).toHaveAttribute('href', 'https://basiclanguage.school');
+    expect(headerLink).toHaveAttribute('rel', 'noopener noreferrer');
+
+    const footerLink = screen.getByRole('link', { name: 'Basic Language School' });
+    expect(footerLink).toHaveAttribute('href', 'https://basiclanguage.school');
+    expect(footerLink).toHaveAttribute('rel', 'noopener noreferrer');
+  });
 });
