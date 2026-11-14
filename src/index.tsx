@@ -19,8 +19,8 @@ reportWebVitals();
 
 // Keep the service worker precache updated silently in the background without
 // forcing mid-session full page reloads. Because index.html is excluded from
-// excluded from precache and served NetworkFirst with no-cache headers, initial
-// page loads already fetch the latest bundle directly from the network.
+// precache and served NetworkFirst with no-cache headers, initial page loads
+// already fetch the latest bundle directly from the network.
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   const checkForUpdates = () => {
     navigator.serviceWorker.getRegistration().then((reg) => {

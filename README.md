@@ -7,7 +7,7 @@ An interactive, responsive Russian language learning application featuring Micro
 [![TypeScript](https://img.shields.io/badge/TypeScript%205-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22%20LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Vite](https://img.shields.io/badge/Vite%206-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Vitest](https://img.shields.io/badge/Vitest-87_Passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-98_Passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20RLS-3ECF8E?style=for-the-badge&logo=supabase&logoColor=black)](https://supabase.com/)
 [![PWA](https://img.shields.io/badge/PWA-Ready-f59e0b?style=for-the-badge&logo=pwa&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![Netlify](https://img.shields.io/badge/Hosted%20on-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://basicrussian.org)
@@ -37,7 +37,7 @@ Designed with modern web performance and security in mind, it provides instant n
 * **⌨️ Integrated Cyrillic Keyboard & Live Transliteration**: Type Russian directly without a physical Russian keyboard using either the on-screen Cyrillic keyboard or live phonetic Latin-to-Cyrillic transliteration.
 * **🎯 Adaptive Quiz Engine (`/quiz`)**:
   * Topic category filtering, Russian-to-English and English-to-Russian modes, and Levenshtein-distance fuzzy matching to forgive minor typos and soft/hard sign nuances.
-  * Spaced-repetition mastery tracking (levels `0`–`5`), audio reinforcement, and end-of-session score recaps.
+  * Spaced-repetition mastery tracking (levels `0`–`3`), audio reinforcement, and end-of-session score recaps.
 * **☁️ Guest-First Progress & OAuth Cloud Sync**:
   * **100% Playable Without Login**: Guest quiz history and weak words are saved locally in `localStorage` and viewable in the **My Stats** modal.
   * **1-Click Single Sign-On**: Optional login via **Google**, **Microsoft Entra ID**, or **GitHub** (powered by Supabase Auth OAuth 2.0 / OIDC) seamlessly migrates guest progress to PostgreSQL and syncs across devices.
@@ -127,6 +127,13 @@ The application is configured for deployment on **Netlify** via [`netlify.toml`]
 
 ---
 
+## 🤝 Contributing & Security
+
+* **Contributing**: Native-speaker Russian translation fixes, Cyrillic keyboard/transliteration improvements, accessibility fixes, and bug fixes with tests are welcome — please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
+* **Security**: Please report suspected vulnerabilities privately rather than opening a public issue; see [`SECURITY.md`](SECURITY.md) for disclosure instructions.
+
+---
+
 ## 👤 Author
 
 **John Bendfeldt**  
@@ -137,4 +144,6 @@ The application is configured for deployment on **Netlify** via [`netlify.toml`]
 ---
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project's source code is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+> **Branding Note**: While the source code is open source under MIT, the **Basic Russian** / **Basic Language School** names, domain branding (`basicrussian.org`), and custom academic emblems are reserved for the official platform.
