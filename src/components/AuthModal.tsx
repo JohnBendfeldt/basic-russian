@@ -7,6 +7,23 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
+const sanitizeAuthError = (
+  raw?: string | null,
+  fallback = 'Authentication failed. Please try again.'
+): string => {
+  if (!raw || typeof raw !== 'string') return fallback;
+  const cleaned = raw
+    .replace(/<[^>]*>/g, '')
+    .replace(/https?:\/\/\S+/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!cleaned) return fallback;
+  if (/postgres|pgrst|pg_|sqlstate|syntax error|stack trace|at \S+\s+\(/i.test(cleaned)) {
+    return fallback;
+  }
+  return cleaned.slice(0, 180);
+};
+
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [loadingProvider, setLoadingProvider] = useState<'google' | 'azure' | 'github' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -19,9 +36,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setErrorMessage(null);
     try {
       const { error } = await signInWithGoogle();
-      if (error) setErrorMessage(error.message);
+      if (error) setErrorMessage(sanitizeAuthError(error.message, 'Failed to initialize Google login'));
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to initialize Google login');
+      setErrorMessage(sanitizeAuthError(err?.message, 'Failed to initialize Google login'));
     } finally {
       setLoadingProvider(null);
     }
@@ -32,9 +49,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setErrorMessage(null);
     try {
       const { error } = await signInWithGithub();
-      if (error) setErrorMessage(error.message);
+      if (error) setErrorMessage(sanitizeAuthError(error.message, 'Failed to initialize GitHub login'));
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to initialize GitHub login');
+      setErrorMessage(sanitizeAuthError(err?.message, 'Failed to initialize GitHub login'));
     } finally {
       setLoadingProvider(null);
     }
@@ -45,9 +62,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setErrorMessage(null);
     try {
       const { error } = await signInWithEntra();
-      if (error) setErrorMessage(error.message);
+      if (error) setErrorMessage(sanitizeAuthError(error.message, 'Failed to initialize Microsoft login'));
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to initialize Microsoft login');
+      setErrorMessage(sanitizeAuthError(err?.message, 'Failed to initialize Microsoft login'));
     } finally {
       setLoadingProvider(null);
     }

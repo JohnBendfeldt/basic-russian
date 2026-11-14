@@ -90,6 +90,9 @@ export const signInWithGoogle = async (): Promise<{ error: Error | null }> => {
   return { error: error as Error | null };
 };
 
+const JWT_FORMAT_RE = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+const MAX_ID_TOKEN_LENGTH = 4096;
+
 export const consumeGoogleIdTokenFromHash = async (): Promise<void> => {
   if (!supabase || typeof window === 'undefined' || !window.location.hash) return;
   const rawHash = window.location.hash.substring(1);
@@ -107,22 +110,22 @@ export const consumeGoogleIdTokenFromHash = async (): Promise<void> => {
     // ignore storage errors
   }
 
+  // Always scrub the token fragment from the URL before verifying or aborting
+  // so stale or injected credentials do not linger in browser history.
   if (typeof window.history?.replaceState === 'function') {
     window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
   }
 
-  const { error } = await supabase.auth.signInWithIdToken({
+  // Require the matching session-bound nonce (prevents Login CSRF) and basic JWT structure/bounds.
+  if (!rawNonce || idToken.length > MAX_ID_TOKEN_LENGTH || !JWT_FORMAT_RE.test(idToken)) {
+    return;
+  }
+
+  await supabase.auth.signInWithIdToken({
     provider: 'google',
     token: idToken,
     nonce: rawNonce,
   });
-
-  if (error && rawNonce) {
-    await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: idToken,
-    });
-  }
 };
 
 /**

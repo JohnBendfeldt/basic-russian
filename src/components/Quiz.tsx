@@ -313,7 +313,9 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     // Check if user answer is digits (allowing spaces like "1 000" or raw "1000")
     const userDigits = cleanUser.replace(/\s+/g, '');
     if (/^\d+$/.test(userDigits)) {
-      const possibleWordForms = numberEquivalents[userDigits] || [];
+      const possibleWordForms = Object.prototype.hasOwnProperty.call(numberEquivalents, userDigits)
+        ? numberEquivalents[userDigits]
+        : [];
       return possibleWordForms.some(wordForm => 
         cleanTarget === wordForm || cleanTarget.includes(wordForm)
       );
@@ -322,7 +324,9 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     // Check if target is digits
     const targetDigits = cleanTarget.replace(/\s+/g, '');
     if (/^\d+$/.test(targetDigits)) {
-      const possibleWordForms = numberEquivalents[targetDigits] || [];
+      const possibleWordForms = Object.prototype.hasOwnProperty.call(numberEquivalents, targetDigits)
+        ? numberEquivalents[targetDigits]
+        : [];
       return possibleWordForms.some(wordForm =>
         cleanUser === wordForm || cleanUser.includes(wordForm)
       );
@@ -341,21 +345,23 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     return false;
   };
 
-  const levenshteinDistance = (a: string, b: string): number => {
-    const matrix = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(null));
-    for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
-    for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+  const levenshteinDistance = (rawA: string, rawB: string): number => {
+    const MAX_LEN = 250;
+    const a = rawA.length > MAX_LEN ? rawA.slice(0, MAX_LEN) : rawA;
+    const b = rawB.length > MAX_LEN ? rawB.slice(0, MAX_LEN) : rawB;
+    if (a.length < b.length) return levenshteinDistance(b, a);
+    if (b.length === 0) return a.length;
+    let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
     for (let i = 1; i <= a.length; i++) {
+      const curr = new Array<number>(b.length + 1);
+      curr[0] = i;
       for (let j = 1; j <= b.length; j++) {
         const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j - 1] + cost
-        );
+        curr[j] = Math.min(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
       }
+      prev = curr;
     }
-    return matrix[a.length][b.length];
+    return prev[b.length];
   };
 
   const getSpellingDifferences = (userInput: string, correctAnswer: string): Array<{ char: string; isDiff: boolean }> => {
@@ -1011,11 +1017,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+    const newValue = e.target.value.slice(0, 250);
     const selectionStart = e.target.selectionStart || 0;
 
     if (!needsRussianKeyboard) {
-      setUserAnswer(newValue);
+      setUserAnswer(newValue.slice(0, 250));
       setLastInput(newValue);
       return;
     }
@@ -1031,7 +1037,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       return;
     }
 
-    setUserAnswer(newValue);
+    setUserAnswer(newValue.slice(0, 250));
 
     const lastCharIndex = selectionStart - 1;
     if (lastCharIndex >= 1 && lastCharIndex < newValue.length) {
@@ -1113,7 +1119,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       }
     }
 
-    setUserAnswer(newValue);
+    setUserAnswer(newValue.slice(0, 250));
 
     // Keep cursor right after inserted character, preventing jumping to start
     setTimeout(() => {
@@ -1479,6 +1485,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             type="text"
             className="quiz-input"
             value={userAnswer}
+            maxLength={250}
             onChange={handleInputChange} 
             onKeyDown={handleKeyDown}
             placeholder={needsRussianKeyboard ? "Type in English (press SPACE)..." : "Your answer here..."}

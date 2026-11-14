@@ -143,6 +143,47 @@ describe('supabaseClient - configured cloud mode', () => {
     replaceStateSpy.mockRestore();
   });
 
+  it('rejects hash id_token without session nonce (Login CSRF defense) while scrubbing hash', async () => {
+    const { mod, auth } = await loadModule(env);
+    sessionStorage.removeItem(mod.GOOGLE_NONCE_STORAGE_KEY);
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
+    window.location.hash = '#id_token=google.jwt.token';
+
+    await mod.consumeGoogleIdTokenFromHash();
+
+    expect(auth.signInWithIdToken).not.toHaveBeenCalled();
+    expect(replaceStateSpy).toHaveBeenCalledTimes(1);
+    replaceStateSpy.mockRestore();
+  });
+
+  it('does not retry signInWithIdToken without nonce when nonced exchange fails', async () => {
+    const { mod, auth } = await loadModule(env);
+    await mod.signInWithGoogle();
+    auth.signInWithIdToken.mockResolvedValueOnce({ error: { message: 'Nonce mismatch' } });
+    window.location.hash = '#id_token=google.jwt.token';
+
+    await mod.consumeGoogleIdTokenFromHash();
+
+    expect(auth.signInWithIdToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects malformed or oversized id_token values in URL hash while scrubbing hash', async () => {
+    const { mod, auth } = await loadModule(env);
+    const replaceStateSpy = vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
+
+    await mod.signInWithGoogle();
+    window.location.hash = '#id_token=not-a-jwt';
+    await mod.consumeGoogleIdTokenFromHash();
+
+    await mod.signInWithGoogle();
+    window.location.hash = `#id_token=hdr.${'a'.repeat(4100)}.sig`;
+    await mod.consumeGoogleIdTokenFromHash();
+
+    expect(auth.signInWithIdToken).not.toHaveBeenCalled();
+    expect(replaceStateSpy).toHaveBeenCalledTimes(2);
+    replaceStateSpy.mockRestore();
+  });
+
   it('triggers Google (fallback), GitHub, and Microsoft Entra OAuth with correct redirect and scopes', async () => {
     const { mod, auth } = await loadModule({ ...env, googleClientId: '' });
 

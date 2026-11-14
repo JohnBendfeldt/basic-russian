@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import { ProgressService } from '../services/progressService';
 
 const ROOT_DIR = path.resolve(__dirname, '../..');
 
@@ -24,6 +25,7 @@ describe('Security Headers, CSP, HTML Script-Injection & PostgreSQL RLS Regressi
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("script-src 'self'");
     expect(csp).toContain("worker-src 'self'");
+    expect(csp).toContain("manifest-src 'self'");
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("base-uri 'self'");
     expect(csp).toContain("frame-ancestors 'none'");
@@ -73,5 +75,64 @@ describe('Security Headers, CSP, HTML Script-Injection & PostgreSQL RLS Regressi
     const manifest = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'public/manifest.json'), 'utf-8'));
     expect(manifest.name).toBeTruthy();
     expect(['.', '/']).toContain(manifest.start_url);
+    expect(netlifyToml).toContain('for = "/*.html"');
+  });
+
+  describe('Input Hardening, Prototype Guards & Service Worker No-Reload Regression', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('never triggers window.location.reload from service worker controllerchange in src/index.tsx', () => {
+      const indexTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/index.tsx'), 'utf-8');
+      expect(indexTsx).not.toContain('window.location.reload');
+      expect(indexTsx).not.toContain('controllerchange');
+    });
+
+    it('sanitizes unsafe localStorage keys, arrays, and out-of-range metrics in ProgressService', async () => {
+      await ProgressService.recordWordAttempt({
+        category: 'phrases',
+        wordId: 'constructor',
+        prompt: 'привет',
+        answer: 'hello',
+        isCorrect: true,
+      });
+      await ProgressService.recordWordAttempt({
+        category: 'phrases',
+        wordId: '__proto__',
+        prompt: 'спасибо',
+        answer: 'thank you',
+        isCorrect: true,
+      });
+      expect(localStorage.getItem('russian_word_progress')).toBeNull();
+
+      localStorage.setItem(
+        'russian_word_progress',
+        JSON.stringify({
+          __proto__: { wordId: '__proto__', masteryLevel: 5 },
+          constructor: { wordId: 'constructor', masteryLevel: 5 },
+          badArray: [1, 2, 3],
+          ok_word: { wordId: 'ok_word', masteryLevel: 99, timesCorrect: -3 },
+        })
+      );
+      localStorage.setItem(
+        'russian_quiz_sessions',
+        JSON.stringify([
+          null,
+          'bad',
+          { category: 'phrases', score: 999, totalQuestions: 10, percentage: 999 },
+        ])
+      );
+
+      const mastered = await ProgressService.getMasteredWordIds();
+      expect(mastered.has('ok_word')).toBe(true);
+      expect(mastered.has('constructor')).toBe(false);
+      expect(mastered.has('__proto__')).toBe(false);
+
+      const stats = await ProgressService.getUserStats();
+      expect(stats.wordsMasteredCount).toBe(1);
+      expect(stats.recentSessions[0].score).toBe(10);
+      expect(stats.recentSessions[0].percentage).toBe(100);
+    });
   });
 });
