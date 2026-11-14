@@ -122,6 +122,26 @@ header h1:hover .russia-flag {
   transform: rotate(-8deg) scale(1.08);
 }
 
+.brand-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.08;
+  gap: 0.18rem;
+}
+
+.brand-title-main {
+  display: block;
+}
+
+.brand-parent-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
 main {
   flex: 1;
   max-width: 1200px;
@@ -2890,6 +2910,10 @@ html {
     height: 40px;
     border-radius: 11px;
   }
+
+  .brand-parent-tag {
+    font-size: 0.64rem;
+  }
 }
 
 /* Add scroll margin to section headers for better positioning */
@@ -3195,6 +3219,22 @@ html {
   justify-content: center;
   font-size: 1.25rem;
   margin-bottom: 0.75rem;
+}
+
+.auth-ecosystem-badge {
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 0.6rem;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .auth-modal-header h2 {

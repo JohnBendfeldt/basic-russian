@@ -64,9 +64,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           <div className="auth-modal-icon">
             <FaLock />
           </div>
+          <div className="auth-ecosystem-badge">
+            <span aria-hidden="true">🌐</span> Basic Language School Account
+          </div>
           <h2>Sync Your Learning Progress</h2>
           <p>
-            Choose a provider to save your quiz history, track words mastered, and sync across all your devices.
+            Sign in with your <strong>Basic Language School</strong> account to save your quiz history, track words mastered, and sync across all 15+ language apps.
           </p>
         </div>
 
