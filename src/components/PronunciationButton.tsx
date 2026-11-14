@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaVolumeUp } from 'react-icons/fa';
 import { speak, initVoices } from '../utils/speech';
 import { containsCyrillic } from '../utils/transliteration';
+import { getLocalAudioUrl } from '../data/audioManifest';
 
 interface PronunciationButtonProps {
   text: string;
@@ -112,8 +113,11 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
 
   const getAudioPath = (): string => {
     if (!text) return '';
-    
-    const normalizedText = text.toLowerCase().trim();
+
+    const manifestUrl = getLocalAudioUrl(text, audioCategory);
+    if (manifestUrl) return manifestUrl;
+
+    const normalizedText = text.normalize('NFC').toLowerCase().trim();
     
     // Use provided audioCategory if available
     let category = audioCategory;
@@ -138,7 +142,7 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     const cleanText = normalizedText
       .split('/')[0]
       .replace(/\s*\([^)]*\)\s*/g, '')
-      .replace(/[?.,!\\]/g, '')
+      .replace(/[?.,!\\«»:"'’]/g, '')
       .replace(/\.\.+/g, '')
       .trim();
     const fileName = cleanText.replace(/\s+/g, '_');

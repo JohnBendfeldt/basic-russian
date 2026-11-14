@@ -85,7 +85,7 @@ describe('Russian Transliteration, Browser Speech, Speech Queue & PronunciationB
   });
 
   describe('browserSpeech.ts & speech.ts', () => {
-    it('discovers Russian female voices, speaks via browser TTS, and cancels cleanly', async () => {
+    it('prioritizes local studio MP3 over browser voices and falls back to Russian TTS for unrecorded text', async () => {
       const utterances: any[] = [];
       const mockSynth = {
         getVoices: vi.fn(() => [
@@ -105,12 +105,22 @@ describe('Russian Transliteration, Browser Speech, Speech Queue & PronunciationB
       expect(browserSpeech.getBestRussianVoice()?.name).toBe('Milena Russian');
       expect(browserSpeech.isRussianVoiceAvailable()).toBe(true);
 
-      const onEnd = vi.fn();
-      speechMod.speak('Привет', 'ru-RU', 'btn-ru-1', onEnd);
+      // Even when a browser Russian voice is installed, studio neural MP3 plays first
+      const onStudioEnd = vi.fn();
+      speechMod.speak('Привет', 'ru-RU', 'btn-ru-1', onStudioEnd);
+      await waitFor(() => expect(FakeAudio.instances).toHaveLength(1));
+      expect(FakeAudio.instances[0].src).toBe('/audio/phrases/привет.mp3');
+      expect(utterances).toHaveLength(0);
+      FakeAudio.instances[0].onended?.();
+      expect(onStudioEnd).toHaveBeenCalledTimes(1);
+
+      // Only unrecorded text falls back to browser TTS
+      const onTtsEnd = vi.fn();
+      speechMod.speak('Тестовая кастомная фраза', 'ru-RU', 'btn-ru-2', onTtsEnd);
       await waitFor(() => expect(utterances).toHaveLength(1));
-      expect(utterances[0].text).toBe('Привет');
+      expect(utterances[0].text).toBe('Тестовая кастомная фраза');
       utterances[0].onend();
-      expect(onEnd).toHaveBeenCalledTimes(1);
+      expect(onTtsEnd).toHaveBeenCalledTimes(1);
 
       speechMod.cancelAllSpeech();
       expect(mockSynth.cancel).toHaveBeenCalled();

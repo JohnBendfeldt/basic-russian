@@ -1,6 +1,7 @@
 /**
- * Browser Speech Synthesis for Russian language with audio file fallback
+ * Browser Speech Synthesis for Russian language with studio neural MP3 first
  */
+import { getLocalAudioUrl } from '../data/audioManifest';
 
 // Audio file mapping
 interface AudioFileMap {
@@ -104,8 +105,8 @@ const getAudioFileForText = async (text: string): Promise<string | null> => {
           });
         }
         
-        // Map examples, phrases, numbers and words
-        ['examples', 'phrases', 'numbers', 'words'].forEach(category => {
+        // Map examples, phrases, numbers, time and words
+        ['examples', 'phrases', 'numbers', 'time', 'words'].forEach(category => {
           if (data.files[category]) {
             data.files[category].forEach((file: any) => {
               const word = file.filename.replace('.mp3', '').replace(/_/g, ' ');
@@ -145,8 +146,8 @@ const getAudioFileForText = async (text: string): Promise<string | null> => {
 };
 
 /**
- * Speaks the text using browser speech synthesis
- * Falls back to local audio files only if no Russian voice is available
+ * Speaks Russian text, always prioritizing pre-rendered studio ru-RU-SvetlanaNeural MP3s
+ * and falling back to browser SpeechSynthesis only if no local MP3 exists or playback fails.
  */
 export const speakText = async (
   text: string, 
@@ -155,36 +156,38 @@ export const speakText = async (
   onError?: (error: Error) => void
 ): Promise<void> => {
   try {
-    // Check if a Russian voice is available in the browser
-    const hasRussianVoice = isRussianVoiceAvailable();
-    
-    if (hasRussianVoice) {
-      // If Russian voice is available, use browser's speech synthesis
-      playWithBrowserTTS(text, lang, onEnd, onError);
-      return;
-    }
-    
-    // If no Russian voice is available, try to use a local audio file
-    const audioFilePath = await getAudioFileForText(text);
-    
+    // Always try pre-rendered studio neural MP3 first so voice stays consistent everywhere
+    const audioFilePath = getLocalAudioUrl(text) || await getAudioFileForText(text);
+
     if (audioFilePath) {
-      // Use audio element with local file
       const audio = new Audio(audioFilePath);
-      
-      audio.onended = () => {
+      let settled = false;
+
+      const finish = () => {
+        if (settled) return;
+        settled = true;
         if (onEnd) onEnd();
       };
-      
-      audio.onerror = () => {
-        // If local audio fails, fall back to browser TTS as last resort
+
+      const fallbackToTts = () => {
+        if (settled) return;
+        settled = true;
         playWithBrowserTTS(text, lang, onEnd, onError);
       };
-      
-      await audio.play();
-      return;
+
+      audio.onended = finish;
+      audio.onerror = fallbackToTts;
+
+      try {
+        await audio.play();
+        return;
+      } catch {
+        fallbackToTts();
+        return;
+      }
     }
-    
-    // If no audio file available either, use browser TTS as last resort
+
+    // No local MP3 matched: fall back to browser speech synthesis
     playWithBrowserTTS(text, lang, onEnd, onError);
   } catch (error) {
     console.error('Speech error:', error);
