@@ -9,6 +9,7 @@
 CREATE TABLE IF NOT EXISTS public.quiz_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  language_id VARCHAR(10) NOT NULL DEFAULT 'ru' CHECK (char_length(language_id) BETWEEN 2 AND 10),
   category VARCHAR(50) NOT NULL CHECK (char_length(category) BETWEEN 1 AND 50), -- 'alphabet', 'numbers', 'time', 'basicPhrases', 'commonWords', 'mixed'
   score INTEGER NOT NULL CHECK (score >= 0 AND score <= total_questions),
   total_questions INTEGER NOT NULL CHECK (total_questions > 0 AND total_questions <= 500),
@@ -29,16 +30,33 @@ CREATE INDEX IF NOT EXISTS idx_quiz_sessions_completed_at ON public.quiz_session
 CREATE TABLE IF NOT EXISTS public.word_progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  language_id VARCHAR(10) NOT NULL DEFAULT 'ru' CHECK (char_length(language_id) BETWEEN 2 AND 10),
   category VARCHAR(50) NOT NULL CHECK (char_length(category) BETWEEN 1 AND 50),
   word_id VARCHAR(150) NOT NULL CHECK (char_length(word_id) BETWEEN 1 AND 150), -- e.g. 'alphabet-А', 'phrases-Привет'
   prompt TEXT NOT NULL CHECK (char_length(prompt) <= 500),
   answer TEXT NOT NULL CHECK (char_length(answer) <= 500),
+  target TEXT CHECK (target IS NULL OR char_length(target) <= 500),
   times_correct INTEGER NOT NULL DEFAULT 0 CHECK (times_correct >= 0),
   times_incorrect INTEGER NOT NULL DEFAULT 0 CHECK (times_incorrect >= 0),
   last_tested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   mastery_level INTEGER NOT NULL DEFAULT 0 CHECK (mastery_level BETWEEN 0 AND 5), -- 0 (learning) to 5 (mastered)
-  CONSTRAINT unique_user_word UNIQUE (user_id, word_id)
+  CONSTRAINT unique_user_lang_word UNIQUE (user_id, language_id, word_id)
 );
+
+-- Idempotent migration for pre-existing installations consolidating into the shared database
+ALTER TABLE public.quiz_sessions ADD COLUMN IF NOT EXISTS language_id VARCHAR(10) NOT NULL DEFAULT 'ru' CHECK (char_length(language_id) BETWEEN 2 AND 10);
+ALTER TABLE public.word_progress ADD COLUMN IF NOT EXISTS language_id VARCHAR(10) NOT NULL DEFAULT 'ru' CHECK (char_length(language_id) BETWEEN 2 AND 10);
+ALTER TABLE public.word_progress ADD COLUMN IF NOT EXISTS target TEXT;
+ALTER TABLE public.word_progress DROP CONSTRAINT IF EXISTS unique_user_word;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'unique_user_lang_word'
+  ) THEN
+    ALTER TABLE public.word_progress
+      ADD CONSTRAINT unique_user_lang_word UNIQUE (user_id, language_id, word_id);
+  END IF;
+END $$;
 
 -- Index for fast lookup by user and category
 CREATE INDEX IF NOT EXISTS idx_word_progress_user_id ON public.word_progress(user_id);

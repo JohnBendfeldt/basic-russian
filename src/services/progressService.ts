@@ -1,6 +1,8 @@
 import { QuizSession, WordProgress, UserStats } from '../types/progress';
 import { supabase } from './supabaseClient';
 
+export const APP_LANGUAGE_ID = 'ru';
+
 const LOCAL_STORAGE_SESSIONS_KEY = 'russian_quiz_sessions';
 const LOCAL_STORAGE_WORDS_KEY = 'russian_word_progress';
 
@@ -89,6 +91,7 @@ export class ProgressService {
             .from('word_progress')
             .select('*')
             .eq('user_id', user.id)
+            .eq('language_id', APP_LANGUAGE_ID)
             .eq('word_id', wordId)
             .single();
 
@@ -102,6 +105,7 @@ export class ProgressService {
             .from('word_progress')
             .upsert({
               user_id: user.id,
+              language_id: APP_LANGUAGE_ID,
               category,
               word_id: wordId,
               prompt,
@@ -110,7 +114,7 @@ export class ProgressService {
               times_incorrect: timesIncorrect,
               last_tested_at: now,
               mastery_level: masteryLevel
-            }, { onConflict: 'user_id,word_id' })
+            }, { onConflict: 'user_id,language_id,word_id' })
             .select()
             .single();
 
@@ -186,11 +190,13 @@ export class ProgressService {
         if (user) {
           const { data } = await supabase
             .from('word_progress')
-            .select('word_id')
+            .select('word_id, language_id')
             .eq('user_id', user.id)
             .gte('mastery_level', 5);
           if (data) {
-            data.forEach((row: any) => mastered.add(row.word_id));
+            data
+              .filter((row: any) => !row.language_id || row.language_id === APP_LANGUAGE_ID)
+              .forEach((row: any) => mastered.add(row.word_id));
           }
         }
       } catch (err) {
@@ -223,6 +229,7 @@ export class ProgressService {
             .from('quiz_sessions')
             .insert({
               user_id: user.id,
+              language_id: APP_LANGUAGE_ID,
               category,
               score,
               total_questions: totalQuestions,
@@ -288,7 +295,9 @@ export class ProgressService {
               .eq('user_id', user.id)
           ]);
 
-          const sessions: QuizSession[] = (sessionsRes.data || []).map((s: any) => ({
+          const sessions: QuizSession[] = (sessionsRes.data || [])
+            .filter((s: any) => !s.language_id || s.language_id === APP_LANGUAGE_ID)
+            .map((s: any) => ({
             id: s.id,
             userId: s.user_id,
             category: s.category,
@@ -298,7 +307,9 @@ export class ProgressService {
             completedAt: s.completed_at
           }));
 
-          const words: WordProgress[] = (wordsRes.data || []).map((w: any) => ({
+          const words: WordProgress[] = (wordsRes.data || [])
+            .filter((w: any) => !w.language_id || w.language_id === APP_LANGUAGE_ID)
+            .map((w: any) => ({
             id: w.id,
             userId: w.user_id,
             category: w.category,
@@ -349,6 +360,7 @@ export class ProgressService {
       if (localWords.length > 0) {
         const payload = localWords.map(w => ({
           user_id: user.id,
+          language_id: APP_LANGUAGE_ID,
           category: w.category,
           word_id: w.wordId,
           prompt: w.prompt,
@@ -361,7 +373,7 @@ export class ProgressService {
 
         const { error } = await supabase
           .from('word_progress')
-          .upsert(payload, { onConflict: 'user_id,word_id' });
+          .upsert(payload, { onConflict: 'user_id,language_id,word_id' });
         if (error) wordsSynced = false;
       }
 
@@ -369,6 +381,7 @@ export class ProgressService {
       if (localSessions.length > 0) {
         const sessionPayload = localSessions.slice(0, 20).map(s => ({
           user_id: user.id,
+          language_id: APP_LANGUAGE_ID,
           category: s.category,
           score: s.score,
           total_questions: s.totalQuestions,
