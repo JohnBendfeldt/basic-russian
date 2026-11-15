@@ -134,5 +134,34 @@ describe('Security Headers, CSP, HTML Script-Injection & PostgreSQL RLS Regressi
       expect(stats.recentSessions[0].score).toBe(10);
       expect(stats.recentSessions[0].percentage).toBe(100);
     });
+
+    it('overrides transitive deepmerge with fail-closed prototype guard (GHSA-gcqx-w48m-w2h4)', async () => {
+      expect(pkgJson.devDependencies.deepmerge).toBe('file:vendor/deepmerge');
+      expect(pkgJson.overrides.deepmerge).toBe('$deepmerge');
+
+      const { default: deepmerge } = await import('deepmerge');
+      const hostile = JSON.parse(
+        '{"__proto__":{"isAdmin":true},"constructor":{"isAdmin":true},"prototype":{"isAdmin":true},"safe":{"ok":true}}'
+      ) as Record<string, unknown>;
+
+      const fromNullProto = deepmerge(Object.create(null) as Record<string, unknown>, hostile);
+      expect(Object.getPrototypeOf(fromNullProto)).toBe(Object.prototype);
+      expect(fromNullProto.isAdmin).toBeUndefined();
+      expect(Object.prototype.hasOwnProperty.call(fromNullProto, '__proto__')).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(fromNullProto, 'constructor')).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(fromNullProto, 'prototype')).toBe(false);
+      expect(fromNullProto.safe).toEqual({ ok: true });
+
+      const fromNullPlaceholder = deepmerge({ session: null } as Record<string, unknown>, { session: hostile });
+      expect(Object.getPrototypeOf(fromNullPlaceholder.session)).toBe(Object.prototype);
+      expect((fromNullPlaceholder.session as Record<string, unknown>).isAdmin).toBeUndefined();
+      expect((fromNullPlaceholder.session as Record<string, unknown>).safe).toEqual({ ok: true });
+
+      const fromHostileTarget = deepmerge(hostile, { extra: 1 });
+      expect(Object.getPrototypeOf(fromHostileTarget)).toBe(Object.prototype);
+      expect(fromHostileTarget.isAdmin).toBeUndefined();
+      expect(fromHostileTarget.extra).toBe(1);
+      expect(({} as Record<string, unknown>).isAdmin).toBeUndefined();
+    });
   });
 });
