@@ -100,6 +100,18 @@ const getAudioCategory = (questionType: string): 'alphabet' | 'phrases' | 'numbe
   }
 };
 
+const prefersReducedMotion = (): boolean =>
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const scrollToTop = (): void => {
+  window.scrollTo({
+    top: 0,
+    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+  });
+};
+
 const Quiz: React.FC<QuizProps> = ({ data }) => {
   // Session Goal: 5, 10, or 20 questions (persisted across sessions)
   const [sessionGoal, setSessionGoal] = useState<number>(() => {
@@ -144,6 +156,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const correctSoundRef = useRef<HTMLAudioElement | null>(null);
   const incorrectSoundRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const continueButtonRef = useRef<HTMLButtonElement>(null);
+  const phoneticGuideTriggerRef = useRef<HTMLButtonElement>(null);
+  const categoryTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const recapCategoryTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const isKeyboardTabNavRef = useRef(false);
   const [_lastInput, setLastInput] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [spellingDiff, setSpellingDiff] = useState<Array<{ char: string; isDiff: boolean }> | null>(null);
@@ -487,6 +504,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   const getRandomQuestion = useCallback((overrideMastered?: Set<string>, categoryOverride?: QuizCategoryFilter) => {
     setUserAnswer('');
+    setCursorPosition(0);
     setIsCorrect(null);
     setIsOverridden(false);
     setShowNext(false);
@@ -508,7 +526,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           prompt: 'No questions available in this category',
           answer: '',
           hint: 'Please choose another topic or reload',
-          russian: ''
+          russian: '',
+          isRussianToEnglish: false
         });
         return;
       }
@@ -550,6 +569,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             answer: 'soft sign/soft',
             hint: `What type of sign is "${character}"?`,
             russian: character,
+            isRussianToEnglish: true,
             id: selected.id,
             wordId: selected.wordId
           });
@@ -560,6 +580,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             answer: 'hard sign/hard',
             hint: `What type of sign is "${character}"?`,
             russian: character,
+            isRussianToEnglish: true,
             id: selected.id,
             wordId: selected.wordId
           });
@@ -570,6 +591,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             answer: pronunciation.toLowerCase(),
             hint: `How is the letter "${character}" pronounced in Russian?`,
             russian: character,
+            isRussianToEnglish: true,
             id: selected.id,
             wordId: selected.wordId
           });
@@ -586,6 +608,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             answer: english.toLowerCase(),
             hint: 'What does this mean in English?',
             russian: russian,
+            isRussianToEnglish: true,
             id: selected.id,
             wordId: selected.wordId
           });
@@ -596,6 +619,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             answer: russian.toLowerCase(),
             hint: 'How do you say this in Russian?',
             russian: russian,
+            isRussianToEnglish: false,
             id: selected.id,
             wordId: selected.wordId
           });
@@ -603,7 +627,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       }
 
       setTimeout(() => {
-        if (inputRef.current) {
+        if (inputRef.current && !isKeyboardTabNavRef.current) {
           inputRef.current.focus({ preventScroll: true });
         }
       }, 100);
@@ -615,6 +639,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         answer: 'привет',
         hint: 'How do you say this in Russian?',
         russian: 'Привет',
+        isRussianToEnglish: false,
         id: 'emergency-hello'
       });
     }
@@ -628,7 +653,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   const handleCompleteSession = useCallback(async () => {
     setIsSessionComplete(true);
     sessionStatsRef.current.isSaved = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
     try {
       await ProgressService.recordQuizSession({
         category: activeCategory === 'all' ? 'mixed' : activeCategory,
@@ -641,7 +666,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   }, [sessionScore, sessionGoal, activeCategory]);
 
   const startNewQuizSession = useCallback((newGoal?: number, newCategory?: QuizCategoryFilter) => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
     const goal = newGoal !== undefined ? newGoal : sessionGoal;
     const cat = newCategory !== undefined ? newCategory : activeCategory;
     if (newGoal !== undefined && newGoal !== sessionGoal) {
@@ -655,6 +680,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     setIsSessionComplete(false);
     setShowNext(false);
     setUserAnswer('');
+    setCursorPosition(0);
     setIsCorrect(null);
     setIsOverridden(false);
     setSpellingDiff(null);
@@ -676,6 +702,37 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     startNewQuizSession(sessionGoal, newCategory);
   };
 
+  const handleCategoryKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    currentId: QuizCategoryFilter,
+    tabRefsMap: React.MutableRefObject<Record<string, HTMLButtonElement | null>>
+  ) => {
+    const idx = QUIZ_CATEGORIES.findIndex(c => c.id === currentId);
+    if (idx === -1) return;
+    let nextIdx = -1;
+    if (e.key === 'ArrowRight') {
+      nextIdx = (idx + 1) % QUIZ_CATEGORIES.length;
+    } else if (e.key === 'ArrowLeft') {
+      nextIdx = (idx - 1 + QUIZ_CATEGORIES.length) % QUIZ_CATEGORIES.length;
+    } else if (e.key === 'Home') {
+      nextIdx = 0;
+    } else if (e.key === 'End') {
+      nextIdx = QUIZ_CATEGORIES.length - 1;
+    }
+    if (nextIdx !== -1) {
+      e.preventDefault();
+      isKeyboardTabNavRef.current = true;
+      const nextCat = QUIZ_CATEGORIES[nextIdx].id;
+      handleCategoryChange(nextCat);
+      requestAnimationFrame(() => {
+        tabRefsMap.current[nextCat]?.focus();
+        setTimeout(() => {
+          isKeyboardTabNavRef.current = false;
+        }, 150);
+      });
+    }
+  };
+
   const handleGoalChange = (newGoal: number) => {
     if (newGoal === sessionGoal) return;
     localStorage.setItem('russian_quiz_goal', newGoal.toString());
@@ -685,7 +742,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     if (sessionAnswered >= newGoal) {
       setIsSessionComplete(true);
       sessionStatsRef.current.isSaved = true;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTop();
       ProgressService.recordQuizSession({
         category: 'mixed',
         score: sessionScore,
@@ -694,20 +751,44 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     }
   };
 
-  // Global event listener for Enter key
+  // Close phonetic typing cheatsheet popover on Escape
+  useEffect(() => {
+    if (!showPhoneticGuide) return;
+    const handlePopoverKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowPhoneticGuide(false);
+        phoneticGuideTriggerRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handlePopoverKeyDown);
+    return () => document.removeEventListener('keydown', handlePopoverKeyDown);
+  }, [showPhoneticGuide]);
+
+  // Global event listener for Enter key shortcut when focus is not on another interactive control
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        if (isSessionComplete) {
-          e.preventDefault();
-          startNewQuizSession();
-        } else if (showNext && !(e.target instanceof HTMLInputElement)) {
-          e.preventDefault();
-          if (sessionAnswered >= sessionGoal) {
-            handleCompleteSession();
-          } else {
-            handleNextQuestion();
-          }
+      if (e.key !== 'Enter' || e.defaultPrevented) return;
+      if (document.querySelector('[role="dialog"], [role="menu"]')) return;
+
+      const target = e.target;
+      if (
+        target instanceof Element &&
+        target.closest('button, a, input, select, textarea, [role="button"], [role="tab"], [role="menuitem"], [contenteditable="true"]')
+      ) {
+        return;
+      }
+
+      if (isSessionComplete) {
+        e.preventDefault();
+        startNewQuizSession();
+      } else if (showNext) {
+        e.preventDefault();
+        if (sessionAnswered >= sessionGoal) {
+          handleCompleteSession();
+        } else {
+          handleNextQuestion();
         }
       }
     };
@@ -720,7 +801,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   // Focus input when new question appears without scrolling/jumping
   useEffect(() => {
-    if (currentQuestion && !showNext && !isSessionComplete && inputRef.current) {
+    if (currentQuestion && !showNext && !isSessionComplete && inputRef.current && !isKeyboardTabNavRef.current) {
       inputRef.current.focus({ preventScroll: true });
     }
   }, [currentQuestion, showNext, isSessionComplete]);
@@ -951,6 +1032,10 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     setMissedInSession(prev => prev.filter(m => m.prompt !== currentQuestion?.prompt));
     playSound(correctSoundRef.current, 'correct');
 
+    requestAnimationFrame(() => {
+      continueButtonRef.current?.focus({ preventScroll: true });
+    });
+
     if (currentQuestion) {
       const questionSnapshot = currentQuestion;
       try {
@@ -1022,6 +1107,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
     if (!needsRussianKeyboard) {
       setUserAnswer(newValue.slice(0, 250));
+      setCursorPosition(selectionStart);
       setLastInput(newValue);
       return;
     }
@@ -1081,19 +1167,25 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     checkAnswer();
   };
 
-  const handleKeyboardLetterClick = (letter: string, e?: React.MouseEvent) => {
+  const handleKeyboardLetterClick = (letter: string, e?: React.MouseEvent<HTMLButtonElement>) => {
     if (showNext) return;
+    const isPointerActivation = Boolean(e && e.detail > 0);
     if (e) {
       e.preventDefault();
     }
 
     const input = inputRef.current;
-    const start = input && typeof input.selectionStart === 'number' 
-      ? input.selectionStart 
-      : userAnswer.length;
-    const end = input && typeof input.selectionEnd === 'number' 
-      ? input.selectionEnd 
-      : userAnswer.length;
+    const useInputSelection =
+      input &&
+      typeof input.selectionStart === 'number' &&
+      (document.activeElement === input || isPointerActivation);
+
+    const start = useInputSelection
+      ? (input!.selectionStart as number)
+      : Math.min(cursorPosition, userAnswer.length);
+    const end = useInputSelection && typeof input!.selectionEnd === 'number'
+      ? (input!.selectionEnd as number)
+      : start;
 
     let newValue = '';
     let newCursorPos = start;
@@ -1116,22 +1208,28 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
       if (letter === ' ') {
         newValue = transliterate(newValue);
+        newCursorPos = newValue.length;
       }
     }
 
-    setUserAnswer(newValue.slice(0, 250));
+    const boundedValue = newValue.slice(0, 250);
+    const boundedCursor = Math.min(newCursorPos, boundedValue.length);
+    setUserAnswer(boundedValue);
+    setCursorPosition(boundedCursor);
 
-    // Keep cursor right after inserted character, preventing jumping to start
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus({ preventScroll: true });
-        try {
-          inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
-        } catch {
-          // ignore in environments without selection range
+    // Only move focus to <input> on pointer clicks (e.detail > 0), preserving keyboard focus on virtual keys
+    if (isPointerActivation && inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+      setTimeout(() => {
+        if (inputRef.current) {
+          try {
+            inputRef.current.setSelectionRange(boundedCursor, boundedCursor);
+          } catch {
+            // ignore in environments without selection range
+          }
         }
-      }
-    }, 0);
+      }, 0);
+    }
   };
 
   const toggleKeyboard = () => {
@@ -1163,10 +1261,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   };
 
   useEffect(() => {
-    if (inputRef.current && needsRussianKeyboard) {
+    if (inputRef.current && needsRussianKeyboard && document.activeElement === inputRef.current) {
       requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+        if (inputRef.current && document.activeElement === inputRef.current) {
+          try {
+            inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+          } catch {
+            // ignore in environments without selection range
+          }
         }
       });
     }
@@ -1185,22 +1287,22 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       headlineRussian = 'Отлично!';
       headlinePronunciation = 'Otlichno!';
       headlineEnglish = 'Perfect score! You mastered every question in this session.';
-      recapIcon = <FaTrophy className="recap-icon gold" />;
+      recapIcon = <FaTrophy className="recap-icon gold" aria-hidden="true" />;
     } else if (percentage >= 80) {
       headlineRussian = 'Молодец!';
       headlinePronunciation = 'Molodets!';
       headlineEnglish = 'Outstanding job! Your Russian skills are getting stronger.';
-      recapIcon = <FaTrophy className="recap-icon silver" />;
+      recapIcon = <FaTrophy className="recap-icon silver" aria-hidden="true" />;
     } else if (percentage >= 60) {
       headlineRussian = 'Хорошо!';
       headlinePronunciation = 'Khorosho!';
       headlineEnglish = 'Solid progress! A little more practice and you will ace it.';
-      recapIcon = <FaStar className="recap-icon bronze" />;
+      recapIcon = <FaStar className="recap-icon bronze" aria-hidden="true" />;
     } else {
       headlineRussian = 'Повторение — мать учения';
       headlinePronunciation = 'Povtorenie — mat ucheniya';
       headlineEnglish = 'Repetition is the mother of learning. Practice makes perfect!';
-      recapIcon = <FaGraduationCap className="recap-icon practice" />;
+      recapIcon = <FaGraduationCap className="recap-icon practice" aria-hidden="true" />;
     }
 
     return (
@@ -1209,10 +1311,10 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
         <div className="quiz-card quiz-recap-card">
           <div className="recap-praise-hero">
-            <div className="recap-badge-icon-wrap">
+            <div className="recap-badge-icon-wrap" aria-hidden="true">
               {recapIcon}
             </div>
-            <h3 className="recap-russian-title">{headlineRussian}</h3>
+            <h3 className="recap-russian-title" lang="ru">{headlineRussian}</h3>
             {headlinePronunciation && (
               <div className="recap-pronunciation-wrap">
                 <span className="recap-pronunciation-pill">
@@ -1259,25 +1361,25 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
             <div className="recap-stats-grid" role="group" aria-label="Session summary stats">
               <div className="recap-stat-card">
-                <span className="stat-label">🎯 Goal</span>
+                <span className="stat-label"><span aria-hidden="true">🎯</span> Goal</span>
                 <span className="stat-value">{sessionGoal} Qs</span>
               </div>
               <div className="recap-stat-card correct">
-                <span className="stat-label">✅ Correct</span>
+                <span className="stat-label"><span aria-hidden="true">✅</span> Correct</span>
                 <span className="stat-value">{sessionScore}</span>
               </div>
               <div className="recap-stat-card highlight">
-                <span className="stat-label">🏆 Mastered</span>
+                <span className="stat-label"><span aria-hidden="true">🏆</span> Mastered</span>
                 <span className="stat-value">{activeMasteredCount} / {activeTotalQuestions}</span>
               </div>
               <div className="recap-stat-card pool-left">
-                <span className="stat-label">📚 Remaining</span>
+                <span className="stat-label"><span aria-hidden="true">📚</span> Remaining</span>
                 <span className="stat-value">{activeRemainingToMaster}</span>
               </div>
             </div>
 
             <p className="recap-save-notice">
-              <FaCheckCircle className="notice-icon" /> Logged as 1 completed quiz in your learning progress
+              <FaCheckCircle className="notice-icon" aria-hidden="true" /> Logged as 1 completed quiz in your learning progress
             </p>
           </div>
 
@@ -1291,14 +1393,17 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
                   return (
                     <button
                       key={cat.id}
+                      ref={(el) => { recapCategoryTabRefs.current[cat.id] = el; }}
                       type="button"
                       role="tab"
                       aria-selected={isActive}
+                      tabIndex={isActive ? 0 : -1}
                       className={`recap-topic-pill ${isActive ? 'active' : ''}`}
                       onClick={() => handleCategoryChange(cat.id)}
+                      onKeyDown={(e) => handleCategoryKeyDown(e, cat.id, recapCategoryTabRefs)}
                       title={`Switch to ${cat.label} (${countInfo?.total || 0} questions)`}
                     >
-                      <span className="cat-icon">{cat.icon}</span>
+                      <span className="cat-icon" aria-hidden="true">{cat.icon}</span>
                       <span className="cat-label">{cat.label}</span>
                     </button>
                   );
@@ -1313,6 +1418,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
                   <button
                     key={count}
                     type="button"
+                    aria-pressed={sessionGoal === count}
                     className={`recap-goal-btn ${sessionGoal === count ? 'active' : ''}`}
                     onClick={() => {
                       setSessionGoal(count);
@@ -1327,17 +1433,18 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             </div>
 
             <div className="quiz-buttons recap-quiz-buttons">
-              <button 
-                className="next-button start-new-quiz-button" 
+              <button
+                type="button"
+                className="next-button start-new-quiz-button"
                 onClick={() => startNewQuizSession(sessionGoal)}
                 autoFocus
                 title="Start next quiz session"
                 aria-label={`Start Next Quiz (${sessionGoal} Qs)`}
               >
                 <span className="btn-main-label">
-                  <FaRedo className="btn-icon" /> Start Next Quiz ({sessionGoal} Qs)
+                  <FaRedo className="btn-icon" aria-hidden="true" /> Start Next Quiz ({sessionGoal} Qs)
                 </span>
-                <span className="btn-hint-badge">
+                <span className="btn-hint-badge" aria-hidden="true">
                   press <span className="btn-kbd">↵ Enter</span>
                 </span>
               </button>
@@ -1347,27 +1454,48 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           {missedInSession.length > 0 && (
             <div className="recap-missed-section">
               <div className="missed-header-row">
-                <h4>Words to Review from This Session ({missedInSession.length})</h4>
+                <h3>Words to Review from This Session ({missedInSession.length})</h3>
               </div>
               <p className="missed-hint">Listen to the correct pronunciation to reinforce your memory:</p>
               <div className="missed-words-list">
-                {missedInSession.map((item, idx) => (
-                  <div key={idx} className="missed-word-item">
-                    <div className="missed-word-details">
-                      <div className="missed-word-prompt">{item.prompt}</div>
-                      <div className="missed-word-answers">
-                        <span className="correct-answer-text">Answer: <strong>{item.answer.split('/')[0]}</strong></span>
-                        {item.userAnswer && (
-                          <span className="user-answer-text">You typed: <span className="strikethrough">{item.userAnswer}</span></span>
-                        )}
+                {missedInSession.map((item, idx) => {
+                  const displayAnswer = item.answer.split('/')[0];
+                  return (
+                    <div key={idx} className="missed-word-item">
+                      <div className="missed-word-details">
+                        <div
+                          className="missed-word-prompt"
+                          lang={containsCyrillic(item.prompt) ? 'ru' : 'en'}
+                        >
+                          {item.prompt}
+                        </div>
+                        <div className="missed-word-answers">
+                          <span className="correct-answer-text">
+                            Answer:{' '}
+                            <strong lang={containsCyrillic(displayAnswer) ? 'ru' : 'en'}>
+                              {displayAnswer}
+                            </strong>
+                          </span>
+                          {item.userAnswer && (
+                            <span className="user-answer-text">
+                              You typed:{' '}
+                              <span
+                                className="strikethrough"
+                                lang={containsCyrillic(item.userAnswer) ? 'ru' : 'en'}
+                              >
+                                {item.userAnswer}
+                              </span>
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      <PronunciationButton
+                        text={item.russian || item.prompt}
+                        audioCategory={getAudioCategory(item.category)}
+                      />
                     </div>
-                    <PronunciationButton
-                      text={item.russian || item.prompt}
-                      audioCategory={getAudioCategory(item.category)}
-                    />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1381,7 +1509,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     return (
       <div className="section quiz-section">
         <h2>Test Your Knowledge</h2>
-        <div className="quiz-card">
+        <div className="quiz-card" role="status" aria-live="polite">
           <h3>Loading quiz questions...</h3>
           <p>Please wait while we prepare your questions.</p>
         </div>
@@ -1391,15 +1519,17 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   // --- RENDER ACTIVE QUIZ SESSION ---
   const progressPercent = sessionGoal > 0 ? Math.min(100, Math.round((sessionAnswered / sessionGoal) * 100)) : 0;
-  const questionsLeft = Math.max(0, sessionGoal - sessionAnswered);
+  const primaryCorrectAnswer = currentQuestion.answer.includes('/')
+    ? currentQuestion.answer.split('/')[0]
+    : currentQuestion.answer;
 
   return (
     <div className="section quiz-section">
       <h2 className="quiz-page-title">Test Your Knowledge</h2>
 
       {/* Modern Horizontal Category Filter Bar */}
-      <div className="quiz-category-filter-bar" role="tablist" aria-label="Filter quiz by category">
-        <div className="category-filter-scroll">
+      <div className="quiz-category-filter-bar">
+        <div className="category-filter-scroll" role="tablist" aria-label="Filter quiz by category">
           {QUIZ_CATEGORIES.map(cat => {
             const isActive = activeCategory === cat.id;
             const countInfo = categoryCounts[cat.id];
@@ -1407,11 +1537,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             return (
               <button
                 key={cat.id}
+                ref={(el) => { categoryTabRefs.current[cat.id] = el; }}
                 type="button"
                 role="tab"
                 aria-selected={isActive}
+                tabIndex={isActive ? 0 : -1}
                 className={`category-filter-pill ${isActive ? 'active' : ''} ${isFullyMastered ? 'mastered' : ''}`}
                 onClick={() => handleCategoryChange(cat.id)}
+                onKeyDown={(e) => handleCategoryKeyDown(e, cat.id, categoryTabRefs)}
                 title={`Filter quiz to ${cat.label} (${countInfo?.total || 0} questions)`}
               >
                 <span className="cat-icon" aria-hidden="true">{cat.icon}</span>
@@ -1427,7 +1560,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
       {/* Modern Compact Quiz Header Panel / Game HUD */}
       <div className="quiz-header-panel">
-        <div className="quiz-progress-bar-container" aria-label="Session progress bar">
+        <div
+          className="quiz-progress-bar-container"
+          role="progressbar"
+          aria-label="Session progress"
+          aria-valuenow={sessionAnswered}
+          aria-valuemin={0}
+          aria-valuemax={sessionGoal}
+        >
           <div 
             className="quiz-progress-bar-fill" 
             style={{ width: `${progressPercent}%` }}
@@ -1450,6 +1590,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
               <button
                 key={count}
                 type="button"
+                aria-pressed={sessionGoal === count}
                 className={`goal-pill ${sessionGoal === count ? 'active' : ''}`}
                 onClick={() => handleGoalChange(count)}
                 title={`Set quiz session to ${count} questions`}
@@ -1461,16 +1602,22 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         </div>
 
         <div className="curriculum-pool-badge" title="Mastered words are removed from future questions">
-          <span className="pool-icon">🏆</span>
+          <span className="pool-icon" aria-hidden="true">🏆</span>
           <span>Mastered: <strong>{activeMasteredCount}</strong> / {activeTotalQuestions}</span>
           <span className="pool-remaining-tag">({activeRemainingToMaster} remaining)</span>
         </div>
       </div>
 
       <div className="quiz-card">
-        <h3 className="quiz-question-hint">{currentQuestion.hint}</h3>
+        <h3 id="quiz-question-hint" className="quiz-question-hint">{currentQuestion.hint}</h3>
         <div className="quiz-prompt">
-          <span className="quiz-prompt-text">{currentQuestion.prompt}</span>
+          <span
+            id="quiz-question-prompt"
+            className="quiz-prompt-text"
+            lang={currentQuestion.isRussianToEnglish ? 'ru' : 'en'}
+          >
+            {currentQuestion.prompt}
+          </span>
           {currentQuestion.type !== 'alphabet' && (
             <PronunciationButton 
               text={currentQuestion.russian}
@@ -1482,12 +1629,17 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         <div className="input-container">
           <input
             ref={inputRef}
+            id="quiz-answer-input"
             type="text"
             className="quiz-input"
+            aria-label="Quiz answer input"
+            aria-describedby="quiz-question-hint quiz-question-prompt"
+            lang={needsRussianKeyboard ? 'ru' : 'en'}
             value={userAnswer}
             maxLength={250}
             onChange={handleInputChange} 
             onKeyDown={handleKeyDown}
+            onSelect={(e) => setCursorPosition((e.target as HTMLInputElement).selectionStart || 0)}
             placeholder={needsRussianKeyboard ? "Type in English (press SPACE)..." : "Your answer here..."}
             autoCorrect="off"
             autoCapitalize="none"
@@ -1495,12 +1647,15 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             disabled={showNext}
           />
           {needsRussianKeyboard && !showNext && (
-            <button 
+            <button
+              type="button"
               className={`keyboard-toggle-button ${showKeyboard ? 'active' : ''}`}
               onClick={toggleKeyboard}
               title="Toggle Russian Keyboard"
+              aria-label="Toggle Russian keyboard"
+              aria-expanded={showKeyboard}
             >
-              <FaKeyboard />
+              <FaKeyboard aria-hidden="true" />
             </button>
           )}
         </div>
@@ -1515,51 +1670,54 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
                     key={char}
                     type="button"
                     className="quick-char-btn"
-                    onClick={() => handleKeyboardLetterClick(char)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={(e) => handleKeyboardLetterClick(char, e)}
                     aria-label={`Insert ${char}`}
                   >
-                    {char}
+                    <span lang="ru">{char}</span>
                   </button>
                 ))}
                 <button
+                  ref={phoneticGuideTriggerRef}
                   type="button"
                   className={`quick-char-btn hint-toggle-btn ${showPhoneticGuide ? 'active' : ''}`}
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => setShowPhoneticGuide(prev => !prev)}
                   title="Phonetic typing guide"
                   aria-expanded={showPhoneticGuide}
                   aria-label="Phonetic typing guide"
                 >
-                  💡
+                  <span aria-hidden="true">💡</span>
                 </button>
               </div>
             </div>
 
             {showPhoneticGuide && (
-              <div className="phonetic-guide-popover" role="region" aria-label="Phonetic typing guide">
+              <div className="phonetic-guide-popover translit-cheatsheet-popover" role="region" aria-label="Phonetic typing guide">
                 <div className="popover-header">
-                  <span className="popover-title">💡 Phonetic Typing Cheatsheet</span>
+                  <span className="popover-title"><span aria-hidden="true">💡</span> Phonetic Typing Cheatsheet</span>
                   <button 
                     type="button" 
                     className="close-popover-btn" 
                     onClick={() => setShowPhoneticGuide(false)}
                     aria-label="Close guide"
                   >
-                    ✕
+                    <span aria-hidden="true">✕</span>
                   </button>
                 </div>
                 <div className="phonetic-rules-grid">
-                  <div><code>ya</code> → <strong>я</strong></div>
-                  <div><code>yu</code> → <strong>ю</strong></div>
-                  <div><code>yo</code> → <strong>ё</strong></div>
-                  <div><code>ih</code> → <strong>ы</strong></div>
-                  <div><code>eh</code> → <strong>э</strong></div>
-                  <div><code>zh</code> → <strong>ж</strong></div>
-                  <div><code>sh</code> → <strong>ш</strong></div>
-                  <div><code>ch</code> → <strong>ч</strong></div>
-                  <div><code>shch</code> → <strong>щ</strong></div>
-                  <div><code>ts</code> → <strong>ц</strong></div>
-                  <div><code>'</code> → <strong>ь</strong></div>
-                  <div><code>"</code> → <strong>ъ</strong></div>
+                  <div><code>ya</code> → <strong lang="ru">я</strong></div>
+                  <div><code>yu</code> → <strong lang="ru">ю</strong></div>
+                  <div><code>yo</code> → <strong lang="ru">ё</strong></div>
+                  <div><code>ih</code> → <strong lang="ru">ы</strong></div>
+                  <div><code>eh</code> → <strong lang="ru">э</strong></div>
+                  <div><code>zh</code> → <strong lang="ru">ж</strong></div>
+                  <div><code>sh</code> → <strong lang="ru">ш</strong></div>
+                  <div><code>ch</code> → <strong lang="ru">ч</strong></div>
+                  <div><code>shch</code> → <strong lang="ru">щ</strong></div>
+                  <div><code>ts</code> → <strong lang="ru">ц</strong></div>
+                  <div><code>'</code> → <strong lang="ru">ь</strong></div>
+                  <div><code>"</code> → <strong lang="ru">ъ</strong></div>
                 </div>
                 <small className="phonetic-note">Type phonetically in English, then press SPACE to auto-convert!</small>
               </div>
@@ -1578,7 +1736,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
                 onClick={toggleKeyboard}
                 aria-label="Close keyboard"
               >
-                ✕ Close
+                <span aria-hidden="true">✕</span> Close
               </button>
             </div>
             <RussianKeyboard onLetterClick={handleKeyboardLetterClick} />
@@ -1587,9 +1745,9 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
         <div className="quiz-buttons">
           {!showNext && (
-            <button className="check-button" onClick={handleCheckAnswer} aria-label="Check Answer">
+            <button type="button" className="check-button" onClick={handleCheckAnswer} aria-label="Check Answer">
               <span className="btn-main-label">Check Answer</span>
-              <span className="btn-hint-badge">
+              <span className="btn-hint-badge" aria-hidden="true">
                 press <span className="btn-kbd">↵ Enter</span>
               </span>
             </button>
@@ -1597,116 +1755,123 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Fluid Duolingo-style Bottom Feedback Sheet */}
-      {showNext && isCorrect !== null && (
-        <div 
-          className={`quiz-feedback-drawer ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}
-          role="region"
-          aria-live="polite"
-        >
-          <div className="feedback-drawer-inner">
-            <div className="feedback-info-area">
-              <div className="feedback-header-row">
-                {isCorrect ? (
-                  <FaCheckCircle className="feedback-icon correct-icon" />
-                ) : (
-                  <FaTimesCircle className="feedback-icon incorrect-icon" />
-                )}
-                <div className="feedback-text-content">
-                  <span className="feedback-title">
-                    {isCorrect ? (isOverridden ? 'Correct! (Overridden)' : 'Correct!') : 'Not quite'}
-                  </span>
-                  {isCorrect && isOverridden && (
-                    <div className="feedback-overridden-note">
-                      Answer accepted as correct — score &amp; mastery updated!
-                    </div>
+      {/* Persistent polite live region wrapping Fluid Duolingo-style Bottom Feedback Sheet */}
+      <div className="quiz-feedback-live-region" aria-live="polite">
+        {showNext && isCorrect !== null && (
+          <div 
+            className={`quiz-feedback-drawer ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`}
+            role="region"
+            aria-label="Answer feedback"
+          >
+            <div className="feedback-drawer-inner">
+              <div className="feedback-info-area">
+                <div className="feedback-header-row">
+                  {isCorrect ? (
+                    <FaCheckCircle className="feedback-icon correct-icon" aria-hidden="true" />
+                  ) : (
+                    <FaTimesCircle className="feedback-icon incorrect-icon" aria-hidden="true" />
                   )}
-                  {!isCorrect && (
-                    <div className="feedback-answer-line">
-                      <span>The correct answer is: </span>
-                      <strong className="feedback-correct-word">
-                        {currentQuestion.answer.includes('/') 
-                          ? currentQuestion.answer.split('/')[0]
-                          : currentQuestion.answer}
-                      </strong>
-                    </div>
-                  )}
-                  {isCorrect && spellingDiff && spellingDiff.length > 0 && (
-                    <div className="spelling-note">
-                      Correct spelling:{' '}
-                      <span>
-                        {spellingDiff.map((item, idx) => (
-                          item.isDiff ? (
-                            <span key={idx} className="diff-char">{item.char}</span>
-                          ) : (
-                            <React.Fragment key={idx}>{item.char}</React.Fragment>
-                          )
-                        ))}
-                      </span>
-                    </div>
-                  )}
-                  {isCorrect && isWordJustMastered && (
-                    <div className="word-mastered-note">
-                      🏆 <strong>Word Mastered ({MASTERY_THRESHOLD}/{MASTERY_THRESHOLD})!</strong> Removed from upcoming questions.
-                    </div>
-                  )}
+                  <div className="feedback-text-content">
+                    <span className="feedback-title">
+                      {isCorrect ? (isOverridden ? 'Correct! (Overridden)' : 'Correct!') : 'Not quite'}
+                    </span>
+                    {isCorrect && isOverridden && (
+                      <div className="feedback-overridden-note">
+                        Answer accepted as correct — score &amp; mastery updated!
+                      </div>
+                    )}
+                    {!isCorrect && (
+                      <div className="feedback-answer-line">
+                        <span>The correct answer is: </span>
+                        <strong
+                          className="feedback-correct-word"
+                          lang={currentQuestion.isRussianToEnglish ? 'en' : 'ru'}
+                        >
+                          {primaryCorrectAnswer}
+                        </strong>
+                      </div>
+                    )}
+                    {isCorrect && spellingDiff && spellingDiff.length > 0 && (
+                      <div className="spelling-note">
+                        Correct spelling:{' '}
+                        <span lang="ru">
+                          {spellingDiff.map((item, idx) => (
+                            item.isDiff ? (
+                              <span key={idx} className="diff-char">{item.char}</span>
+                            ) : (
+                              <React.Fragment key={idx}>{item.char}</React.Fragment>
+                            )
+                          ))}
+                        </span>
+                      </div>
+                    )}
+                    {isCorrect && isWordJustMastered && (
+                      <div className="word-mastered-note">
+                        <span aria-hidden="true">🏆</span> <strong>Word Mastered ({MASTERY_THRESHOLD}/{MASTERY_THRESHOLD})!</strong> Removed from upcoming questions.
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {/* Audio button in feedback sheet if available */}
+                {currentQuestion.russian && (
+                  <div className="feedback-audio-action">
+                    <PronunciationButton 
+                      text={currentQuestion.russian}
+                      className="feedback-pronounce-btn"
+                      audioCategory={getAudioCategory(currentQuestion.type)}
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Audio button in feedback sheet if available */}
-              {currentQuestion.russian && (
-                <div className="feedback-audio-action">
-                  <PronunciationButton 
-                    text={currentQuestion.russian}
-                    className="feedback-pronounce-btn"
-                    audioCategory={getAudioCategory(currentQuestion.type)}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="feedback-action-area">
-              {!isCorrect && (
-                <button
-                  type="button"
-                  className="feedback-override-button"
-                  onClick={handleOverrideAnswer}
-                  title="Mark my answer as correct (alternative valid translation or phrasing)"
-                >
-                  💡 I was right
-                </button>
-              )}
-              {sessionAnswered < sessionGoal ? (
-                <button 
-                  className={`feedback-continue-button ${isCorrect ? 'btn-next-correct' : 'btn-next-incorrect'}`} 
-                  onClick={handleNextQuestion} 
-                  autoFocus
-                  aria-label={`Next Question (${sessionIndex + 1}/${sessionGoal})`}
-                >
-                  <span className="btn-main-label">Next Question ({sessionIndex + 1}/{sessionGoal})</span>
-                  <span className="btn-hint-badge">
-                    press <span className="btn-kbd">↵ Enter</span>
-                  </span>
-                </button>
-              ) : (
-                <button 
-                  className="feedback-continue-button finish-quiz-button" 
-                  onClick={handleCompleteSession} 
-                  autoFocus
-                  aria-label="Complete Quiz & View Results"
-                >
-                  <span className="btn-main-label">
-                    <FaCheckCircle className="btn-icon" /> Complete Quiz & View Results 🎉
-                  </span>
-                  <span className="btn-hint-badge">
-                    press <span className="btn-kbd">↵ Enter</span>
-                  </span>
-                </button>
-              )}
+              <div className="feedback-action-area">
+                {!isCorrect && (
+                  <button
+                    type="button"
+                    className="feedback-override-button"
+                    onClick={handleOverrideAnswer}
+                    title="Mark my answer as correct (alternative valid translation or phrasing)"
+                  >
+                    <span aria-hidden="true">💡</span> I was right
+                  </button>
+                )}
+                {sessionAnswered < sessionGoal ? (
+                  <button
+                    ref={continueButtonRef}
+                    type="button"
+                    className={`feedback-continue-button ${isCorrect ? 'btn-next-correct' : 'btn-next-incorrect'}`}
+                    onClick={handleNextQuestion}
+                    autoFocus
+                    aria-label={`Next Question (${sessionIndex + 1}/${sessionGoal})`}
+                  >
+                    <span className="btn-main-label">Next Question ({sessionIndex + 1}/${sessionGoal})</span>
+                    <span className="btn-hint-badge" aria-hidden="true">
+                      press <span className="btn-kbd">↵ Enter</span>
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    ref={continueButtonRef}
+                    type="button"
+                    className="feedback-continue-button finish-quiz-button"
+                    onClick={handleCompleteSession}
+                    autoFocus
+                    aria-label="Complete Quiz & View Results"
+                  >
+                    <span className="btn-main-label">
+                      <FaCheckCircle className="btn-icon" aria-hidden="true" /> Complete Quiz & View Results <span aria-hidden="true">🎉</span>
+                    </span>
+                    <span className="btn-hint-badge" aria-hidden="true">
+                      press <span className="btn-kbd">↵ Enter</span>
+                    </span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

@@ -23,12 +23,12 @@ const Alphabet: React.FC<AlphabetProps> = ({ data }) => {
             <div className="letter-container">
               <div className="letter-header">
                 <div className="letter-pair">
-                  <span className="letter-uppercase">{item.letter}</span>
-                  <span className="letter-lowercase">{item.letter.toLowerCase()}</span>
+                  <span className="letter-uppercase" lang="ru">{item.letter}</span>
+                  <span className="letter-lowercase" lang="ru">{item.letter.toLowerCase()}</span>
                 </div>
               </div>
               
-              <div className="letter-underline"></div>
+              <div className="letter-underline" aria-hidden="true"></div>
               
               <div className="pronunciation-button-wrapper">
                 <PronunciationButton 
@@ -45,8 +45,8 @@ const Alphabet: React.FC<AlphabetProps> = ({ data }) => {
             
             {item.russianWord && (
               <div className="example">
-                <strong>Example:</strong> <span className="example-word">{item.russianWord}</span> 
-                {item.englishWord && <span className="example-translation"> ({item.englishWord})</span>}
+                <strong>Example:</strong> <span className="example-word" lang="ru">{item.russianWord}</span> 
+                {item.englishWord && <span className="example-translation" lang="en"> ({item.englishWord})</span>}
                 {item.russianWord && (
                   <PronunciationButton 
                     text={item.russianWord} 

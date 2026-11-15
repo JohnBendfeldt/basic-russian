@@ -176,7 +176,7 @@ describe('Russian Transliteration, Browser Speech, Speech Queue & PronunciationB
   });
 
   describe('PronunciationButton.tsx', () => {
-    it('blocks non-Cyrillic English text, resolves category heuristics, plays MP3, and falls back to TTS on error', async () => {
+    it('blocks non-Cyrillic English text, resolves category heuristics, plays MP3, retains keyboard focus via aria-disabled, and falls back to TTS on error', async () => {
       vi.spyOn(speechMod, 'initVoices').mockResolvedValue();
       const speakSpy = vi.spyOn(speechMod, 'speak').mockImplementation((_t, _l, _id, onEnd) => {
         if (onEnd) onEnd();
@@ -186,23 +186,31 @@ describe('Russian Transliteration, Browser Speech, Speech Queue & PronunciationB
       // 1. Non-Cyrillic text is blocked by safety guard
       const { rerender, unmount } = render(<PronunciationButton text="Hello" label="English guard" />);
       const guardBtn = await screen.findByRole('button', { name: 'English guard' });
-      await waitFor(() => expect(guardBtn).not.toBeDisabled());
+      await waitFor(() => expect(guardBtn).toHaveAttribute('aria-disabled', 'false'));
       fireEvent.click(guardBtn);
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Skipped playing non-Russian text'), 'Hello');
       expect(FakeAudio.instances).toHaveLength(0);
 
-      // 2. Cyrillic phrase with basicPhrases category maps to /audio/phrases/*.mp3 and strips punctuation
+      // 2. Cyrillic phrase with basicPhrases category maps to /audio/phrases/*.mp3, strips punctuation, and retains focus
       rerender(<PronunciationButton text="Как дела? (informal)" audioCategory="basicPhrases" label="Play phrase" />);
       const btn = screen.getByRole('button', { name: 'Play phrase' });
+      btn.focus();
+      expect(document.activeElement).toBe(btn);
       fireEvent.click(btn);
       expect(FakeAudio.instances).toHaveLength(1);
       expect(FakeAudio.instances[0].src).toBe('/audio/phrases/как_дела.mp3');
       expect(btn).toHaveClass('playing');
+      expect(btn).toHaveAttribute('aria-disabled', 'true');
+      expect(btn).not.toBeDisabled();
+      // Focus MUST remain on the button during playback instead of dropping to document.body
+      expect(document.activeElement).toBe(btn);
 
       act(() => {
         FakeAudio.instances[0].onended?.();
       });
       expect(btn).not.toHaveClass('playing');
+      expect(btn).toHaveAttribute('aria-disabled', 'false');
+      expect(document.activeElement).toBe(btn);
 
       // 3. Re-clicking same text reuses existing Audio element and resets currentTime
       fireEvent.click(btn);
@@ -222,9 +230,10 @@ describe('Russian Transliteration, Browser Speech, Speech Queue & PronunciationB
       expect(speakSpy).toHaveBeenCalledTimes(1);
       expect(screen.getByRole('button', { name: 'Play word' })).not.toHaveClass('playing');
 
-      // 5. Category auto-heuristics when audioCategory is omitted
-      rerender(<PronunciationButton text="один" label="Heuristic number" />);
-      fireEvent.click(screen.getByRole('button', { name: 'Heuristic number' }));
+      // 5. Category auto-heuristics and contextual fallback label when label prop is omitted
+      rerender(<PronunciationButton text="один" />);
+      const defaultLabeledBtn = screen.getByRole('button', { name: 'Pronounce "один"' });
+      fireEvent.click(defaultLabeledBtn);
       expect(FakeAudio.instances[FakeAudio.instances.length - 1].src).toBe('/audio/numbers/один.mp3');
 
       unmount();

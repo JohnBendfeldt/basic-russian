@@ -18,7 +18,7 @@ describe('App', () => {
     fireEvent.click(privacyLink);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Privacy Policy', level: 1 })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Privacy Policy', level: 2 })).toBeInTheDocument();
       expect(window.location.pathname).toBe('/privacy');
     });
   });
@@ -29,7 +29,7 @@ describe('App', () => {
     fireEvent.click(termsLink);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Terms of Service', level: 1 })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Terms of Service', level: 2 })).toBeInTheDocument();
       expect(window.location.pathname).toBe('/terms');
     });
   });
@@ -39,7 +39,7 @@ describe('App', () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Privacy Policy', level: 1 })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Privacy Policy', level: 2 })).toBeInTheDocument();
     });
   });
 
@@ -48,7 +48,7 @@ describe('App', () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: 'Terms of Service', level: 1 })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Terms of Service', level: 2 })).toBeInTheDocument();
     });
   });
 

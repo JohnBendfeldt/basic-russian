@@ -44,8 +44,8 @@ describe('App Routing, Numbers & Time, RussianKeyboard, AuthModal & UserMenu', (
     expect(window.location.pathname).toBe('/phrases');
 
     // Top Navigation bar -> Quiz
-    const navListItems = document.querySelectorAll('.navigation li');
-    const quizNavItem = Array.from(navListItems).find((el) => el.textContent === 'Quiz')!;
+    const navButtons = document.querySelectorAll('.navigation .nav-tab-btn');
+    const quizNavItem = Array.from(navButtons).find((el) => el.textContent === 'Quiz')!;
     fireEvent.click(quizNavItem);
     expect(window.location.pathname).toBe('/quiz');
 
@@ -111,7 +111,7 @@ describe('App Routing, Numbers & Time, RussianKeyboard, AuthModal & UserMenu', (
     fireEvent.click(screen.getByRole('button', { name: 'Insert letter щ' }));
     expect(onLetterClick).toHaveBeenLastCalledWith('щ');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Space' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Пробел (Space)' }));
     expect(onLetterClick).toHaveBeenLastCalledWith(' ');
 
     fireEvent.click(screen.getByRole('button', { name: 'Insert soft sign (ь)' }));
@@ -138,16 +138,16 @@ describe('App Routing, Numbers & Time, RussianKeyboard, AuthModal & UserMenu', (
 
     render(<AuthModal isOpen={true} onClose={onClose} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in with Google' }));
+    fireEvent.click(screen.getByRole('button', { name: /Sign in with Google/i }));
     expect(await screen.findByText('Google OAuth disabled')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in with GitHub' }));
+    fireEvent.click(screen.getByRole('button', { name: /Sign in with GitHub/i }));
     expect(await screen.findByText('GitHub timeout')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in with Microsoft Entra ID' }));
+    fireEvent.click(screen.getByRole('button', { name: /Sign in with Microsoft Entra ID/i }));
     await waitFor(() => expect(entraSpy).toHaveBeenCalledTimes(1));
 
-    fireEvent.click(screen.getByRole('dialog'));
+    fireEvent.click(document.querySelector('.auth-modal-backdrop')!);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -216,7 +216,7 @@ describe('App Routing, Numbers & Time, RussianKeyboard, AuthModal & UserMenu', (
     render(<App />);
 
     const headerLink = await screen.findByRole('link', {
-      name: /Explore 15\+ world languages on Basic Language School/i,
+      name: /15\+ Languages — Explore Basic Language School/i,
     });
     expect(headerLink).toHaveAttribute('href', 'https://basiclanguage.school');
     expect(headerLink).toHaveAttribute('rel', 'noopener noreferrer');
