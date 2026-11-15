@@ -1,0 +1,19 @@
+{
+  "name": "deepmerge-safe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hardened drop-in deepmerge 4.x replacement mitigating GHSA-gcqx-w48m-w2h4",
+  "license": "MIT",
+  "main": "./index.cjs",
+  "module": "./index.mjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.cjs",
+      "default": "./index.cjs"
+    },
+    "./package.json": "./package.json"
+  }
+}

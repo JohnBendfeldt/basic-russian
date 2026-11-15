@@ -13,7 +13,8 @@
   "overrides": {
     "serialize-javascript": "^7.1.4",
     "minimatch": "^11.0.4",
-    "glob": "^14.0.3"
+    "glob": "^14.0.3",
+    "deepmerge": "$deepmerge"
   },
   "scripts": {
     "start": "vite",
@@ -36,6 +37,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",
     "@vitest/coverage-v8": "^5.0.3",
+    "deepmerge": "file:vendor/deepmerge",
     "jsdom": "^26.1.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.1",
