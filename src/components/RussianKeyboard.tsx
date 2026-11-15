@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface RussianKeyboardProps {
-  onLetterClick: (letter: string) => void;
+  onLetterClick: (letter: string, e?: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const RussianKeyboard: React.FC<RussianKeyboardProps> = ({ onLetterClick }) => {
@@ -70,31 +70,40 @@ const RussianKeyboard: React.FC<RussianKeyboardProps> = ({ onLetterClick }) => {
   // Common vowels that need uppercase versions
   const vowels = ['а', 'е', 'и', 'о', 'у', 'я', 'ю', 'ё', 'э'];
 
+  const handleKeyClick = (letter: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    if (e.detail > 0) {
+      onLetterClick(letter, e);
+    } else {
+      onLetterClick(letter);
+    }
+  };
+
   return (
-    <div className="russian-keyboard">
-      
+    <div className="russian-keyboard" role="group" aria-label="Russian phonetic virtual keyboard">
       {keyboardRows.map((row, rowIndex) => (
         <div key={rowIndex} className="keyboard-row">
           {row.map((letter, i) => (
             <button
               key={`${rowIndex}-${i}`}
               className="keyboard-key"
-              onClick={() => onLetterClick(letter)}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => handleKeyClick(letter, e)}
               type="button"
               aria-label={`Insert letter ${letter}`}
             >
-              <span className="key-ru">{letter}</span>
-              <span className="key-en">{phoneticGuide[rowIndex][i]?.en || ''}</span>
+              <span className="key-ru" lang="ru">{letter}</span>
+              <span className="key-en" aria-hidden="true">{phoneticGuide[rowIndex][i]?.en || ''}</span>
             </button>
           ))}
           {rowIndex === 2 && (
             <button
               className="keyboard-key space-key"
-              onClick={() => onLetterClick(' ')}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => handleKeyClick(' ', e)}
               type="button"
-              aria-label="Space"
+              aria-label="Пробел (Space)"
             >
-              Пробел
+              <span lang="ru">Пробел</span>
             </button>
           )}
         </div>
@@ -104,12 +113,13 @@ const RussianKeyboard: React.FC<RussianKeyboardProps> = ({ onLetterClick }) => {
         {/* Soft sign first for emphasis */}
         <button
           className="keyboard-key special-key soft-sign-key"
-          onClick={() => onLetterClick('ь')}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => handleKeyClick('ь', e)}
           type="button"
           aria-label="Insert soft sign (ь)"
         >
-          <span className="key-ru">Ь</span>
-          <span className="key-en">'</span>
+          <span className="key-ru" lang="ru">Ь</span>
+          <span className="key-en" aria-hidden="true">&apos;</span>
         </button>
         
         {/* Special Russian characters that don't map directly */}
@@ -117,12 +127,13 @@ const RussianKeyboard: React.FC<RussianKeyboardProps> = ({ onLetterClick }) => {
           <button
             key={char.value}
             className="keyboard-key special-key"
-            onClick={() => onLetterClick(char.value)}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => handleKeyClick(char.value, e)}
             type="button"
             aria-label={`Insert letter ${char.label}`}
           >
-            <span className="key-ru">{char.label}</span>
-            <span className="key-en">{char.en}</span>
+            <span className="key-ru" lang="ru">{char.label}</span>
+            <span className="key-en" aria-hidden="true">{char.en}</span>
           </button>
         ))}
       </div>
@@ -133,26 +144,29 @@ const RussianKeyboard: React.FC<RussianKeyboardProps> = ({ onLetterClick }) => {
           <button
             key={`upper-${letter}`}
             className="keyboard-key vowel-key"
-            onClick={() => onLetterClick(letter.toUpperCase())}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => handleKeyClick(letter.toUpperCase(), e)}
             type="button"
             aria-label={`Insert uppercase letter ${letter.toUpperCase()}`}
           >
-            {letter.toUpperCase()}
+            <span lang="ru">{letter.toUpperCase()}</span>
           </button>
         ))}
         
         <button
           className="keyboard-key backspace-key"
-          onClick={() => onLetterClick('backspace')}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => handleKeyClick('backspace', e)}
           type="button"
           aria-label="Backspace"
         >
-          ←
+          <span aria-hidden="true">←</span>
         </button>
         
         <button
           className="keyboard-key clear-key"
-          onClick={() => onLetterClick('clear')}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => handleKeyClick('clear', e)}
           type="button"
           aria-label="Clear"
         >

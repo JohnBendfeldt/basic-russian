@@ -150,8 +150,9 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     return `/audio/${category}/${fileName}.mp3`;
   };
 
-  const handleSpeak = () => {
-    if (isPlaying) return;
+  const handleSpeak = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (isPlaying || !initialized) return;
     
     // Safety guard: PronunciationButton is designed for Russian pronunciation.
     // Never pronounce English text even if inadvertently passed.
@@ -248,14 +249,16 @@ const PronunciationButton: React.FC<PronunciationButtonProps> = ({
     );
   };
 
+  const resolvedLabel = label || `Pronounce "${text}"`;
+
   return (
     <button
       type="button"
       className={`pronunciation-button ${isPlaying ? 'playing' : ''} ${className || ''}`}
       onClick={handleSpeak}
-      disabled={isPlaying || !initialized}
-      title={isPlaying ? "Speaking..." : (label || "Pronounce")}
-      aria-label={isPlaying ? "Speaking..." : (label || "Pronounce")}
+      aria-disabled={isPlaying || !initialized}
+      title={isPlaying ? `Speaking "${text}"...` : resolvedLabel}
+      aria-label={isPlaying ? `${resolvedLabel} (Speaking...)` : resolvedLabel}
       data-button-id={buttonId.current}
     >
       {isPlaying ? (

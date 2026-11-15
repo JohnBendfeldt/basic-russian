@@ -21,18 +21,28 @@ const Navigation: React.FC<NavigationProps> = ({
     { id: 'quiz', label: 'Quiz' }
   ];
 
+  const handleNavClick = (id: string) => {
+    setActiveSection(id);
+  };
+
   return (
-    <nav className={`navigation ${isOpen ? 'open' : ''}`}>
+    <nav className={`navigation ${isOpen ? 'open' : ''}`} aria-label="Main navigation">
       <ul>
-        {navItems.map(item => (
-          <li
-            key={item.id}
-            className={(activeSection === item.id || (item.id === 'numbers' && activeSection === 'time')) ? 'active' : ''}
-            onClick={() => setActiveSection(item.id)}
-          >
-            {item.label}
-          </li>
-        ))}
+        {navItems.map(item => {
+          const isActive = activeSection === item.id || (item.id === 'numbers' && activeSection === 'time');
+          return (
+            <li key={item.id} className={isActive ? 'active' : ''}>
+              <button
+                type="button"
+                className={`nav-tab-btn ${isActive ? 'active' : ''}`}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => handleNavClick(item.id)}
+              >
+                {item.label}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
