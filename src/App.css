@@ -1284,8 +1284,8 @@ footer {
 
 .recap-ring-wrap {
   position: relative;
-  width: 136px;
-  height: 136px;
+  width: 164px;
+  height: 164px;
   margin: 0.25rem auto 1rem;
   display: flex;
   align-items: center;
@@ -1293,6 +1293,8 @@ footer {
 }
 
 .recap-progress-ring {
+  width: 164px;
+  height: 164px;
   display: block;
   overflow: visible;
 }
@@ -1311,6 +1313,8 @@ footer {
 .recap-ring-label {
   position: absolute;
   inset: 0;
+  padding: 0 22px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1323,7 +1327,7 @@ footer {
 
 .recap-score-percent {
   font-family: var(--font-heading);
-  font-size: 2.35rem;
+  font-size: 2.2rem;
   font-weight: 900;
   color: #0f172a;
   line-height: 1;
@@ -1345,7 +1349,8 @@ footer {
   font-size: 0.8rem;
   font-weight: 700;
   color: #64748b;
-  margin-top: 4px;
+  line-height: 1.2;
+  margin-top: 5px;
   letter-spacing: 0.01em;
 }
 
@@ -2847,22 +2852,27 @@ html {
   }
 
   .recap-ring-wrap {
-    width: 96px;
-    height: 96px;
-    margin: 0 auto 0.35rem;
+    width: 136px;
+    height: 136px;
+    margin: 0.1rem auto 0.5rem;
   }
 
   .recap-progress-ring {
-    width: 96px;
-    height: 96px;
+    width: 136px;
+    height: 136px;
+  }
+
+  .recap-ring-label {
+    padding: 0 18px;
   }
 
   .recap-score-percent {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
   .recap-score-ratio {
-    font-size: 0.68rem;
+    font-size: 0.75rem;
+    margin-top: 4px;
   }
 
   .recap-stats-grid {

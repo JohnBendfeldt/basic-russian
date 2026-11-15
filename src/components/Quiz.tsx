@@ -1225,7 +1225,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
           <div className="recap-hero-score">
             <div className="recap-ring-wrap">
-              <svg className="recap-progress-ring" width="136" height="136" viewBox="0 0 136 136" aria-hidden="true">
+              <svg className="recap-progress-ring" width="164" height="164" viewBox="0 0 164 164" aria-hidden="true">
                 <defs>
                   <linearGradient id="scoreRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor={percentage === 100 ? '#f59e0b' : percentage >= 80 ? '#3b82f6' : '#4A5AF4'} />
@@ -1234,21 +1234,21 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
                 </defs>
                 <circle
                   className="recap-ring-track"
-                  cx="68"
-                  cy="68"
-                  r={54}
-                  strokeWidth="9"
+                  cx="82"
+                  cy="82"
+                  r={72}
+                  strokeWidth="10"
                 />
                 <circle
                   className="recap-ring-bar"
-                  cx="68"
-                  cy="68"
-                  r={54}
-                  strokeWidth="9"
-                  strokeDasharray={339.29}
-                  strokeDashoffset={339.29 - (percentage / 100) * 339.29}
+                  cx="82"
+                  cy="82"
+                  r={72}
+                  strokeWidth="10"
+                  strokeDasharray={452.39}
+                  strokeDashoffset={452.39 - (percentage / 100) * 452.39}
                   strokeLinecap="round"
-                  transform="rotate(-90 68 68)"
+                  transform="rotate(-90 82 82)"
                 />
               </svg>
               <div className="recap-ring-label">
