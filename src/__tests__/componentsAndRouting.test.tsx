@@ -179,7 +179,11 @@ describe('App Routing, Numbers & Time, RussianKeyboard, AuthModal & UserMenu', (
     expect(document.querySelector('.user-avatar-img')).toBeNull();
 
     fireEvent.click(trigger);
-    expect(screen.getByText(/GitHub/)).toBeInTheDocument();
+    expect(document.querySelector('.provider-badge')).toHaveTextContent(/GitHub/);
+    expect(screen.getByRole('menuitem', { name: /GitHub Repository/i })).toHaveAttribute(
+      'href',
+      'https://github.com/JohnBendfeldt/basic-russian'
+    );
 
     fireEvent.click(screen.getByText('Privacy Policy'));
     expect(onNavigate).toHaveBeenCalledWith('privacy');

@@ -388,6 +388,15 @@ const App: React.FC = () => {
             }}
           >
             Terms of Service
+          </a>{' '}
+          ·{' '}
+          <a
+            href="https://github.com/JohnBendfeldt/basic-russian"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            GitHub
           </a>
         </p>
       </footer>

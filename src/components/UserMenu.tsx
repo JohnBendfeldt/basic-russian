@@ -216,6 +216,18 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, initialUser = nu
                   <span>15+ Languages Hub</span>
                 </a>
 
+                <a
+                  href="https://github.com/JohnBendfeldt/basic-russian"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  role="menuitem"
+                  className="dropdown-item"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <FaGithub aria-hidden="true" />
+                  <span>GitHub Repository</span>
+                </a>
+
                 {onNavigate && (
                   <>
                     <div className="dropdown-divider" role="separator"></div>

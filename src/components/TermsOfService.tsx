@@ -39,7 +39,25 @@ const TermsOfService: React.FC<TermsOfServiceProps> = ({ onNavigate }) => {
         </ul>
 
         <h3>4. Intellectual Property</h3>
-        <p>The code for Basic Russian is open source under the MIT License. The audio assets, learning design, and trademarks belong to their respective creators and operators.</p>
+        <p>
+          The code for Basic Russian is open source under the{' '}
+          <a
+            href="https://github.com/JohnBendfeldt/basic-russian/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            MIT License
+          </a>{' '}
+          on{' '}
+          <a
+            href="https://github.com/JohnBendfeldt/basic-russian"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
+          . The audio assets, learning design, and trademarks belong to their respective creators and operators.
+        </p>
 
         <h3>5. Disclaimer of Warranties</h3>
         <p>Basic Russian is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis without warranties of any kind, either express or implied. While we strive for accuracy in our language transliterations and pronunciation guides, we make no guarantees that the content is completely error-free or that service will be uninterrupted.</p>
@@ -56,7 +74,15 @@ const TermsOfService: React.FC<TermsOfServiceProps> = ({ onNavigate }) => {
           <strong>Basic Russian</strong><br />
           Attn: John Bendfeldt<br />
           Email: <a href="mailto:dev@basicrussian.org">dev@basicrussian.org</a><br />
-          Website: <a href="https://basicrussian.org">https://basicrussian.org</a>
+          Website: <a href="https://basicrussian.org">https://basicrussian.org</a><br />
+          GitHub:{' '}
+          <a
+            href="https://github.com/JohnBendfeldt/basic-russian"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            github.com/JohnBendfeldt/basic-russian
+          </a>
         </p>
 
         <div className="legal-page-footer">
