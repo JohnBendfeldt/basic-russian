@@ -537,7 +537,7 @@ describe('WCAG 2.1 / 2.2 Level AA Accessibility Audit Suite', () => {
 
       const menu = screen.getByRole('menu');
       const items = screen.getAllByRole('menuitem');
-      expect(items.length).toBe(5);
+      expect(items.length).toBe(6);
       expect(menu.querySelectorAll('[role="separator"]').length).toBe(2);
 
       items[0].focus();
