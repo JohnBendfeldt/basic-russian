@@ -23,7 +23,8 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
 
   audit-all:
-    name: Audit all dependencies (informational)
+    name: Audit all dependencies (informational, weekly only)
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
