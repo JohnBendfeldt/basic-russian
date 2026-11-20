@@ -1,11 +1,19 @@
 {
+  "id": "/",
+  "lang": "en",
   "short_name": "Basic Russian",
-  "name": "Basic Russian Learning",
+  "name": "Basic Russian — Learn Russian Online",
   "icons": [
     {
       "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
       "src": "logo192.png",
@@ -26,14 +34,5 @@
   "background_color": "#ffffff",
   "orientation": "portrait",
   "categories": ["education", "learning", "languages"],
-  "description": "Learn Basic Russian with interactive exercises",
-  "screenshots": [
-    {
-      "src": "screenshot1.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Russian Alphabet Learning"
-    }
-  ]
+  "description": "Learn basic Russian and the Cyrillic alphabet online for free with studio neural audio, essential phrases, numbers, telling time, vocabulary, and interactive quizzes."
 }

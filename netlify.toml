@@ -25,10 +25,26 @@
   status = 301
   force = true
 
-# Serve sitemap directly
+# Serve sitemap and robots directly
 [[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
+  status = 200
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+
+# Serve standalone static legal pages directly for OAuth verifiers & crawlers
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms"
+  to = "/terms/index.html"
   status = 200
 
 # Route .well-known requests to un-dotted directory (Netlify deploy strips leading dot-directories)
@@ -77,11 +93,17 @@
     Content-Security-Policy = "default-src 'self'; script-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://auth.basiclanguage.school wss://auth.basiclanguage.school https://login.microsoftonline.com https://accounts.google.com https://github.com; frame-src 'self' https://accounts.google.com https://login.microsoftonline.com https://github.com; upgrade-insecure-requests;"
     Cache-Control = "no-cache, no-store, must-revalidate"
 
-# Sitemap must be served as XML
+# Sitemap and robots.txt must be served with crawler-friendly Content-Type and caching
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]
     Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
     Cache-Control = "public, max-age=86400"
 
 # Microsoft identity association must be served as JSON
