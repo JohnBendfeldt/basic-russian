@@ -197,7 +197,17 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({ isOpen, onClose, u
                   {stats.recentSessions.map((session) => (
                     <div key={session.id} className="session-item">
                       <div className="session-meta">
-                        <span className="session-category">{session.category}</span>
+                        <span className="session-category">
+                          {({
+                            mixed: 'All Topics',
+                            all: 'All Topics',
+                            alphabet: 'Alphabet',
+                            basicPhrases: 'Phrases & Greetings',
+                            numbers: 'Numbers',
+                            time: 'Time & Days',
+                            commonWords: 'Common Words',
+                          } as Record<string, string>)[session.category] || session.category}
+                        </span>
                         <span className="session-date">
                           {new Date(session.completedAt).toLocaleDateString(undefined, {
                             month: 'short',
