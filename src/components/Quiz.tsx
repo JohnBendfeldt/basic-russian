@@ -196,7 +196,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   // Ensure view glides to top when quiz completes so user never misses celebration banner
   useEffect(() => {
     if (isSessionComplete) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTop();
     }
   }, [isSessionComplete]);
 
@@ -207,6 +207,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       mainText = outsideParentheses;
     }
     let normalized = mainText.toLowerCase()
+      .replace(/[\u2018\u2019]/g, "'")
       .replace(/[.,/#!$%^&*;:{}=\-_`~()?]/g, "")
       .replace(/\s+/g, " ")
       .trim();
@@ -222,7 +223,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
   };
 
   const normalizeEnglishPhrase = (text: string): string => {
-    let s = text.toLowerCase().trim();
+    let s = text.toLowerCase().replace(/[\u2018\u2019]/g, "'").trim();
 
     // Remove text inside parentheses first (e.g. 'Hello (formal)' -> 'Hello')
     s = s.replace(/\s*\([^)]*\)\s*/g, ' ');
@@ -238,6 +239,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       [/\b(there's|theres)\b/gi, 'there is'],
       [/\b(here's|heres)\b/gi, 'here is'],
       [/\b(i'm|im)\b/gi, 'i am'],
+      [/\b(i'd|id)\b/gi, 'i would'],
       [/\b(you're|youre)\b/gi, 'you are'],
       [/\b(we're|were)\b/gi, 'we are'],
       [/\b(they're|theyre)\b/gi, 'they are'],
@@ -265,17 +267,17 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     const synonymMap: [RegExp, string][] = [
       [/\b(restroom|toilet|washroom|water closet|wc|lavatory)\b/gi, 'bathroom'],
       [/\b(hi|hey|greetings)\b/gi, 'hello'],
-      [/\b(bye|bye bye|see you|farewell)\b/gi, 'goodbye'],
+      [/\b(bye bye|bye|see you|farewell)\b/gi, 'goodbye'],
       [/\b(thanks|thank u|many thanks)\b/gi, 'thank you'],
-      [/\b(welcome|no problem|not at all|my pleasure|dont mention it)\b/gi, 'you are welcome'],
-      [/\b(sorry|pardon|pardon me|forgive me)\b/gi, 'excuse me'],
+      [/\b(you are welcome|welcome|no problem|not at all|my pleasure|do not mention it)\b/gi, 'you are welcome'],
+      [/\b(pardon me|pardon|forgive me)\b/gi, 'excuse me'],
       [/\b(speak slower|talk slower|speak slowly|talk more slowly)\b/gi, 'speak more slowly'],
       [/\b(repeat please|say it again|say that again|can you repeat)\b/gi, 'please repeat'],
       [/\b(how are you doing|how are things|how is it going)\b/gi, 'how are you'],
-      [/\b(how much is it|how much is this|whats the price|what is the price)\b/gi, 'how much does it cost'],
-      [/\b(im hungry|i am hungry|i want food|i would like to eat)\b/gi, 'i want to eat'],
-      [/\b(im thirsty|i am thirsty|i want water|i would like to drink)\b/gi, 'i want to drink'],
-      [/\b(i do not understand|i do not get it|i dont get it)\b/gi, 'i dont understand'],
+      [/\b(how much is it|how much is this|what is the price)\b/gi, 'how much does it cost'],
+      [/\b(i am hungry|i want food|i would like to eat)\b/gi, 'i want to eat'],
+      [/\b(i am thirsty|i want water|i would like to drink)\b/gi, 'i want to drink'],
+      [/\b(i do not understand|i do not get it)\b/gi, 'i dont understand'],
       [/\b(i am called|they call me)\b/gi, 'my name is'],
       [/\b(yeah|yep|yup)\b/gi, 'yes'],
       [/\b(nope|nah)\b/gi, 'no']
@@ -286,6 +288,42 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     });
 
     return s.replace(/\s+/g, ' ').trim();
+  };
+
+  const RUSSIAN_LETTER_ANSWERS: Record<string, string[]> = {
+    А: ['a', 'ah'],
+    Б: ['b', 'be'],
+    В: ['v', 've'],
+    Г: ['g', 'ge'],
+    Д: ['d', 'de'],
+    Е: ['ye', 'je', 'e'],
+    Ё: ['yo', 'jo', 'e'],
+    Ж: ['zh', 'zhe'],
+    З: ['z', 'ze'],
+    И: ['ee', 'i'],
+    Й: ['y', 'j', 'short i', 'iy', 'ee kratkoye'],
+    К: ['k', 'ka'],
+    Л: ['l', 'el'],
+    М: ['m', 'em'],
+    Н: ['n', 'en'],
+    О: ['o', 'oh'],
+    П: ['p', 'pe'],
+    Р: ['r', 'er'],
+    С: ['s', 'es'],
+    Т: ['t', 'te'],
+    У: ['oo', 'u'],
+    Ф: ['f', 'ef'],
+    Х: ['kh', 'h', 'ha', 'kha'],
+    Ц: ['ts', 'tse', 'c'],
+    Ч: ['ch', 'che'],
+    Ш: ['sh', 'sha'],
+    Щ: ['shch', 'shcha'],
+    Ъ: ['hard sign', 'hard', 'твёрдый знак', 'твердый знак'],
+    Ы: ['y', 'ih', 'ui', 'i'],
+    Ь: ['soft sign', 'soft', 'мягкий знак'],
+    Э: ['e', 'eh'],
+    Ю: ['yu', 'ju', 'u'],
+    Я: ['ya', 'ja']
   };
 
   const numberEquivalents: { [key: string]: string[] } = {
@@ -307,7 +345,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     "15": ["fifteen", "пятнадцать"],
     "16": ["sixteen", "шестнадцать"],
     "17": ["seventeen", "семнадцать"],
-    "18": ["eighteen", "восемьнадцать"],
+    "18": ["eighteen", "восемнадцать"],
     "19": ["nineteen", "девятнадцать"],
     "20": ["twenty", "двадцать"],
     "30": ["thirty", "тридцать"],
@@ -333,9 +371,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       const possibleWordForms = Object.prototype.hasOwnProperty.call(numberEquivalents, userDigits)
         ? numberEquivalents[userDigits]
         : [];
-      return possibleWordForms.some(wordForm => 
-        cleanTarget === wordForm || cleanTarget.includes(wordForm)
-      );
+      return possibleWordForms.some(wordForm => cleanTarget === wordForm);
     } 
 
     // Check if target is digits
@@ -344,9 +380,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       const possibleWordForms = Object.prototype.hasOwnProperty.call(numberEquivalents, targetDigits)
         ? numberEquivalents[targetDigits]
         : [];
-      return possibleWordForms.some(wordForm =>
-        cleanUser === wordForm || cleanUser.includes(wordForm)
-      );
+      return possibleWordForms.some(wordForm => cleanUser === wordForm);
     }
 
     // Check if both user and target are equivalent representations of the same number
@@ -561,12 +595,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
         const item = selected.item as AlphabetItem;
         const character = item.character?.toString() || '';
         const pronunciation = item.pronunciation?.toString() || '';
+        const aliases = RUSSIAN_LETTER_ANSWERS[character.toUpperCase()] || [];
 
         if (isSoftSign(character)) {
+          const ansList = Array.from(new Set(['soft sign', 'soft', ...aliases]));
           setCurrentQuestion({
             type: 'alphabet',
             prompt: character,
-            answer: 'soft sign/soft',
+            answer: ansList.join('/'),
             hint: `What type of sign is "${character}"?`,
             russian: character,
             isRussianToEnglish: true,
@@ -574,10 +610,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             wordId: selected.wordId
           });
         } else if (isHardSign(character)) {
+          const ansList = Array.from(new Set(['hard sign', 'hard', ...aliases]));
           setCurrentQuestion({
             type: 'alphabet',
             prompt: character,
-            answer: 'hard sign/hard',
+            answer: ansList.join('/'),
             hint: `What type of sign is "${character}"?`,
             russian: character,
             isRussianToEnglish: true,
@@ -585,10 +622,11 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
             wordId: selected.wordId
           });
         } else {
+          const ansList = Array.from(new Set([pronunciation.toLowerCase(), ...aliases].filter(Boolean)));
           setCurrentQuestion({
             type: 'alphabet',
             prompt: character,
-            answer: pronunciation.toLowerCase(),
+            answer: ansList.join('/'),
             hint: `How is the letter "${character}" pronounced in Russian?`,
             russian: character,
             isRussianToEnglish: true,
@@ -744,7 +782,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       sessionStatsRef.current.isSaved = true;
       scrollToTop();
       ProgressService.recordQuizSession({
-        category: 'mixed',
+        category: activeCategory === 'all' ? 'mixed' : activeCategory,
         score: sessionScore,
         totalQuestions: sessionAnswered,
       }).catch(err => console.warn('Could not save quiz session on goal adjustment:', err));
@@ -925,7 +963,9 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
           // Article tolerance ("where is restroom" === "where is the bathroom")
           const stripArticles = (s: string) => s.replace(/\b(the|a|an)\b/gi, '').replace(/\s+/g, ' ').trim();
-          if (stripArticles(userEnglishNorm) === stripArticles(targetEnglishNorm)) {
+          const strippedUser = stripArticles(userEnglishNorm);
+          const strippedTarget = stripArticles(targetEnglishNorm);
+          if (currentQuestion.type !== 'alphabet' && strippedUser.length > 0 && strippedTarget.length > 0 && strippedUser === strippedTarget) {
             isAnswerCorrect = true;
             break;
           }
@@ -989,7 +1029,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
     sessionStatsRef.current = {
       score: newSessionScore,
       total: newSessionAnswered,
-      category: currentQuestion?.type || 'mixed',
+      category: activeCategory === 'all' ? 'mixed' : activeCategory,
       isSaved: false
     };
 
@@ -1276,7 +1316,8 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
 
   // --- RENDER RECAP SCREEN WHEN SESSION IS COMPLETE ---
   if (isSessionComplete) {
-    const percentage = sessionGoal > 0 ? Math.round((sessionScore / sessionGoal) * 100) : 0;
+    const completedTotal = sessionAnswered > 0 ? sessionAnswered : sessionGoal;
+    const percentage = completedTotal > 0 ? Math.min(100, Math.round((sessionScore / completedTotal) * 100)) : 0;
 
     let headlineRussian = '';
     let headlinePronunciation = '';
@@ -1300,7 +1341,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
       recapIcon = <FaStar className="recap-icon bronze" aria-hidden="true" />;
     } else {
       headlineRussian = 'Повторение — мать учения';
-      headlinePronunciation = 'Povtorenie — mat ucheniya';
+      headlinePronunciation = "Povtoreniye — mat' ucheniya";
       headlineEnglish = 'Repetition is the mother of learning. Practice makes perfect!';
       recapIcon = <FaGraduationCap className="recap-icon practice" aria-hidden="true" />;
     }
@@ -1355,14 +1396,14 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
               </svg>
               <div className="recap-ring-label">
                 <span className="recap-score-percent">{percentage}%</span>
-                <span className="recap-score-ratio">{sessionScore} / {sessionGoal} correct</span>
+                <span className="recap-score-ratio">{sessionScore} / {completedTotal} correct</span>
               </div>
             </div>
 
             <div className="recap-stats-grid" role="group" aria-label="Session summary stats">
               <div className="recap-stat-card">
                 <span className="stat-label"><span aria-hidden="true">🎯</span> Goal</span>
-                <span className="stat-value">{sessionGoal} Qs</span>
+                <span className="stat-value">{completedTotal} Qs</span>
               </div>
               <div className="recap-stat-card correct">
                 <span className="stat-label"><span aria-hidden="true">✅</span> Correct</span>
@@ -1618,7 +1659,7 @@ const Quiz: React.FC<QuizProps> = ({ data }) => {
           >
             {currentQuestion.prompt}
           </span>
-          {currentQuestion.type !== 'alphabet' && (
+          {currentQuestion.type !== 'alphabet' && currentQuestion.isRussianToEnglish && (
             <PronunciationButton 
               text={currentQuestion.russian}
               className="quiz-prompt-audio margin-left"

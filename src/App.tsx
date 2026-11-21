@@ -24,7 +24,7 @@ const SECTION_META: Record<string, { title: string; description: string }> = {
   },
   numbers: {
     title: 'Russian Numbers & Time | Basic Russian',
-    description: 'Learn Russian numbers and telling time with authentic native audio. Count in Russian from 1 to 1000 and tell time accurately.',
+    description: 'Learn Russian numbers and telling time with authentic native audio. Count in Russian from 0 to 1,000 and tell time accurately.',
   },
   time: {
     title: 'Russian Time & Telling Time | Basic Russian',

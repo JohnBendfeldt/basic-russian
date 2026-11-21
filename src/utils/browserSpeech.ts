@@ -133,12 +133,11 @@ const getAudioFileForText = async (text: string): Promise<string | null> => {
     if (audioFilesCache[normalizedText]) {
       return audioFilesCache[normalizedText];
     }
-    
-    // Search for closest match
-    for (const [word, path] of Object.entries(audioFilesCache)) {
-      if (normalizedText.includes(word) || word.includes(normalizedText)) {
-        return path;
-      }
+
+    // Punctuation-stripped exact match (avoid substring matching single alphabet letters)
+    const strippedText = normalizedText.replace(/[?!.,;:()]/g, '').replace(/\s+/g, ' ').trim();
+    if (strippedText && audioFilesCache[strippedText]) {
+      return audioFilesCache[strippedText];
     }
   }
   

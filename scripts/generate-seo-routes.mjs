@@ -29,7 +29,7 @@ const ROUTES = [
     path: '/numbers',
     title: 'Russian Numbers & Time | Basic Russian',
     description:
-      'Learn Russian numbers and telling time with authentic native audio. Count in Russian from 1 to 1000 and tell time accurately.',
+      'Learn Russian numbers and telling time with authentic native audio. Count in Russian from 0 to 1,000 and tell time accurately.',
     heading: 'Russian Numbers (0–1,000)',
     summary:
       'Learn how to count in Russian from 0 to 1,000 with studio neural audio pronunciation and transliteration guides.',

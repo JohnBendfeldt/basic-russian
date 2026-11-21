@@ -94,7 +94,7 @@ const NumbersAndTime: React.FC<NumbersAndTimeProps> = ({
                 <h4>The 1 / 2–4 / 5+ Hour Rule</h4>
                 <p>The word for &quot;hour&quot; changes based on the number:</p>
                 <ul>
-                  <li><strong>1:</strong> <em lang="ru">один час</em> (nominative)</li>
+                  <li><strong>1:</strong> <em lang="ru">час / один час</em> (nominative)</li>
                   <li><strong>2, 3, 4:</strong> <em lang="ru">два, три, четыре часа</em> (genitive singular)</li>
                   <li><strong>5–12:</strong> <em lang="ru">пять ... двенадцать часов</em> (genitive plural)</li>
                 </ul>
@@ -115,10 +115,10 @@ const NumbersAndTime: React.FC<NumbersAndTimeProps> = ({
               <div className="guide-card">
                 <span className="guide-badge">Rule 3</span>
                 <h4>Asking the Time</h4>
-                <p>Two natural ways to ask what time it is:</p>
+                <p>Natural ways to ask the time:</p>
                 <ul>
-                  <li><strong lang="ru">Который час?</strong> — Lit. &quot;Which hour?&quot; (Most common)</li>
-                  <li><strong lang="ru">Сколько сейчас времени?</strong> — &quot;How much time is it now?&quot;</li>
+                  <li><strong lang="ru">Который час?</strong> — &quot;What time is it?&quot; (Lit. &quot;Which hour?&quot; — most common)</li>
+                  <li><strong lang="ru">Сколько сейчас времени?</strong> — &quot;What time is it now?&quot; (Lit. &quot;How much time now?&quot;)</li>
                   <li><strong lang="ru">Во сколько?</strong> — &quot;At what time?&quot;</li>
                 </ul>
               </div>

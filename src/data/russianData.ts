@@ -79,7 +79,7 @@ const alphabet: AlphabetItem[] = [
   {
     letter: 'Й',
     pronunciation: 'y',
-    example: 'as in boy',
+    example: 'as in boy (or initial y as in yogurt)',
     russianWord: 'йогурт',
     englishWord: 'yogurt'
   },
@@ -114,7 +114,7 @@ const alphabet: AlphabetItem[] = [
   {
     letter: 'О',
     pronunciation: 'o',
-    example: 'as in more',
+    example: 'as in more (when stressed; unstressed sounds like "a")',
     russianWord: 'окно',
     englishWord: 'window'
   },
@@ -128,7 +128,7 @@ const alphabet: AlphabetItem[] = [
   {
     letter: 'Р',
     pronunciation: 'r',
-    example: 'rolled r',
+    example: '(rolled r)',
     russianWord: 'рыба',
     englishWord: 'fish'
   },
@@ -191,28 +191,28 @@ const alphabet: AlphabetItem[] = [
   {
     letter: 'Щ',
     pronunciation: 'shch',
-    example: 'as in fresh cheese',
+    example: 'long soft sh (as in fresh cheese)',
     russianWord: 'щека',
     englishWord: 'cheek'
   },
   {
     letter: 'Ъ',
     pronunciation: 'hard sign',
-    example: 'separates consonant and vowel',
+    example: '(silent; keeps preceding consonant hard before е, ё, ю, я)',
     russianWord: 'объект',
     englishWord: 'object'
   },
   {
     letter: 'Ы',
-    pronunciation: 'i',
-    example: 'no English equivalent',
+    pronunciation: 'y',
+    example: '(like "i" in "bit" with tongue pulled back)',
     russianWord: 'мы',
     englishWord: 'we'
   },
   {
     letter: 'Ь',
     pronunciation: 'soft sign',
-    example: 'softens preceding consonant',
+    example: '(silent; softens preceding consonant)',
     russianWord: 'мать',
     englishWord: 'mother'
   },
@@ -254,7 +254,7 @@ const basicPhrases: PhraseItem[] = [
   {
     russian: 'До свидания',
     english: 'Goodbye',
-    pronunciation: 'dah svee-dah-nee-ye'
+    pronunciation: 'dah svee-DAH-nee-ya'
   },
   {
     russian: 'Спасибо',
@@ -282,8 +282,8 @@ const basicPhrases: PhraseItem[] = [
     pronunciation: 'eez-vee-nee-tye'
   },
   {
-    russian: 'Как дела',
-    english: 'How are you',
+    russian: 'Как дела?',
+    english: 'How are you?',
     pronunciation: 'kahk dee-lah'
   },
   {
@@ -307,39 +307,39 @@ const basicPhrases: PhraseItem[] = [
     pronunciation: 'gah-vah-ree-tye myed-lyen-nye-ye'
   },
   {
-    russian: 'Повторите пожалуйста',
+    russian: 'Повторите, пожалуйста',
     english: 'Please repeat',
-    pronunciation: 'pahf-tah-ree-tye pah-zhal-stah'
+    pronunciation: 'pahf-tah-REE-tye, pah-ZHAL-sta'
   },
   {
-    russian: 'Меня зовут',
-    english: 'My name is',
+    russian: 'Меня зовут...',
+    english: 'My name is...',
     pronunciation: 'mee-nya zah-voot'
   },
   {
-    russian: 'Сколько стоит',
-    english: 'How much does it cost',
+    russian: 'Сколько стоит?',
+    english: 'How much does it cost?',
     pronunciation: 'skohl-kah stoh-eet'
   },
   {
-    russian: 'Где туалет',
-    english: 'Where is the bathroom',
+    russian: 'Где туалет?',
+    english: 'Where is the bathroom?',
     pronunciation: 'gdye too-ah-lyet'
   },
   {
-    russian: 'Помогите',
-    english: 'Help me',
+    russian: 'Помогите!',
+    english: 'Help me!',
     pronunciation: 'pah-mah-gee-tye'
   },
   {
     russian: 'Я хочу есть',
     english: 'I want to eat',
-    pronunciation: 'ya khah-choo yest'
+    pronunciation: 'ya khah-CHOO yest\''
   },
   {
     russian: 'Я хочу пить',
     english: 'I want to drink',
-    pronunciation: 'ya khah-choo peet'
+    pronunciation: 'ya khah-CHOO peet\''
   },
   {
     russian: 'Доброе утро',
@@ -374,7 +374,7 @@ const basicPhrases: PhraseItem[] = [
   {
     russian: 'Не за что',
     english: 'You\'re welcome / Not at all',
-    pronunciation: 'nye za shta'
+    pronunciation: 'NYE za shta'
   },
   {
     russian: 'Вы говорите по-английски?',
@@ -384,12 +384,12 @@ const basicPhrases: PhraseItem[] = [
   {
     russian: 'Я немного говорю по-русски',
     english: 'I speak a little Russian',
-    pronunciation: 'ya nye-mnoh-gah gah-vah-ryoo pah roos-kee'
+    pronunciation: 'ya nee-MNOH-gah gah-vah-RYOO pah ROOS-kee'
   },
   {
     russian: 'Как это по-русски?',
     english: 'How do you say this in Russian?',
-    pronunciation: 'kak eh-ta pah roos-kee'
+    pronunciation: 'kahk EH-ta pah ROOS-kee'
   }
 ];
 
@@ -398,7 +398,7 @@ const numbers: PhraseItem[] = [
   {
     russian: 'ноль',
     english: 'Zero',
-    pronunciation: 'nohl'
+    pronunciation: 'nohl\''
   },
   {
     russian: 'один',
@@ -418,92 +418,92 @@ const numbers: PhraseItem[] = [
   {
     russian: 'четыре',
     english: 'Four',
-    pronunciation: 'chee-tih-rye'
+    pronunciation: 'chee-TY-rye'
   },
   {
     russian: 'пять',
     english: 'Five',
-    pronunciation: 'pyat'
+    pronunciation: 'pyat\''
   },
   {
     russian: 'шесть',
     english: 'Six',
-    pronunciation: 'shest'
+    pronunciation: 'shest\''
   },
   {
     russian: 'семь',
     english: 'Seven',
-    pronunciation: 'syem'
+    pronunciation: 'syem\''
   },
   {
     russian: 'восемь',
     english: 'Eight',
-    pronunciation: 'voh-seem'
+    pronunciation: 'VOH-seem\''
   },
   {
     russian: 'девять',
     english: 'Nine',
-    pronunciation: 'dyeh-vyet'
+    pronunciation: 'DYEH-veet\''
   },
   {
     russian: 'десять',
     english: 'Ten',
-    pronunciation: 'dyeh-syet'
+    pronunciation: 'DYEH-seet\''
   },
   {
     russian: 'одиннадцать',
     english: 'Eleven',
-    pronunciation: 'ah-deen-nad-tsat'
+    pronunciation: 'ah-DEE-nat-sat\''
   },
   {
     russian: 'двенадцать',
     english: 'Twelve',
-    pronunciation: 'dvye-nad-tsat'
+    pronunciation: 'dvye-NAT-sat\''
   },
   {
     russian: 'тринадцать',
     english: 'Thirteen',
-    pronunciation: 'tree-nad-tsat'
+    pronunciation: 'tree-NAT-sat\''
   },
   {
     russian: 'четырнадцать',
     english: 'Fourteen',
-    pronunciation: 'chee-tir-nad-tsat'
+    pronunciation: 'chee-TYR-nat-sat\''
   },
   {
     russian: 'пятнадцать',
     english: 'Fifteen',
-    pronunciation: 'peet-nad-tsat'
+    pronunciation: 'peet-NAT-sat\''
   },
   {
     russian: 'шестнадцать',
     english: 'Sixteen',
-    pronunciation: 'shest-nad-tsat'
+    pronunciation: 'shees-NAT-sat\''
   },
   {
     russian: 'семнадцать',
     english: 'Seventeen',
-    pronunciation: 'seem-nad-tsat'
+    pronunciation: 'seem-NAT-sat\''
   },
   {
     russian: 'восемнадцать',
     english: 'Eighteen',
-    pronunciation: 'vah-seem-nad-tsat'
+    pronunciation: 'vah-seem-NAT-sat\''
   },
   {
     russian: 'девятнадцать',
     english: 'Nineteen',
-    pronunciation: 'dee-veet-nad-tsat'
+    pronunciation: 'dee-veet-NAT-sat\''
   },
   {
     russian: 'двадцать',
     english: 'Twenty',
-    pronunciation: 'dvad-tsat'
+    pronunciation: 'DVAH-tsat\''
   },
   {
     russian: 'тридцать',
     english: 'Thirty',
-    pronunciation: 'treed-tsat'
+    pronunciation: 'TREE-tsat\''
   },
   {
     russian: 'сорок',
@@ -513,27 +513,27 @@ const numbers: PhraseItem[] = [
   {
     russian: 'пятьдесят',
     english: 'Fifty',
-    pronunciation: 'pee-dee-seat'
+    pronunciation: 'pee-dee-SYAT'
   },
   {
     russian: 'шестьдесят',
     english: 'Sixty',
-    pronunciation: 'shest-dee-seat'
+    pronunciation: 'shyz-dye-SYAT'
   },
   {
     russian: 'семьдесят',
     english: 'Seventy',
-    pronunciation: 'sem-dee-seat'
+    pronunciation: 'SYEM\'-dee-syat'
   },
   {
     russian: 'восемьдесят',
     english: 'Eighty',
-    pronunciation: 'voh-seem-dee-seat'
+    pronunciation: 'VOH-seem\'-dee-syat'
   },
   {
     russian: 'девяносто',
     english: 'Ninety',
-    pronunciation: 'dev-ya-noh-stah'
+    pronunciation: 'dee-vee-NOH-stah'
   },
   {
     russian: 'сто',
@@ -543,7 +543,7 @@ const numbers: PhraseItem[] = [
   {
     russian: 'тысяча',
     english: 'One thousand',
-    pronunciation: 'tih-see-cha'
+    pronunciation: 'TY-see-cha'
   }
 ];
 
@@ -552,17 +552,17 @@ const commonWords: PhraseItem[] = [
   {
     russian: 'мужчина',
     english: 'man',
-    pronunciation: 'moosh-chee-na'
+    pronunciation: 'moo-SHCHEE-na'
   },
   {
     russian: 'женщина',
     english: 'woman',
-    pronunciation: 'zhen-shee-na'
+    pronunciation: 'ZHEN-shchee-na'
   },
   {
     russian: 'ребенок',
     english: 'child',
-    pronunciation: 'ree-byo-nok'
+    pronunciation: 'ree-BYOH-nak'
   },
   {
     russian: 'мальчик',
@@ -612,7 +612,7 @@ const commonWords: PhraseItem[] = [
   {
     russian: 'овощи',
     english: 'vegetables',
-    pronunciation: 'o-va-shi'
+    pronunciation: 'OH-vah-shchee'
   },
   {
     russian: 'фрукты',
@@ -672,7 +672,7 @@ const commonWords: PhraseItem[] = [
   {
     russian: 'площадь',
     english: 'square',
-    pronunciation: 'ploh-shad'
+    pronunciation: 'PLOH-shchat\''
   },
   {
     russian: 'парк',
@@ -732,7 +732,7 @@ const commonWords: PhraseItem[] = [
   {
     russian: 'паспорт',
     english: 'passport',
-    pronunciation: 'pass-port'
+    pronunciation: 'PAHS-pahrt'
   },
   {
     russian: 'виза',
@@ -804,7 +804,7 @@ const commonWords: PhraseItem[] = [
   {
     russian: 'муж',
     english: 'husband',
-    pronunciation: 'moozh'
+    pronunciation: 'moosh'
   },
   {
     russian: 'жена',
@@ -820,7 +820,7 @@ const commonWords: PhraseItem[] = [
   {
     russian: 'поезд',
     english: 'train',
-    pronunciation: 'poh-yezd'
+    pronunciation: 'POH-yest'
   },
   {
     russian: 'такси',
@@ -932,22 +932,22 @@ const time: PhraseItem[] = [
   {
     russian: 'Девять часов',
     english: 'Nine o\'clock',
-    pronunciation: 'dyeh-vyat\' cha-sohf'
+    pronunciation: 'DYEH-veet\' cha-SOHF'
   },
   {
     russian: 'Десять часов',
     english: 'Ten o\'clock',
-    pronunciation: 'dyeh-syat\' cha-sohf'
+    pronunciation: 'DYEH-seet\' cha-SOHF'
   },
   {
     russian: 'Одиннадцать часов',
     english: 'Eleven o\'clock',
-    pronunciation: 'ah-deen-nad-tsat\' cha-sohf'
+    pronunciation: 'ah-DEE-nat-sat\' cha-SOHF'
   },
   {
     russian: 'Двенадцать часов',
     english: 'Twelve o\'clock',
-    pronunciation: 'dvye-nad-tsat\' cha-sohf'
+    pronunciation: 'dvye-NAT-sat\' cha-SOHF'
   },
 
   // Times of Day
@@ -964,7 +964,7 @@ const time: PhraseItem[] = [
   {
     russian: 'вечера',
     english: 'in the evening (p.m.)',
-    pronunciation: 'vye-chee-rah'
+    pronunciation: 'VYE-chee-rah'
   },
   {
     russian: 'ночи',
@@ -991,7 +991,7 @@ const time: PhraseItem[] = [
   {
     russian: 'четверть часа',
     english: 'quarter of an hour',
-    pronunciation: 'cheet-vyert\' cha-sah'
+    pronunciation: 'CHYET-vyert\' cha-SAH'
   },
   {
     russian: 'Половина первого',
