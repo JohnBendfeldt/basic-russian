@@ -70,7 +70,7 @@ describe('Security Headers, CSP, HTML Script-Injection & PostgreSQL RLS Regressi
   it('stays pinned to React 19.3+ and TypeScript 5.9+ with valid PWA manifest', () => {
     expect(pkgJson.dependencies.react).toMatch(/^\^?19\./);
     expect(pkgJson.dependencies['react-dom']).toMatch(/^\^?19\./);
-    expect(pkgJson.devDependencies.typescript).toMatch(/^\^?5\.9\./);
+    expect(pkgJson.devDependencies.typescript).toMatch(/^\^?(?:5\.9|[6-9]|\d{2,})\./);
 
     const manifest = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'public/manifest.json'), 'utf-8'));
     expect(manifest.name).toBeTruthy();
