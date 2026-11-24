@@ -17,6 +17,8 @@
     <title>Basic Russian | Free Online Russian for Beginners</title>
     <meta name="description" content="Learn basic Russian online for free. Study the Russian alphabet (Cyrillic), essential phrases, common words, numbers, and telling time with native audio pronunciation and interactive quizzes." />
     <meta name="keywords" content="basic russian, learn russian online, free russian, russian for beginners, russian alphabet, cyrillic alphabet, basic russian online, free basic russian, russian phrases, russian vocabulary, russian numbers, telling time in russian, free russian lessons" />
+    <meta name="author" content="John Bendfeldt" />
+    <link rel="author" href="https://johnbendfeldt.com/" />
     <link rel="canonical" href="https://basicrussian.org/" />
 
     <!-- Open Graph (Facebook, LinkedIn, etc.) -->
@@ -54,11 +56,24 @@
       "@context": "https://schema.org",
       "@graph": [
         {
+          "@type": "Person",
+          "@id": "https://johnbendfeldt.com/#person",
+          "name": "John Bendfeldt",
+          "url": "https://johnbendfeldt.com/",
+          "sameAs": [
+            "https://github.com/JohnBendfeldt",
+            "https://www.linkedin.com/in/johnbendfeldt"
+          ]
+        },
+        {
           "@type": "EducationalOrganization",
           "@id": "https://basiclanguage.school/#organization",
           "name": "Basic Language School",
           "url": "https://basiclanguage.school/",
           "logo": "https://basiclanguage.school/logo512.png",
+          "founder": {
+            "@id": "https://johnbendfeldt.com/#person"
+          },
           "sameAs": [
             "https://basicenglish.school/",
             "https://basicfrench.org/",
@@ -75,6 +90,9 @@
           "url": "https://basicrussian.org/",
           "description": "Free interactive Russian and Cyrillic alphabet, phrases, numbers, telling time, vocabulary, and quiz web app for beginners.",
           "inLanguage": ["en", "ru"],
+          "author": {
+            "@id": "https://johnbendfeldt.com/#person"
+          },
           "publisher": {
             "@id": "https://basiclanguage.school/#organization"
           }
@@ -92,6 +110,12 @@
           "browserRequirements": "Requires JavaScript",
           "inLanguage": ["en", "ru"],
           "isAccessibleForFree": true,
+          "author": {
+            "@id": "https://johnbendfeldt.com/#person"
+          },
+          "creator": {
+            "@id": "https://johnbendfeldt.com/#person"
+          },
           "provider": {
             "@id": "https://basiclanguage.school/#organization"
           },
@@ -126,6 +150,9 @@
           "educationalLevel": "Beginner",
           "teaches": "Russian Cyrillic alphabet, pronunciation, essential phrases, numbers, telling time, and core vocabulary",
           "isAccessibleForFree": true,
+          "creator": {
+            "@id": "https://johnbendfeldt.com/#person"
+          },
           "provider": {
             "@id": "https://basiclanguage.school/#organization"
           },
@@ -151,7 +178,7 @@
       <p>
         Learn basic Russian online for free at BasicRussian.org. Study the Russian alphabet (Cyrillic),
         essential Russian phrases, common Russian words, numbers, telling time, and pronunciation with interactive
-        exercises and studio neural audio. Free Russian lessons for beginners. Please enable JavaScript to use the full app.
+        exercises and studio neural audio. Free Russian lessons for beginners. Created by <a href="https://johnbendfeldt.com/" rel="author">John Bendfeldt</a>. Please enable JavaScript to use the full app.
       </p>
       <nav aria-label="Lessons and resources">
         <ul>
