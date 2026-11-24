@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import { buildRouteJsonLd } from '../../scripts/generate-seo-routes.mjs';
 
 const ROOT_DIR = path.resolve(__dirname, '../..');
 const BASE_URL = 'https://basicrussian.org';
@@ -81,7 +82,25 @@ describe('SEO, Structured Data, Sitemap & Asset Integrity Audit', () => {
     expect(webApp.creator).toEqual({ '@id': 'https://johnbendfeldt.com/#person' });
   });
 
-  it('never references non-existent public assets in index.html or manifest.json', () => {
+  it('enriches static SEO routes with route-specific WebPage and BreadcrumbList JSON-LD', () => {
+    const ldMatch = indexHtml.match(/<script\s+type="application\/ld\+json">([\s\S]*?)<\/script>/i);
+    const baseJsonLd = JSON.parse(ldMatch![1]);
+
+    const routeLd = buildRouteJsonLd(baseJsonLd, {
+      path: '/alphabet',
+      title: 'Russian Alphabet (Cyrillic) | Basic Russian',
+      description: 'Learn the 33 letters of the Russian alphabet.',
+      heading: 'Russian Alphabet (Cyrillic)',
+    });
+    const webPage = routeLd['@graph'].find((n: { '@type': string }) => n['@type'] === 'WebPage');
+    const breadcrumb = routeLd['@graph'].find((n: { '@type': string }) => n['@type'] === 'BreadcrumbList');
+    expect(webPage.url).toBe(`${BASE_URL}/alphabet`);
+    expect(webPage.author).toEqual({ '@id': 'https://johnbendfeldt.com/#person' });
+    expect(breadcrumb.itemListElement).toHaveLength(2);
+    expect(breadcrumb.itemListElement[1].item).toBe(`${BASE_URL}/alphabet`);
+  });
+
+  it('never references non-existent public assets in index.html or manifest.json and keeps og-image optimized', () => {
     expect(indexHtml).not.toContain('/splash-screen.png');
 
     for (const icon of manifest.icons || []) {
@@ -94,7 +113,9 @@ describe('SEO, Structured Data, Sitemap & Asset Integrity Audit', () => {
       expect(fs.existsSync(assetPath), `Missing manifest screenshot: ${shot.src}`).toBe(true);
     }
 
-    expect(fs.existsSync(path.join(ROOT_DIR, 'public/og-image.png'))).toBe(true);
+    const ogImagePath = path.join(ROOT_DIR, 'public/og-image.png');
+    expect(fs.existsSync(ogImagePath)).toBe(true);
+    expect(fs.statSync(ogImagePath).size).toBeLessThan(650 * 1024);
   });
 
   it('configures robots.txt and sitemap.xml consistently with canonical URLs and lastmod dates', () => {
