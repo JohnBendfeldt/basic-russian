@@ -370,7 +370,16 @@ const App: React.FC = () => {
       
       <footer>
         <p>
-          © {new Date().getFullYear()} Basic Russian Learning · Part of{' '}
+          © {new Date().getFullYear()} Basic Russian Learning · Created by{' '}
+          <a
+            href="https://johnbendfeldt.com"
+            target="_blank"
+            rel="noopener noreferrer author"
+            className="footer-link"
+          >
+            John Bendfeldt
+          </a>{' '}
+          · Part of{' '}
           <a
             href="https://basiclanguage.school"
             target="_blank"
