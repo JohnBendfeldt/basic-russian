@@ -18,7 +18,7 @@ Security fixes are applied to the latest production deployment on the `master` b
 To report a suspected vulnerability privately:
 
 1. Use **GitHub Private Vulnerability Reporting** via the **Security** tab -> **Advisories** -> **Report a vulnerability** on this repository, **or**
-2. Email [dev@basicrussian.org](mailto:dev@basicrussian.org) with:
+2. Email [dev@basiclanguage.school](mailto:dev@basiclanguage.school) with:
    - A clear description of the issue and affected component or URL.
    - Step-by-step reproduction instructions or a minimal proof of concept.
    - Potential impact assessment.
