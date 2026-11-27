@@ -115,7 +115,7 @@ describe('SEO, Structured Data, Sitemap & Asset Integrity Audit', () => {
 
     const ogImagePath = path.join(ROOT_DIR, 'public/og-image.png');
     expect(fs.existsSync(ogImagePath)).toBe(true);
-    expect(fs.statSync(ogImagePath).size).toBeLessThan(650 * 1024);
+    expect(fs.statSync(ogImagePath).size).toBeLessThan(300 * 1024);
   });
 
   it('configures robots.txt and sitemap.xml consistently with canonical URLs and lastmod dates', () => {
